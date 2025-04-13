@@ -32,8 +32,7 @@ export default class CategoriesRepository {
 
     async deleteCategory(id: number) {
         const query = 'DELETE FROM category WHERE id = ?';
-        const values = [id];
-        const result = await this.database.execute(query, values);
+        const result = await this.database.execute(query, [id]);
 
         if (result.affectedRows > 0) {
             return {

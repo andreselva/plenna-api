@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import MySQLDatabase from "src/Database/MySQLDatabase";
 import { ExpenseRowDTO } from "./DTOs/ExpenseRowDTO";
 import { Expense } from "./Entity/Expense";
-import { CreateExpenseResponseDTO } from "./DTOs/CreateExpenseResponseDTO";
+import { ExpenseResponseDTO } from "./DTOs/ExpenseResponseDTO";
 
 @Injectable()
 export class ExpensesRepository {
@@ -24,7 +24,7 @@ export class ExpensesRepository {
         ));
     }
 
-    async createExpense(expense: Expense): Promise<CreateExpenseResponseDTO> {
+    async createExpense(expense: Expense): Promise<ExpenseResponseDTO> {
         const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory) VALUES (?, ?, ?, ?, ?)";
         const result = await this.database.execute(
             query,
@@ -32,7 +32,7 @@ export class ExpensesRepository {
         );
 
         if (result.affectedRows > 0) {
-            return new CreateExpenseResponseDTO(
+            return new ExpenseResponseDTO(
                 result.insertId,
                 expense.getName(),
                 expense.getDescription(),
@@ -43,5 +43,42 @@ export class ExpensesRepository {
         }
 
         throw new Error("Failed to create expense");
+    }
+
+    async deleteExpense(id: number) {
+        const query = "DELETE FROM expense WHERE id = ?";
+        const result = await this.database.execute(query, [id]);
+
+        if (result.affectedRows > 0) {
+            return {
+                message: 'Expense deleted successfully',
+            };
+        }
+        throw new Error('Failed to delete expense');
+    }
+
+    async updateExpense(expense: Expense): Promise<ExpenseResponseDTO> {
+        if (!expense.getId()) {
+            throw new Error('Expense ID is required for update');
+        }
+        
+        const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ? WHERE id = ?";
+        const result = await this.database.execute(
+            query,
+            [expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getId()]
+        );
+
+        if (result.affectedRows > 0) {
+            return new ExpenseResponseDTO(
+                expense.getId(),
+                expense.getName(),
+                expense.getDescription(),
+                expense.getValue(),
+                expense.getInvoiceDueDate(),
+                expense.getIdCategory()
+            );
+        }
+
+        throw new Error('Failed to update category');
     }
 }

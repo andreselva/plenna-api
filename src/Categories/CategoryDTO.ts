@@ -3,4 +3,5 @@ export default class CategoryDTO {
     description: string;
     type: string;
     color: string;
+    id?: number;
 }

@@ -20,6 +20,8 @@ import { GetExpenses } from './Expenses/UseCases/GetExpenses';
 import { CreateExpense } from './Expenses/UseCases/CreateExpense';
 import { ExpensesRepository } from './Expenses/ExpensesRepository';
 import { ExpensesServices } from './Expenses/ExpensesServices';
+import { DeleteExpense } from './Expenses/UseCases/DeleteExpense';
+import { UpdateExpense } from './Expenses/UseCases/UpdateExpense';
 
 const services = [
   CategoriesService,
@@ -36,6 +38,8 @@ const useCases = [
   GetRevenues,
   GetExpenses,
   CreateExpense,
+  DeleteExpense,
+  UpdateExpense,
 ];
 
 const repositories = [

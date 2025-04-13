@@ -37,7 +37,10 @@ export class Expense {
         return this.idCategory;
     }
 
-    getId() {
+    getId(): number {
+        if (this.id === undefined) {
+            throw new Error('ID is not set');
+        }
         return this.id;
     }
 

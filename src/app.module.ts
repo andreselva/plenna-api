@@ -15,10 +15,16 @@ import RevenuesService from './Revenues/RevenuesService';
 import CreateRevenue from './Revenues/UseCases/CreateRevenue';
 import GetRevenues from './Revenues/UseCases/GetRevenues';
 import RevenuesRepository from './Revenues/RevenuesRepository';
+import { ExpensesController } from './Expenses/ExpensesController';
+import { GetExpenses } from './Expenses/UseCases/GetExpenses';
+import { CreateExpense } from './Expenses/UseCases/CreateExpense';
+import { ExpensesRepository } from './Expenses/ExpensesRepository';
+import { ExpensesServices } from './Expenses/ExpensesServices';
 
 const services = [
   CategoriesService,
   RevenuesService,
+  ExpensesServices,
 ];
 
 const useCases = [
@@ -28,11 +34,14 @@ const useCases = [
   UpdateCategory,
   CreateRevenue,
   GetRevenues,
+  GetExpenses,
+  CreateExpense,
 ];
 
 const repositories = [
   CategoriesRepository,
   RevenuesRepository,
+  ExpensesRepository,
 ]
 
 @Module({
@@ -40,7 +49,8 @@ const repositories = [
   controllers: [
     AppController, 
     CategoriesController,
-    RevenuesController
+    RevenuesController,
+    ExpensesController,
   ],
   providers: [
     AppService,

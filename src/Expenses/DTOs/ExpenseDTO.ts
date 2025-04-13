@@ -1,8 +1,8 @@
-export class RevenueDTO {
+export class ExpenseDTO {
     name: string;
     description: string;
     value: number;
     invoiceDueDate: string;
-    idCategory: string;
+    idCategory: number;
     id?: number;
 }

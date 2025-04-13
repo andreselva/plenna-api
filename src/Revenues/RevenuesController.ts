@@ -16,7 +16,6 @@ export default class RevenuesController {
 
     @Post()
     async createRevenue(@Body() revenue: RevenueDTO) {
-        console.log(revenue);
         return await this.revenuesService.createRevenue(revenue);
     }
 }

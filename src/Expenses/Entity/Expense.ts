@@ -1,12 +1,12 @@
-import { RevenueDTO } from "../DTOs/RevenueDTO";
+import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 
-export default class Revenue {
-    name: string;
-    description: string;
-    value: number;
-    invoiceDueDate: string;
-    idCategory: number
-    id?: number;
+export class Expense {
+    public name: string;
+    public description: string;
+    public value: number;
+    public invoiceDueDate: string;
+    public idCategory: number;
+    public id?: number;
 
     constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, id?: number) {
         this.name = name;
@@ -17,33 +17,38 @@ export default class Revenue {
         this.id = id;
     }
 
-    getName(): string {
+    getName() {
         return this.name;
     }
 
-    getDescription(): string {
+    getDescription() {
         return this.description;
     }
 
-    getValue(): number {
+    getValue() {
         return this.value;
     }
 
-    getInvoiceDueDate(): string {
+    getInvoiceDueDate() {
         return this.invoiceDueDate;
     }
 
-    getIdCategory(): number {
+    getIdCategory() {
         return this.idCategory;
     }
 
-    static fromDTO(dto: RevenueDTO): Revenue {
-        return new Revenue(
+    getId() {
+        return this.id;
+    }
+
+    static fromDTO(dto: ExpenseDTO): Expense {
+        return new Expense(
             dto.name,
             dto.description,
             Number(dto.value),
             dto.invoiceDueDate,
-            Number(dto.idCategory)
-        );
+            dto.idCategory,
+            dto.id,
+        )
     }
 }

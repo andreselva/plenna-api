@@ -47,7 +47,7 @@ export class Expense {
             dto.description,
             Number(dto.value),
             dto.invoiceDueDate,
-            dto.idCategory,
+            Number(dto.idCategory),
             dto.id,
         )
     }

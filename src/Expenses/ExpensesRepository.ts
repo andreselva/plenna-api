@@ -11,7 +11,7 @@ export class ExpensesRepository {
     ) { }
 
     async getExpenses(): Promise<Expense[]> {
-        const query = "SELECT * FROM revenue";
+        const query = "SELECT * FROM expense";
         const rows = await this.database.select(query) as ExpenseRowDTO[];
 
         return rows.map(row => new Expense(

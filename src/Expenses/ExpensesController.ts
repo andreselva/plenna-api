@@ -1,8 +1,8 @@
-import { Controller, Dependencies, Get, Post } from "@nestjs/common";
+import { Body, Controller, Dependencies, Get, Post } from "@nestjs/common";
 import { ExpensesServices } from "./ExpensesServices";
 import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 
-@Controller()
+@Controller('/expenses')
 @Dependencies(ExpensesServices)
 export class ExpensesController {
     constructor(
@@ -15,7 +15,7 @@ export class ExpensesController {
     }
 
     @Post()
-    async createExpense(expense: ExpenseDTO) {
+    async createExpense(@Body() expense: ExpenseDTO) {
         return await this.service.createExpense(expense);
     }
 }

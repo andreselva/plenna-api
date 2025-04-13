@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 import { Expense } from "../Entity/Expense";
 import { ExpensesRepository } from "../ExpensesRepository";
-import { FormatDate } from "src/Helpers/DateHelper/FormatDate";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
 
 @Injectable()
 export class UpdateExpense {

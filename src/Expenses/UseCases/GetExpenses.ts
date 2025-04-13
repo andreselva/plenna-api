@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ExpensesRepository } from "../ExpensesRepository";
-import { FormatDate } from "src/Helpers/DateHelper/FormatDate";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
 
 @Injectable()
 export class GetExpenses {

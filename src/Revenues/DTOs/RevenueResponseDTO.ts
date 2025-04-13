@@ -1,6 +1,6 @@
-import { FormatDate } from "src/Helpers/DateHelper/FormatDate";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
 
-export class CreateRevenueResponseDTO {
+export class RevenueResponseDTO {
     public readonly invoiceDueDate: string;
     
     constructor(

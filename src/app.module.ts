@@ -4,12 +4,12 @@ import { AppService } from './app.service';
 import CategoriesController from './Categories/CategoriesController';
 import CategoriesService from './Categories/CategoriesService';
 import CategoriesRepository from './Categories/CategoriesRepository';
-import MySQLDatabase from './Database/MySQLDatabase';
+import MySQLDatabase from './Config/Database/MySQLDatabase';
 import CreateCategory from './Categories/useCases/CreateCategory';
 import GetCategories from './Categories/useCases/GetCategories';
 import DeleteCategory from './Categories/useCases/DeleteCategory';
 import UpdateCategory from './Categories/useCases/UpdateCategory';
-import { LoggerMiddleware } from './Logger/logger.middleware';
+import { LoggerMiddleware } from './Shared/Logger/logger.middleware';
 import RevenuesController from './Revenues/RevenuesController';
 import RevenuesService from './Revenues/RevenuesService';
 import CreateRevenue from './Revenues/UseCases/CreateRevenue';
@@ -22,6 +22,8 @@ import { ExpensesRepository } from './Expenses/ExpensesRepository';
 import { ExpensesServices } from './Expenses/ExpensesServices';
 import { DeleteExpense } from './Expenses/UseCases/DeleteExpense';
 import { UpdateExpense } from './Expenses/UseCases/UpdateExpense';
+import { DeleteRevenue } from './Revenues/UseCases/DeleteRevenue';
+import { UpdateRevenue } from './Revenues/UseCases/UpdateRevenue';
 
 const services = [
   CategoriesService,
@@ -36,6 +38,8 @@ const useCases = [
   UpdateCategory,
   CreateRevenue,
   GetRevenues,
+  DeleteRevenue,
+  UpdateRevenue,
   GetExpenses,
   CreateExpense,
   DeleteExpense,
@@ -51,7 +55,7 @@ const repositories = [
 @Module({
   imports: [],
   controllers: [
-    AppController, 
+    AppController,
     CategoriesController,
     RevenuesController,
     ExpensesController,

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import MySQLDatabase from "src/Database/MySQLDatabase";
+import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import Category from "./Entity/Category";
 
 @Injectable()

@@ -1,4 +1,4 @@
-import { FormatDate } from "src/Helpers/DateHelper/FormatDate";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
 import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 import { ExpensesRepository } from "../ExpensesRepository";
 import { Expense } from "../Entity/Expense";

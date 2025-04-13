@@ -1,18 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import Revenue from "../Entity/Revenue";
 import { RevenueDTO } from "../DTOs/RevenueDTO";
+import Revenue from "../Entity/Revenue";
 import RevenuesRepository from "../RevenuesRepository";
 import { FormatDate } from "src/Shared/Utils/FormatDate";
 
 @Injectable()
-export default class CreateRevenue {
+export class UpdateRevenue {
     constructor(
-        private readonly revenueRepository: RevenuesRepository
-    ) {}
+        private readonly repository: RevenuesRepository
+    ) { }
 
-    async execute(revenue: RevenueDTO) {
+    async execute(id: string, revenue: RevenueDTO) {
+        revenue.id = Number(id);
         revenue.invoiceDueDate = FormatDate.formatToYYYYMMDD(revenue.invoiceDueDate);
         const entity = Revenue.fromDTO(revenue);
-        return await this.revenueRepository.createRevenue(entity);
+        return await this.repository.updateRevenue(entity);
     }
 }

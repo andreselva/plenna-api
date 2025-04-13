@@ -1,8 +1,8 @@
-import MySQLDatabase from "src/Database/MySQLDatabase";
+import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import Revenue from "./Entity/Revenue";
 import { Injectable } from "@nestjs/common";
 import { RevenueRowDTO } from "./DTOs/RevenueRowDTO";
-import { CreateRevenueResponseDTO } from "./DTOs/CreateRevenueResponseDTO";
+import { RevenueResponseDTO } from "./DTOs/RevenueResponseDTO";
 
 @Injectable()
 export default class RevenuesRepository {
@@ -24,22 +24,54 @@ export default class RevenuesRepository {
         ));
     }
 
-    async createRevenue(revenue: Revenue): Promise<CreateRevenueResponseDTO> {
+    async createRevenue(revenue: Revenue): Promise<RevenueResponseDTO> {
         const query = "INSERT INTO revenue (name, description, value, invoiceDueDate, idCategory) VALUES (?, ?, ?, ?, ?)";
         const params = [revenue.getName(), revenue.getDescription(), revenue.getValue(), revenue.getInvoiceDueDate(), revenue.getIdCategory()];
         const result = await this.database.execute(query, params);
-    
+
         if (result.affectedRows > 0) {
-            return new CreateRevenueResponseDTO(
+            return new RevenueResponseDTO(
                 result.insertId,
                 revenue.getName(),
                 revenue.getDescription(),
                 revenue.getValue(),
                 revenue.getInvoiceDueDate(),
                 revenue.getIdCategory(),
-            );  
+            );
         }
-    
+
         throw new Error("Failed to create revenue");
+    }
+
+    async deleteRevenue(id: number) {
+        const query = "DELETE FROM revenue WHERE id = ?";
+        const result = await this.database.execute(query, [id]);
+
+        if (result.affectedRows > 0) {
+            return {
+                message: 'Revenue deleted successfully',
+            }
+        }
+        throw new Error('Failed to delete revenue');
+    }
+
+    async updateRevenue(revenue: Revenue): Promise<RevenueResponseDTO> {
+        const query = "UPDATE revenue SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ? WHERE id = ?";
+        const result = await this.database.execute(
+            query,
+            [revenue.getName(), revenue.getDescription(), revenue.getValue(), revenue.getInvoiceDueDate(), revenue.getIdCategory(), revenue.getId()]
+        )
+
+        if (result.affectedRows > 0) {
+            return new RevenueResponseDTO(
+                revenue.getId(),
+                revenue.getName(),
+                revenue.getDescription(),
+                revenue.getValue(),
+                revenue.getInvoiceDueDate(),
+                revenue.getIdCategory()
+            )
+        }
+        throw new Error('Failed to update revenue');
     }
 }

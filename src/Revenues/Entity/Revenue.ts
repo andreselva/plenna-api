@@ -37,13 +37,21 @@ export default class Revenue {
         return this.idCategory;
     }
 
+    getId() {
+        if (this.id === undefined) {
+            throw new Error('ID is not set');
+        }
+        return this.id;
+    }
+
     static fromDTO(dto: RevenueDTO): Revenue {
         return new Revenue(
             dto.name,
             dto.description,
             Number(dto.value),
             dto.invoiceDueDate,
-            Number(dto.idCategory)
+            Number(dto.idCategory),
+            dto.id
         );
     }
 }

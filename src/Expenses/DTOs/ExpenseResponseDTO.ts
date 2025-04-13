@@ -1,4 +1,4 @@
-import { FormatDate } from "src/Helpers/DateHelper/FormatDate";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
 
 export class ExpenseResponseDTO {
     public readonly invoiceDueDate: string;

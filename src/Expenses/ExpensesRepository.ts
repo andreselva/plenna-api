@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import MySQLDatabase from "src/Database/MySQLDatabase";
+import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import { ExpenseRowDTO } from "./DTOs/ExpenseRowDTO";
 import { Expense } from "./Entity/Expense";
 import { ExpenseResponseDTO } from "./DTOs/ExpenseResponseDTO";

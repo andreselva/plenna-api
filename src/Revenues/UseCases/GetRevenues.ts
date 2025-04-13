@@ -1,6 +1,6 @@
 import { Dependencies, Injectable } from "@nestjs/common";
 import RevenuesRepository from "../RevenuesRepository";
-import { FormatDate } from "src/Helpers/DateHelper/FormatDate";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
 
 @Injectable()
 @Dependencies(RevenuesRepository)

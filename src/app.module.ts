@@ -24,6 +24,14 @@ import { DeleteExpense } from './Expenses/UseCases/DeleteExpense';
 import { UpdateExpense } from './Expenses/UseCases/UpdateExpense';
 import { DeleteRevenue } from './Revenues/UseCases/DeleteRevenue';
 import { UpdateRevenue } from './Revenues/UseCases/UpdateRevenue';
+import { BillsDueRepository } from './Dashboard/BillsDue/BillsDueRepository';
+import { BillsDueService } from './Dashboard/BillsDue/BillsDueService';
+import { CurrentBalanceRepository } from './Dashboard/CurrentBalance/CurrentBalanceRepository';
+import { CurrentBalanceService } from './Dashboard/CurrentBalance/CurrentBalanceService';
+import { ExpensesByCategoryRepository } from './Dashboard/ExpensesByCategory/ExpensesByCategoryRepository';
+import { ExpensesByCategoryService } from './Dashboard/ExpensesByCategory/ExpensesByCategoryService';
+import { DashboardServices } from './Dashboard/DashboardServices';
+import { DashboardController } from './Dashboard/DashboardController';
 
 const services = [
   CategoriesService,
@@ -59,6 +67,7 @@ const repositories = [
     CategoriesController,
     RevenuesController,
     ExpensesController,
+    DashboardController
   ],
   providers: [
     AppService,
@@ -66,6 +75,13 @@ const repositories = [
     ...useCases,
     ...repositories,
     MySQLDatabase,
+    BillsDueRepository,
+    BillsDueService,
+    CurrentBalanceRepository,
+    CurrentBalanceService,
+    ExpensesByCategoryRepository,
+    ExpensesByCategoryService,
+    DashboardServices,
   ],
 })
 

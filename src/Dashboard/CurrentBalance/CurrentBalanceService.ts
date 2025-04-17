@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { DashboardCurrentBalanceDTO } from "../DTOs/DashboardDTO";
 import { CurrentBalanceRepository } from "./CurrentBalanceRepository";
 import { DashboardCurrentBalanceDatasetDTO } from "./DTOs/DashboardCurrentBalanceDatasetDTO";
+import { CurrentBalanceChartConfig } from "./ChartConfig/CurrentBalanceChartConfig";
+import { DashboardCurrentBalanceDTO } from "./DTOs/DashboardCurrentBalanceDTO";
 
 @Injectable()
 export class CurrentBalanceService {
@@ -15,15 +16,15 @@ export class CurrentBalanceService {
 
         const currentBalanceDataSet = new DashboardCurrentBalanceDatasetDTO(
             [totalRevenues, totalExpenses],
-            ["rgba(76, 175, 80, 0.8)", "rgba(244, 67, 54, 0.8)"],
-            ["rgba(76, 175, 80, 1)", "rgba(244, 67, 54, 1)"],
-            0,
-            4
+            CurrentBalanceChartConfig.getBackgroundColors(),
+            CurrentBalanceChartConfig.getHoverBackgroundColors(),
+            CurrentBalanceChartConfig.getBorderWidth(),
+            CurrentBalanceChartConfig.getHoverOffset()
         );
 
         return new DashboardCurrentBalanceDTO(
-            ['Receitas', 'Despesas'],
-            [currentBalanceDataSet]
+            CurrentBalanceChartConfig.getLabels(),
+            [currentBalanceDataSet],
         );
     }
 

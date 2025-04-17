@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { DashboardExpenseByCategoryDatasetDTO } from "./DTOs/DashboardExpenseByCategoryDatasetDTO";
 import { DashboardExpenseByCategoryDTO } from "./DTOs/DashboardExpenseByCategoryDTO";
 import { ExpensesByCategoryRepository } from "./ExpensesByCategoryRepository";
+import ExpensesByCategoryChartConfig from "./ChartConfig/ExpensesByCategoryChartConfig";
 
 @Injectable()
 export class ExpensesByCategoryService {
@@ -23,22 +24,10 @@ export class ExpensesByCategoryService {
         const expensesByCategoryDataset = new DashboardExpenseByCategoryDatasetDTO(
             "Gastos por categoria",
             totals,
-            [
-                'rgba(255, 99, 132, 0.7)',
-                'rgba(54, 162, 235, 0.7)',
-                'rgba(255, 205, 86, 0.7)',
-                'rgba(75, 192, 192, 0.7)',
-                'rgba(153, 102, 255, 0.7)',
-            ],
-            [
-                'rgb(255, 99, 132)',
-                'rgb(54, 162, 235)',
-                'rgb(255, 205, 86)',
-                'rgb(75, 192, 192)',
-                'rgb(153, 102, 255)',
-            ],
-            1,
-            5
+            ExpensesByCategoryChartConfig.getBackgroundColor(),
+            ExpensesByCategoryChartConfig.getBorderColor(),
+            ExpensesByCategoryChartConfig.getBorderWidth(),
+            ExpensesByCategoryChartConfig.getBorderRadius()
         );
 
         return new DashboardExpenseByCategoryDTO(

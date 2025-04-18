@@ -18,10 +18,7 @@ export class DashboardServices {
         const currentBalance = await this.currentBalance.getCurrentBalanceData();
         const expensesByCategory = await this.expensesByCategory.getExpensesByCategoryData();
         const billsDue = await this.billsDue.getBillsData();
-        const monthlyProgress = await this.monthlyProgress.getMonthlyProgressData();
-
-        console.log(monthlyProgress);
-        
+        const monthlyProgress = await this.monthlyProgress.getMonthlyProgressData();        
         return {
             saldoAtual: currentBalance,
             despesasPorCategoria: expensesByCategory,

@@ -1,10 +1,10 @@
-import DashboardMonthlyProgressDataset from "./DashboardMonthlyProgressDataset";
+import MonthlyProgressDatasetInterface from "./MonthlyProgressDataSetInterface";
 
 export default class DashboardMonthlyProgressDTO {
     labels: string[];
-    datasets: DashboardMonthlyProgressDataset[];
+    datasets: MonthlyProgressDatasetInterface[];
 
-    constructor(labels: string[], datasets: DashboardMonthlyProgressDataset[]) {
+    constructor(labels: string[], datasets: MonthlyProgressDatasetInterface[]) {
         this.labels = labels;
         this.datasets = datasets;
     }

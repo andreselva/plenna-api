@@ -1,7 +1,8 @@
 import MonthlyProgressDatasetConfig from "../ChartConfig/MonthlyProgressDatasetConfig";
+import MonthlyProgressDatasetInterface from "./MonthlyProgressDataSetInterface";
 
 export default class DashboardMonthlyProgressDataset {
-    datasets: any[];
+    datasets: MonthlyProgressDatasetInterface[];
 
     constructor(
         expensesValue: number[],

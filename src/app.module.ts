@@ -32,6 +32,8 @@ import { ExpensesByCategoryRepository } from './Dashboard/ExpensesByCategory/Exp
 import { ExpensesByCategoryService } from './Dashboard/ExpensesByCategory/ExpensesByCategoryService';
 import { DashboardServices } from './Dashboard/DashboardServices';
 import { DashboardController } from './Dashboard/DashboardController';
+import { MonthlyProgressServices } from './Dashboard/MonthlyProgress/MonthlyProgressServices';
+import { MonthlyProgressRepository } from './Dashboard/MonthlyProgress/MonthlyProgressRepository';
 
 const services = [
   CategoriesService,
@@ -82,6 +84,8 @@ const repositories = [
     ExpensesByCategoryRepository,
     ExpensesByCategoryService,
     DashboardServices,
+    MonthlyProgressServices,
+    MonthlyProgressRepository
   ],
 })
 

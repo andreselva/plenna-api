@@ -3,9 +3,11 @@ import { DashboardCurrentBalanceDatasetDTO } from "./DashboardCurrentBalanceData
 export class DashboardCurrentBalanceDTO {
     labels: string[];
     datasets: DashboardCurrentBalanceDatasetDTO[];
+    remainingBalance: number;
 
-    constructor(labels: string[], datasets: DashboardCurrentBalanceDatasetDTO[]) {
+    constructor(labels: string[], datasets: DashboardCurrentBalanceDatasetDTO[], remainingBalance: number) {
         this.labels = labels;
         this.datasets = datasets;
+        this.remainingBalance = remainingBalance;
     }
 }

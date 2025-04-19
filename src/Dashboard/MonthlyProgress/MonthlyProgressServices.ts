@@ -57,7 +57,7 @@ export class MonthlyProgressServices {
 
     private getDatesInfo(): { startDate: string; endDate: string; labels: string[] } {
         const mesesAbreviados = [
-            "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+            "Jan", "Fev", "Mar", "Abr", "Maio", "Jun",
             "Jul", "Ago", "Set", "Out", "Nov", "Dez"
         ];
 

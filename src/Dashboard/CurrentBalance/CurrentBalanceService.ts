@@ -25,6 +25,7 @@ export class CurrentBalanceService {
         return new DashboardCurrentBalanceDTO(
             CurrentBalanceChartConfig.getLabels(),
             [currentBalanceDataSet],
+            totalRevenues - totalExpenses
         );
     }
 

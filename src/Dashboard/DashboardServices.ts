@@ -20,10 +20,11 @@ export class DashboardServices {
         const billsDue = await this.billsDue.getBillsData();
         const monthlyProgress = await this.monthlyProgress.getMonthlyProgressData();        
         return {
-            saldoAtual: currentBalance,
-            despesasPorCategoria: expensesByCategory,
-            contasVencendo: billsDue,
-            evolucaoMensal: monthlyProgress
+            currentBalance: currentBalance,
+            expensesByCategory: expensesByCategory,
+            billsDue: billsDue,
+            monthlyProgress: monthlyProgress,
+            remainingBalance: currentBalance.remainingBalance
         };
     }
 }

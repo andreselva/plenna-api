@@ -1,8 +1,7 @@
-import { Dependencies, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import BankAccountsRepository from "../BankAccountsRepository";
 
 @Injectable()
-@Dependencies(BankAccountsRepository)
 export default class DeleteBankAccount {
     constructor(
         private readonly repository: BankAccountsRepository

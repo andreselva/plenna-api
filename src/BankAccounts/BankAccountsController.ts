@@ -1,9 +1,8 @@
-import { Body, Controller, Delete, Dependencies, Get, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
 import BankAccountDTO from "./DTOs/BankAccountDTO";
 import BankAccountsService from "./BankAccountsServices";
 
 @Controller("bank-accounts")
-@Dependencies(BankAccountsService)
 export default class BankAccountsController {
     constructor(
         private readonly service: BankAccountsService,

@@ -11,14 +11,14 @@ export class ExpensesByCategoryService {
     ) { }
 
     async getExpensesByCategoryData() {
-        const data = await this.repository.getTotalExpenses();
+        const expenses = await this.repository.getTotalExpenses();
 
         const labels: string[] = [];
         const totals: number[] = [];
 
-        data.forEach(item => {
-            labels.push(item.name);
-            totals.push(item.value);
+        expenses.forEach(expense => {
+            labels.push(expense.name);
+            totals.push(expense.value);
         })
 
         const expensesByCategoryDataset = new DashboardExpenseByCategoryDatasetDTO(

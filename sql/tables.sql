@@ -15,3 +15,9 @@ CREATE TABLE expense (
     invoiceDueDate DATE,
     idCategory BIGINT NOT NULL DEFAULT 0
 )
+
+CREATE TABLE bank_account (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50),
+    icon VARCHAR(50)
+)

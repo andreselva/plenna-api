@@ -40,4 +40,37 @@ export default class BankAccountsRepository {
         throw new Error("Failed to create bank account");
     }
 
+    async deleteBankAccount(id: number): Promise<{ message: string }> {
+        const query = "DELETE FROM bank_account WHERE id = ?";
+        const result = await this.database.execute(query, [id]);
+
+        if (result.affectedRows > 0) {
+            return { message: "Bank account deleted successfully" };
+        }
+        throw new Error("Failed to delete bank account");
+    }
+
+    async updateBankAccount(bankAccount: BankAccount): Promise<BankAccountResponseDTO> {
+        const id = bankAccount.getId();
+        if (id === undefined) {
+            throw new Error("Bank account ID is required for update");
+        }
+
+        const query = "UPDATE bank_account SET name = ?, icon = ? WHERE id = ?";
+        const params = [
+            bankAccount.getName(),
+            bankAccount.getIcon() || "",
+            id
+        ];
+        const result = await this.database.execute(query, params);
+        if (result.affectedRows > 0) {
+            return new BankAccountResponseDTO(
+                id,
+                bankAccount.getName(),
+                bankAccount.getIcon()
+            );
+        }
+        throw new Error("Failed to update bank account");
+    }
+
 }

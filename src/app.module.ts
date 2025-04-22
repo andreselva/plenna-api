@@ -39,6 +39,8 @@ import GetBankAccounts from './BankAccounts/UseCases/GetBankAccounts';
 import CreateBankAccount from './BankAccounts/UseCases/CreateBankAccount';
 import BankAccountsRepository from './BankAccounts/BankAccountsRepository';
 import BankAccountsController from './BankAccounts/BankAccountsController';
+import DeleteBankAccount from './BankAccounts/UseCases/DeleteBankAccount';
+import UpdateBankAccount from './BankAccounts/UseCases/UpdateBankAccount';
 
 const services = [
   CategoriesService,
@@ -61,7 +63,9 @@ const useCases = [
   DeleteExpense,
   UpdateExpense,
   GetBankAccounts,
-  CreateBankAccount
+  CreateBankAccount,
+  DeleteBankAccount,
+  UpdateBankAccount,
 ];
 
 const repositories = [

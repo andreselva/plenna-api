@@ -1,4 +1,4 @@
-import { Body, Controller, Dependencies, Get, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Dependencies, Get, Param, Post, Put } from "@nestjs/common";
 import BankAccountDTO from "./DTOs/BankAccountDTO";
 import BankAccountsService from "./BankAccountsServices";
 
@@ -17,5 +17,15 @@ export default class BankAccountsController {
     @Post()
     async createBankAccount(@Body() bankAccount: BankAccountDTO) {
         return await this.service.createBankAccount(bankAccount);
+    }
+
+    @Delete(':id')
+    async deleteBankAccount(@Param('id') id: string) {
+        return await this.service.deleteBankAccount(id);
+    }
+
+    @Put(':id')
+    async updateBankAccount(@Param('id') id: string, @Body() bankAccount: BankAccountDTO) {
+        return await this.service.updateBankAccount(id, bankAccount);
     }
 }

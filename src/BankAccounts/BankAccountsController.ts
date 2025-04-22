@@ -2,7 +2,6 @@ import { Body, Controller, Dependencies, Get, Post } from "@nestjs/common";
 import BankAccountDTO from "./DTOs/BankAccountDTO";
 import BankAccountsService from "./BankAccountsServices";
 
-
 @Controller("bank-accounts")
 @Dependencies(BankAccountsService)
 export default class BankAccountsController {

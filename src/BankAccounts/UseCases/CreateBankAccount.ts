@@ -10,6 +10,9 @@ export default class CreateBankAccount {
     ) { }
 
     async execute(bankAccount: BankAccountDTO) {
+        if (!bankAccount.icon) {
+            bankAccount.icon = "";
+        }
         const entity = new BankAccount(bankAccount.name, bankAccount.icon);
         return await this.repository.createBankAccount(entity);
     }

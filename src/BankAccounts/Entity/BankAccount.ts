@@ -3,7 +3,7 @@ export default class BankAccount {
     name: string;
     icon?: string;
 
-    constructor(name: string, icon?: string, id?: number,) {
+    constructor(name: string, icon: string = "", id?: number) {
         this.icon = icon;
         this.id = id;
         this.name = name;

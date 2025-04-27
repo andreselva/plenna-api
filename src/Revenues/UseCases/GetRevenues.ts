@@ -13,7 +13,7 @@ export default class GetRevenues {
         const revenues = await this.revenuesRepository.getRevenues();
         const formattedRevenues = revenues.map(revenue => ({
             ...revenue,
-            invoiceDueDate: FormatDate.formatDateToDDMMYYYY(revenue.invoiceDueDate)
+            invoiceDueDate: FormatDate.formatToYYYYMMDD(revenue.invoiceDueDate)
         }));
         return formattedRevenues;
     }

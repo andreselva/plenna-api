@@ -16,7 +16,6 @@ export class ExpensesController {
 
     @Post()
     async createExpense(@Body() expense: ExpenseDTO) {
-        console.log(expense);
         return await this.service.createExpense(expense);
     }
 

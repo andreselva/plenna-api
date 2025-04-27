@@ -4,6 +4,5 @@ export class ExpenseDTO {
     value: number;
     invoiceDueDate: string;
     idCategory: number;
-    idCreditCard: number;
     id?: number;
 }

@@ -12,7 +12,7 @@ export class GetExpenses {
         const expenses = await this.repository.getExpenses();
         const formattedExpenses = expenses.map(expense => ({
             ...expense,
-            invoiceDueDate: FormatDate.formatToYYYYMMDD(expense.invoiceDueDate)
+            invoiceDueDate: FormatDate.formatDateToDDMMYYYY(expense.invoiceDueDate)
         }));
         return formattedExpenses;
     }

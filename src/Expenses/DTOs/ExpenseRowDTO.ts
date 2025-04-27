@@ -4,6 +4,5 @@ export class ExpenseRowDTO {
     value: number;
     invoiceDueDate: string;
     idCategory: number;
-    idCreditCard?: number;
     id?: number;
 }

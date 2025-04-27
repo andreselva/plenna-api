@@ -20,16 +20,15 @@ export class ExpensesRepository {
             row.value,
             row.invoiceDueDate,
             row.idCategory,
-            row.idCreditCard,
             row.id,
         ));
     }
 
     async createExpense(expense: Expense): Promise<ExpenseResponseDTO> {
-        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard) VALUES (?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory) VALUES (?, ?, ?, ?, ?)";
         const result = await this.database.execute(
             query,
-            [expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getIdCreditCard()]
+            [expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory()]
         );
 
         if (result.affectedRows > 0) {
@@ -39,8 +38,7 @@ export class ExpensesRepository {
                 expense.getDescription(),
                 expense.getValue(),
                 expense.getInvoiceDueDate(),
-                expense.getIdCategory(),
-                expense.getIdCreditCard()
+                expense.getIdCategory()
             )
         }
 
@@ -63,19 +61,11 @@ export class ExpensesRepository {
         if (!expense.getId()) {
             throw new Error('Expense ID is required for update');
         }
-
-        const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ?, idCreditCard = ? WHERE id = ?";
+        
+        const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ? WHERE id = ?";
         const result = await this.database.execute(
             query,
-            [
-                expense.getName(),
-                expense.getDescription(),
-                expense.getValue(),
-                expense.getInvoiceDueDate(),
-                expense.getIdCategory(),
-                expense.getIdCreditCard(),
-                expense.getId()
-            ]
+            [expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getId()]
         );
 
         if (result.affectedRows > 0) {
@@ -85,10 +75,10 @@ export class ExpensesRepository {
                 expense.getDescription(),
                 expense.getValue(),
                 expense.getInvoiceDueDate(),
-                expense.getIdCategory(),
-                expense.getIdCreditCard()
+                expense.getIdCategory()
             );
         }
+
         throw new Error('Failed to update category');
     }
 }

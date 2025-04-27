@@ -7,15 +7,13 @@ export class Expense {
     public invoiceDueDate: string;
     public idCategory: number;
     public id?: number;
-    public idCreditCard?: number;
 
-    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, idCreditCard?: number, id?: number) {
+    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, id?: number) {
         this.name = name;
         this.description = description;
         this.value = value;
         this.invoiceDueDate = invoiceDueDate;
         this.idCategory = idCategory;
-        this.idCreditCard = idCreditCard;
         this.id = id;
     }
 
@@ -46,13 +44,6 @@ export class Expense {
         return this.id;
     }
 
-    getIdCreditCard(): number {
-        if (this.idCreditCard === undefined) {
-            throw new Error('ID Credit Card is not set');
-        }
-        return this.idCreditCard;
-    }
-
     static fromDTO(dto: ExpenseDTO): Expense {
         return new Expense(
             dto.name,
@@ -60,7 +51,6 @@ export class Expense {
             Number(dto.value),
             dto.invoiceDueDate,
             Number(dto.idCategory),
-            Number(dto.idCreditCard),
             dto.id,
         )
     }

@@ -10,6 +10,9 @@ export class CreateExpense {
     ) { }
 
     async execute(expense: ExpenseDTO) {
+        if (expense.idCreditCard === undefined || !expense.idCreditCard) {
+            expense.idCreditCard = 0;
+        }
         const entity = Expense.fromDTO(expense);
         return await this.repository.createExpense(entity);
     }

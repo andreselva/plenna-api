@@ -11,6 +11,9 @@ export class UpdateExpense {
 
     async execute(id: string, expense: ExpenseDTO) {
         expense.id = Number(id);
+        if (expense.idCreditCard === undefined || !expense.idCreditCard) {
+            expense.idCreditCard = 0;
+        }
         const entity = Expense.fromDTO(expense);
         return await this.repository.updateExpense(entity)
     }

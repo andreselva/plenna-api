@@ -41,6 +41,8 @@ import BankAccountsRepository from './BankAccounts/BankAccountsRepository';
 import BankAccountsController from './BankAccounts/BankAccountsController';
 import DeleteBankAccount from './BankAccounts/UseCases/DeleteBankAccount';
 import UpdateBankAccount from './BankAccounts/UseCases/UpdateBankAccount';
+import CreditCardStatementsService from './Dashboard/CreditCardStatements/CreditCardStatementsService';
+import CreditCardStatementsRepository from './Dashboard/CreditCardStatements/CreditCardStatementsRepository';
 
 const services = [
   CategoriesService,
@@ -99,7 +101,9 @@ const repositories = [
     ExpensesByCategoryService,
     DashboardServices,
     MonthlyProgressServices,
-    MonthlyProgressRepository
+    MonthlyProgressRepository,
+    CreditCardStatementsService,
+    CreditCardStatementsRepository
   ],
 })
 

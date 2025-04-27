@@ -12,11 +12,6 @@ export default class CreditCardStatementsService {
 
     async getData() {
         const expenses = await this.repository.getExpenses();
-
-        if (!expenses || expenses.length === 0) {
-            throw new Error("No expenses found.");
-        }
-
         const labels: string[] = [];
         const values: number[] = [];
 

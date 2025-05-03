@@ -4,6 +4,7 @@ import { CurrentBalanceService } from "./CurrentBalance/CurrentBalanceService";
 import { ExpensesByCategoryService } from "./ExpensesByCategory/ExpensesByCategoryService";
 import { MonthlyProgressServices } from "./MonthlyProgress/MonthlyProgressServices";
 import CreditCardStatementsService from "./CreditCardStatements/CreditCardStatementsService";
+import DashboardArgs from "./Args/DashboardArgs";
 
 @Injectable()
 export class DashboardServices {
@@ -15,12 +16,12 @@ export class DashboardServices {
         private readonly creditCardStatements: CreditCardStatementsService,
     ) { }
 
-    async getDashboardData() {
-        const currentBalance = await this.currentBalance.getCurrentBalanceData();
-        const expensesByCategory = await this.expensesByCategory.getExpensesByCategoryData();
-        const billsDue = await this.billsDue.getBillsData();
-        const monthlyProgress = await this.monthlyProgress.getMonthlyProgressData();
-        const creditCardStatements = await this.creditCardStatements.getData();
+    async getDashboardData(args: DashboardArgs) {
+        const currentBalance = await this.currentBalance.getCurrentBalanceData(args);
+        const expensesByCategory = await this.expensesByCategory.getExpensesByCategoryData(args);
+        const billsDue = await this.billsDue.getBillsData(args);
+        const monthlyProgress = await this.monthlyProgress.getMonthlyProgressData(args);
+        const creditCardStatements = await this.creditCardStatements.getData(args);
         return {
             currentBalance: currentBalance,
             expensesByCategory: expensesByCategory,

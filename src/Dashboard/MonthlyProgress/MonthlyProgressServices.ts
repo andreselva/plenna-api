@@ -3,6 +3,7 @@ import { MonthlyProgressRepository } from "./MonthlyProgressRepository";
 import DashboardMonthlyProgressDataset from "./DTOs/DashboardMonthlyProgressDataset";
 import MonthlyProgressRowDTO from "./DTOs/MonthlyProgressRowDTO";
 import DashboardMonthlyProgressDTO from "./DTOs/DashboardMonthlyProgressDTO";
+import DashboardArgs from "../Args/DashboardArgs";
 
 @Injectable()
 export class MonthlyProgressServices {
@@ -10,14 +11,14 @@ export class MonthlyProgressServices {
         private readonly repository: MonthlyProgressRepository
     ) { }
 
-    async getMonthlyProgressData() {
-        const { startDate, endDate, labels } = this.getDatesInfo();
+    async getMonthlyProgressData(args: DashboardArgs) {
+        const { startDate, endDate, labels, labelsForMap } = this.getDatesInfo(args);
         const expenses = await this.repository.getExpensesData(startDate, endDate);
         const revenues = await this.repository.getRevenuesData(startDate, endDate);
 
         // Formatação dos dados com os labels
-        const formattedExpenses = this.formatDataWithLabels(expenses, labels);
-        const formattedRevenues = this.formatDataWithLabels(revenues, labels);
+        const formattedExpenses = this.formatDataWithLabels(expenses, labelsForMap);
+        const formattedRevenues = this.formatDataWithLabels(revenues, labelsForMap);
 
         // Criando o dataset com os dados formatados
         const datasets = new DashboardMonthlyProgressDataset(formattedExpenses, formattedRevenues);
@@ -55,14 +56,15 @@ export class MonthlyProgressServices {
         return result;
     }
 
-    private getDatesInfo(): { startDate: string; endDate: string; labels: string[] } {
+    private getDatesInfo(args: DashboardArgs): { startDate: string; endDate: string; labels: string[]; labelsForMap: string[] } {
         const mesesAbreviados = [
             "Jan", "Fev", "Mar", "Abr", "Maio", "Jun",
             "Jul", "Ago", "Set", "Out", "Nov", "Dez"
         ];
 
         const labels: string[] = [];
-        const today = new Date();
+        const labelsForMap: string[] = [];
+        const today = new Date(args.endDate);
 
         // Começa pelo próximo mês
         let month = today.getMonth() + 1;
@@ -78,7 +80,10 @@ export class MonthlyProgressServices {
         for (let i = 11; i >= 0; i--) {
             const date = new Date(year, month - i, 1); // 1º dia do mês correspondente
             datas.push(date);
-            labels.push(mesesAbreviados[date.getMonth()]);
+            const labelForMap = mesesAbreviados[date.getMonth()];
+            const label = `${mesesAbreviados[date.getMonth()]}/${date.getFullYear().toString().slice(-2)}`;
+            labels.push(label);
+            labelsForMap.push(labelForMap); // Corrigido
         }
 
         // yyyy-mm-dd
@@ -93,7 +98,8 @@ export class MonthlyProgressServices {
         return {
             startDate,
             endDate,
-            labels
+            labels,
+            labelsForMap
         };
     }
 }

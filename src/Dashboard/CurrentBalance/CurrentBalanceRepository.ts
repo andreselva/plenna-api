@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
+import DashboardArgs from "../Args/DashboardArgs";
 
 @Injectable()
 export class CurrentBalanceRepository {
@@ -7,15 +8,15 @@ export class CurrentBalanceRepository {
         private readonly database: MySQLDatabase,
     ) { }
 
-    async getSumAllRevenues(): Promise<number> {
-        const query = "SELECT SUM(value) as total FROM revenue";
-        const [row] = await this.database.select(query);
+    async getSumAllRevenues(args: DashboardArgs): Promise<number> {
+        const query = "SELECT SUM(value) as total FROM revenue WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
+        const [row] = await this.database.select(query, [args.startDate, args.endDate]);
         return row.total ?? 0;
     }
 
-    async getSumAllExpenses(): Promise<number> {
-        const query = "SELECT SUM(value) as total FROM expense";
-        const [row] = await this.database.select(query);
+    async getSumAllExpenses(args: DashboardArgs): Promise<number> {
+        const query = "SELECT SUM(value) as total FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
+        const [row] = await this.database.select(query, [args.startDate, args.endDate]);
         return row.total ?? 0;
     }
 }

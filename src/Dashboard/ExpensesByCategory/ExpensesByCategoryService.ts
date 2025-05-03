@@ -3,6 +3,7 @@ import { DashboardExpenseByCategoryDatasetDTO } from "./DTOs/DashboardExpenseByC
 import { DashboardExpenseByCategoryDTO } from "./DTOs/DashboardExpenseByCategoryDTO";
 import { ExpensesByCategoryRepository } from "./ExpensesByCategoryRepository";
 import ExpensesByCategoryChartConfig from "./ChartConfig/ExpensesByCategoryChartConfig";
+import DashboardArgs from "../Args/DashboardArgs";
 
 @Injectable()
 export class ExpensesByCategoryService {
@@ -10,8 +11,8 @@ export class ExpensesByCategoryService {
         private readonly repository: ExpensesByCategoryRepository
     ) { }
 
-    async getExpensesByCategoryData() {
-        const expenses = await this.repository.getTotalExpenses();
+    async getExpensesByCategoryData(args: DashboardArgs) {
+        const expenses = await this.repository.getTotalExpenses(args);
 
         const labels: string[] = [];
         const totals: number[] = [];

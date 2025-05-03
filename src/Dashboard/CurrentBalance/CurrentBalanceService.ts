@@ -3,6 +3,7 @@ import { CurrentBalanceRepository } from "./CurrentBalanceRepository";
 import { DashboardCurrentBalanceDatasetDTO } from "./DTOs/DashboardCurrentBalanceDatasetDTO";
 import { CurrentBalanceChartConfig } from "./ChartConfig/CurrentBalanceChartConfig";
 import { DashboardCurrentBalanceDTO } from "./DTOs/DashboardCurrentBalanceDTO";
+import DashboardArgs from "../Args/DashboardArgs";
 
 @Injectable()
 export class CurrentBalanceService {
@@ -10,9 +11,9 @@ export class CurrentBalanceService {
         private readonly repository: CurrentBalanceRepository
     ) { }
 
-    async getCurrentBalanceData() {
-        const totalRevenues = await this.getTotalRevenues();
-        const totalExpenses = await this.getTotalExpenses();
+    async getCurrentBalanceData(args: DashboardArgs) {
+        const totalRevenues = await this.repository.getSumAllRevenues(args);
+        const totalExpenses = await this.repository.getSumAllExpenses(args);
 
         const currentBalanceDataSet = new DashboardCurrentBalanceDatasetDTO(
             [totalRevenues, totalExpenses],
@@ -27,13 +28,5 @@ export class CurrentBalanceService {
             [currentBalanceDataSet],
             totalRevenues - totalExpenses
         );
-    }
-
-    private async getTotalRevenues(): Promise<number> {
-        return await this.repository.getSumAllRevenues();
-    }
-
-    private async getTotalExpenses(): Promise<number> {
-        return await this.repository.getSumAllExpenses();
     }
 }

@@ -3,6 +3,7 @@ import CreditCardStatementsChartConfig from "./ChartConfig/CreditCardStatementsC
 import CreditCardStatementsRepository from "./CreditCardStatementsRepository";
 import DashboardCreditCardDatasetDTO from "./DTOs/DashboardCreditCardDatasetDTO";
 import DashboardCreditCardStatementsDTO from "./DTOs/DashboardCreditCardStatementsDTO";
+import DashboardArgs from "../Args/DashboardArgs";
 
 @Injectable()
 export default class CreditCardStatementsService {
@@ -10,8 +11,8 @@ export default class CreditCardStatementsService {
         private readonly repository: CreditCardStatementsRepository
     ) { }
 
-    async getData() {
-        const expenses = await this.repository.getExpenses();
+    async getData(args: DashboardArgs) {
+        const expenses = await this.repository.getExpenses(args);
         const labels: string[] = [];
         const values: number[] = [];
 

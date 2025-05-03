@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { BillsDueRepository } from "./BillsDueRepository";
 import { BillsDueResponseDTO } from "./DTOs/BillsDueResponseDTO";
+import DashboardArgs from "../Args/DashboardArgs";
 
 @Injectable()
 export class BillsDueService {
@@ -8,8 +9,8 @@ export class BillsDueService {
         private readonly repository: BillsDueRepository
     ) { }
 
-    async getBillsData(): Promise<BillsDueResponseDTO[]> {
-        const bills = await this.repository.getBills();
+    async getBillsData(args: DashboardArgs): Promise<BillsDueResponseDTO[]> {
+        const bills = await this.repository.getBills(args);
 
         return bills.map(bill => new BillsDueResponseDTO(
             bill.name,

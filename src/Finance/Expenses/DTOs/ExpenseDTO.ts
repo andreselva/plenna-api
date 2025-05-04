@@ -5,5 +5,8 @@ export class ExpenseDTO {
     invoiceDueDate: string;
     idCategory: number;
     idCreditCard: number;
+    installments: number;
+    typeOfInstallment: string;
+    sourceAccountId: number;
     id?: number;
 }

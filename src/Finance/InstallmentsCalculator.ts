@@ -5,10 +5,10 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
     private readonly type: 'P' | 'F';
     private quantityInstallments: number;
     private readonly entity: T;
-    
+
     public readonly otherInstallments: T[] = [];
 
-    constructor(type: 'P' | 'F', quantityInstallments:number, entity: T) {
+    constructor(type: 'P' | 'F', quantityInstallments: number, entity: T) {
         this.type = type;
         this.quantityInstallments = quantityInstallments;
         this.entity = entity;
@@ -42,10 +42,10 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
                         this.entity.getValue(),
                         newDate.toISOString().split('T')[0],
                         this.entity.getIdCategory(),
-                        0,//Id é zero ao gerar a parcela
                         0,//A parcela não pode ter parcelas
                         this.entity.getTypeOfInstallments(),
-                        this.entity.getId()//Salvamos o id da conta de origem
+                        this.entity.getId(),//Salvamos o id da conta de origem
+                        0//Id é zero ao gerar a parcela
                     ) as T;
                 } else {
                     installment = new Expense(
@@ -54,7 +54,11 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
                         this.entity.getValue(),
                         newDate.toISOString().split('T')[0],
                         this.entity.getIdCategory(),
-                        this.entity.getIdCreditCard()
+                        this.entity.getIdCreditCard(),
+                        0,//A parcela não pode ter parcelas
+                        this.entity.getTypeOfInstallments(),
+                        this.entity.getId(),//Salvamos o id da conta de origem
+                        0//Id é zero ao gerar a parcela
                     ) as T;
                 }
 

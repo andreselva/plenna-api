@@ -6,16 +6,22 @@ export class Expense {
     public value: number;
     public invoiceDueDate: string;
     public idCategory: number;
+    public idCreditCard: number = 0;
+    public installments: number = 0;
+    public typeOfInstallments: string = 'U';
+    public sourceAccountId: number = 0;
     public id?: number;
-    public idCreditCard?: number;
 
-    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, idCreditCard?: number, id?: number) {
+    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, idCreditCard: number, installments: number, typeOfInstallments: string, sourceAccountId: number, id?: number) {
         this.name = name;
         this.description = description;
         this.value = value;
         this.invoiceDueDate = invoiceDueDate;
         this.idCategory = idCategory;
         this.idCreditCard = idCreditCard;
+        this.installments = installments;
+        this.typeOfInstallments = typeOfInstallments;
+        this.sourceAccountId = sourceAccountId;
         this.id = id;
     }
 
@@ -40,27 +46,42 @@ export class Expense {
     }
 
     getId(): number {
-        if (this.id === undefined) {
-            throw new Error('ID is not set');
-        }
-        return this.id;
+        return this.id ?? 0;
     }
 
     getIdCreditCard(): number {
-        if (this.idCreditCard === undefined) {
-            throw new Error('ID Credit Card is not set');
+        return this.idCreditCard ?? 0;
+    }
+
+    getInstallments() {
+        return this.installments ?? 0;
+    }
+
+    getTypeOfInstallments() {
+        return this.typeOfInstallments ?? 'U';
+    }
+
+    getSourceAccountId() {
+        return this.sourceAccountId ?? 0;
+    }
+
+    setId(id: number) {
+        if (this.id === undefined || !this.id) {
+            this.id = id;
         }
-        return this.idCreditCard;
     }
 
     static fromDTO(dto: ExpenseDTO): Expense {
         return new Expense(
             dto.name,
             dto.description,
-            Number(dto.value),
+            dto.value,
             dto.invoiceDueDate,
             Number(dto.idCategory),
-            Number(dto.idCreditCard),
+            Number(dto.idCreditCard) || 0,
+            Number(dto.installments) || 0,
+            dto.typeOfInstallment,
+            dto.sourceAccountId,
             dto.id,
         )
     }

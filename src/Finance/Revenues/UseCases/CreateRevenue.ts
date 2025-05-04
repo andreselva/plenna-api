@@ -27,13 +27,13 @@ export default class CreateRevenue {
                 new InstallmentsCalculator(
                     revenueCreated.getTypeOfInstallments() as 'P' | 'F',
                     revenueCreated.getInstallments(),
-                    revenueCreated)
-                ).getInstallments();
+                    revenueCreated
+                )
+            ).getInstallments();
 
             const revenuesCreated = [] as Revenue[];
             //Adicionar a primeira conta gerada para retornar pro front mapeado posteriormente.
             revenuesCreated.push(revenueCreated);
-
             for (let i = 0; i < otherInstallments.length; i++) {
                 //Cria as parcelas no banco de dados e as salva em um novo array para retornar pro front.
                 revenuesCreated.push(await this.revenueRepository.createRevenue(otherInstallments[i]));

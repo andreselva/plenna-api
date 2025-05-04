@@ -17,20 +17,20 @@ export default class Revenue {
         value: number,
         invoiceDueDate: string,
         idCategory: number,
-        id?: number,
         installments: number = 0,
         typeOfInstallments: string = 'U',
-        sourceAccountId: number = 0
+        sourceAccountId: number = 0,
+        id?: number,
     ) {
         this.name = name;
         this.description = description;
         this.value = value;
         this.invoiceDueDate = invoiceDueDate;
         this.idCategory = idCategory;
-        this.id = id;
         this.installments = installments;
         this.typeOfInstallments = typeOfInstallments;
         this.sourceAccountId = sourceAccountId;
+        this.id = id;
     }
 
     getName(): string {
@@ -82,10 +82,10 @@ export default class Revenue {
             Number(dto.value),
             dto.invoiceDueDate,
             Number(dto.idCategory),
-            dto.id,
             Number(dto.installments),
             dto.typeOfInstallment,
-            dto.sourceAccountId
+            dto.sourceAccountId,
+            dto.id,
         );
     }
 }

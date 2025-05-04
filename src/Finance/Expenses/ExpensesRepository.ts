@@ -21,27 +21,33 @@ export class ExpensesRepository {
             row.invoiceDueDate,
             row.idCategory,
             row.idCreditCard,
+            row.installments,
+            row.typeOfInstallments,
+            row.sourceAccountId,
             row.id,
         ));
     }
 
-    async createExpense(expense: Expense): Promise<ExpenseResponseDTO> {
-        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard) VALUES (?, ?, ?, ?, ?, ?)";
+    async createExpense(expense: Expense): Promise<Expense> {
+        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard, installments, typeOfInstallments, sourceAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         const result = await this.database.execute(
             query,
-            [expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getIdCreditCard()]
-        );
-
-        if (result.affectedRows > 0) {
-            return new ExpenseResponseDTO(
-                result.insertId,
+            [
                 expense.getName(),
                 expense.getDescription(),
                 expense.getValue(),
                 expense.getInvoiceDueDate(),
                 expense.getIdCategory(),
-                expense.getIdCreditCard()
-            )
+                expense.getIdCreditCard(),
+                expense.getInstallments(),
+                expense.getTypeOfInstallments(),
+                expense.getSourceAccountId()
+            ]
+        );
+
+        if (result.affectedRows > 0) {
+            expense.setId(result.insertId);
+            return expense;
         }
 
         throw new Error("Failed to create expense");

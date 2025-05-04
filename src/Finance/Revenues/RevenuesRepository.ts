@@ -20,6 +20,9 @@ export default class RevenuesRepository {
             row.value,
             row.invoiceDueDate,
             row.idCategory,
+            row.installments,
+            row.typeOfInstallments,
+            row.sourceAccountId,
             row.id,
         ));
     }

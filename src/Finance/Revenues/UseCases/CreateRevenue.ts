@@ -19,7 +19,7 @@ export default class CreateRevenue {
         if (
             revenueCreated
             && (
-                (revenueCreated.getTypeOfInstallments() === 'P' && revenueCreated.getInstallments() > 0) 
+                (revenueCreated.getTypeOfInstallments() === 'P' && revenueCreated.getInstallments() > 0)
                 || revenueCreated.getTypeOfInstallments() === 'F'
             )
         ) {
@@ -28,7 +28,7 @@ export default class CreateRevenue {
                     revenueCreated.getTypeOfInstallments() as 'P' | 'F',
                     revenueCreated.getInstallments(),
                     revenueCreated)
-            ).getInstallments();
+                ).getInstallments();
 
             const revenuesCreated = [] as Revenue[];
             //Adicionar a primeira conta gerada para retornar pro front mapeado posteriormente.
@@ -39,19 +39,15 @@ export default class CreateRevenue {
                 revenuesCreated.push(await this.revenueRepository.createRevenue(otherInstallments[i]));
             }
 
-            const revenues = [] as RevenueResponseDTO[];
-            revenuesCreated.forEach(revenue => {
-                revenues.push(new RevenueResponseDTO(
-                    revenue.getId(),
-                    revenue.getName(),
-                    revenue.getDescription(),
-                    revenue.getValue(),
-                    revenue.getInvoiceDueDate(),
-                    revenue.getIdCategory(),
-                ))
-            });
-
-            return revenues;
+            //Mapeia para retornar pro front
+            return revenuesCreated.map(revenue => new RevenueResponseDTO(
+                revenue.getId(),
+                revenue.getName(),
+                revenue.getDescription(),
+                revenue.getValue(),
+                revenue.getInvoiceDueDate(),
+                revenue.getIdCategory(),
+            ));
         }
 
         //Se não houver parcelas, retorna diretamente a conta criada

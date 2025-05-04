@@ -24,20 +24,14 @@ export default class RevenuesRepository {
         ));
     }
 
-    async createRevenue(revenue: Revenue): Promise<RevenueResponseDTO> {
+    async createRevenue(revenue: Revenue): Promise<Revenue> {
         const query = "INSERT INTO revenue (name, description, value, invoiceDueDate, idCategory) VALUES (?, ?, ?, ?, ?)";
         const params = [revenue.getName(), revenue.getDescription(), revenue.getValue(), revenue.getInvoiceDueDate(), revenue.getIdCategory()];
         const result = await this.database.execute(query, params);
 
         if (result.affectedRows > 0) {
-            return new RevenueResponseDTO(
-                result.insertId,
-                revenue.getName(),
-                revenue.getDescription(),
-                revenue.getValue(),
-                revenue.getInvoiceDueDate(),
-                revenue.getIdCategory(),
-            );
+            revenue.setId(result.insertId);
+            return revenue;
         }
 
         throw new Error("Failed to create revenue");

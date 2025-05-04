@@ -5,4 +5,6 @@ export class RevenueDTO {
     invoiceDueDate: string;
     idCategory: string;
     id?: number;
+    installments?: number;
+    typeOfInstallment?: string;
 }

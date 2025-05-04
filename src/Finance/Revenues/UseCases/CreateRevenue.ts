@@ -11,15 +11,17 @@ export default class CreateRevenue {
         private readonly revenueRepository: RevenuesRepository
     ) { }
 
-    async execute(revenue: RevenueDTO) {
-        const entity = Revenue.fromDTO(revenue);
+    async execute(dto: RevenueDTO) {
+        const entity = Revenue.fromDTO(dto);
         const revenueCreated = await this.revenueRepository.createRevenue(entity);
 
         //Só entra nesse if se houver uma quantidade de parcelas informadas e se o tipo da parcela for P (parcelada) ou F (fixa).
         if (
             revenueCreated
-            && revenueCreated.getInstallments() > 0
-            && (revenueCreated.getTypeOfInstallments() === 'P' || revenueCreated.getTypeOfInstallments() === 'F')
+            && (
+                (revenueCreated.getTypeOfInstallments() === 'P' && revenueCreated.getInstallments() > 0) 
+                || revenueCreated.getTypeOfInstallments() === 'F'
+            )
         ) {
             const otherInstallments = (
                 new InstallmentsCalculator(
@@ -38,21 +40,21 @@ export default class CreateRevenue {
             }
 
             const revenues = [] as RevenueResponseDTO[];
-            revenuesCreated.forEach(installment => {
+            revenuesCreated.forEach(revenue => {
                 revenues.push(new RevenueResponseDTO(
-                    installment.getId(),
-                    installment.getName(),
-                    installment.getDescription(),
-                    installment.getValue(),
-                    installment.getInvoiceDueDate(),
-                    installment.getIdCategory(),
+                    revenue.getId(),
+                    revenue.getName(),
+                    revenue.getDescription(),
+                    revenue.getValue(),
+                    revenue.getInvoiceDueDate(),
+                    revenue.getIdCategory(),
                 ))
             });
 
             return revenues;
         }
 
-        //Se não houver parcelas, retorna diretamente a conta gerada
+        //Se não houver parcelas, retorna diretamente a conta criada
         return new RevenueResponseDTO(
             revenueCreated.getId(),
             revenueCreated.getName(),

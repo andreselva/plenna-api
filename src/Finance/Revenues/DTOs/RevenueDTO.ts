@@ -7,4 +7,5 @@ export class RevenueDTO {
     id?: number;
     installments?: number;
     typeOfInstallment?: string;
+    sourceAccountId?: number;
 }

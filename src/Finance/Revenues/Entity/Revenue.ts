@@ -6,10 +6,10 @@ export default class Revenue {
     value: number;
     invoiceDueDate: string;
     idCategory: number
-    id?: number | null;
-    installments?: number;
-    typeOfInstallments?: string;
-    sourceAccountId?: number;
+    id?: number;
+    installments?: number = 0;
+    typeOfInstallments?: string = 'U';
+    sourceAccountId?: number = 0;
 
     constructor(
         name: string,
@@ -18,9 +18,9 @@ export default class Revenue {
         invoiceDueDate: string,
         idCategory: number,
         id?: number,
-        installments?: number,
-        typeOfInstallments?: string,
-        sourceAccountId?: number
+        installments: number = 0,
+        typeOfInstallments: string = 'U',
+        sourceAccountId: number = 0
     ) {
         this.name = name;
         this.description = description;
@@ -54,31 +54,19 @@ export default class Revenue {
     }
 
     getId() {
-        if (this.id === undefined || !this.id) {
-            return 0;
-        }
-        return this.id;
+        return this.id ?? 0;
     }
 
     getInstallments() {
-        if (this.installments === undefined) {
-            return 0;
-        }
-        return this.installments;
+        return this.installments ?? 0;
     }
 
     getTypeOfInstallments() {
-        if (this.typeOfInstallments === undefined || !this.typeOfInstallments) {
-            throw new Error('Type of installments not assign!');
-        }
-        return this.typeOfInstallments;
+        return this.typeOfInstallments ?? 'U';
     }
 
     getSourceAccountId() {
-        if (this.sourceAccountId === undefined || !this.sourceAccountId) {
-            return 0;
-        }
-        return this.sourceAccountId;
+        return this.sourceAccountId ?? 0;
     }
 
     setId(id: number) {
@@ -95,8 +83,9 @@ export default class Revenue {
             dto.invoiceDueDate,
             Number(dto.idCategory),
             dto.id,
-            dto.installments,
-            dto.typeOfInstallment
+            Number(dto.installments),
+            dto.typeOfInstallment,
+            dto.sourceAccountId
         );
     }
 }

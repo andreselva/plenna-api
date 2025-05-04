@@ -25,8 +25,17 @@ export default class RevenuesRepository {
     }
 
     async createRevenue(revenue: Revenue): Promise<Revenue> {
-        const query = "INSERT INTO revenue (name, description, value, invoiceDueDate, idCategory) VALUES (?, ?, ?, ?, ?)";
-        const params = [revenue.getName(), revenue.getDescription(), revenue.getValue(), revenue.getInvoiceDueDate(), revenue.getIdCategory()];
+        const query = "INSERT INTO revenue (name, description, value, invoiceDueDate, idCategory, installments, typeOfInstallments, sourceAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        const params = [
+            revenue.getName(),
+            revenue.getDescription(),
+            revenue.getValue(),
+            revenue.getInvoiceDueDate(),
+            revenue.getIdCategory(),
+            revenue.getInstallments(),
+            revenue.getTypeOfInstallments(),
+            revenue.getSourceAccountId()
+        ];
         const result = await this.database.execute(query, params);
 
         if (result.affectedRows > 0) {

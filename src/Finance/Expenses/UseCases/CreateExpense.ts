@@ -15,7 +15,8 @@ export class CreateExpense {
         const entity = Expense.fromDTO(expense);
         const firstExpense = await this.repository.createExpense(entity);
 
-        //Só entra nesse if se houver uma quantidade de parcelas informadas e se o tipo da parcela for P (parcelada) ou F (fixa).
+        //Só entra nesse if se houver uma quantidade de parcelas informadas e se 
+        // o tipo da parcela for P (parcelada), ou se o tipo for F (fixa).
         if (
             firstExpense
             && (
@@ -47,7 +48,10 @@ export class CreateExpense {
                 expense.getValue(),
                 expense.getInvoiceDueDate(),
                 expense.getIdCategory(),
-                expense.getIdCreditCard()
+                expense.getIdCreditCard(),
+                expense.getTypeOfInstallments(),
+                expense.getSourceAccountId(),
+                expense.getHasInstallments()
             ));
         }
 
@@ -59,7 +63,10 @@ export class CreateExpense {
             firstExpense.getValue(),
             firstExpense.getInvoiceDueDate(),
             firstExpense.getIdCategory(),
-            firstExpense.getIdCreditCard()
+            firstExpense.getIdCreditCard(),
+            firstExpense.getTypeOfInstallments(),
+            firstExpense.getSourceAccountId(),
+            firstExpense.getHasInstallments()
         )
     }
 }

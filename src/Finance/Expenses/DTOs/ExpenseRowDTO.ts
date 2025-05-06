@@ -8,5 +8,6 @@ export class ExpenseRowDTO {
     installments: number;
     typeOfInstallments: string;
     sourceAccountId: number;
+    hasInstallments: boolean;
     id?: number;
 }

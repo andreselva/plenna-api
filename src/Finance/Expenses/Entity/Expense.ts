@@ -10,9 +10,10 @@ export class Expense {
     public installments: number = 0;
     public typeOfInstallments: string = 'U';
     public sourceAccountId: number = 0;
+    public hasInstallments: boolean = false;
     public id?: number;
 
-    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, idCreditCard: number, installments: number, typeOfInstallments: string, sourceAccountId: number, id?: number) {
+    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, idCreditCard: number, installments: number, typeOfInstallments: string, sourceAccountId: number, hasInstallments: boolean, id?: number) {
         this.name = name;
         this.description = description;
         this.value = value;
@@ -22,6 +23,7 @@ export class Expense {
         this.installments = installments;
         this.typeOfInstallments = typeOfInstallments;
         this.sourceAccountId = sourceAccountId;
+        this.hasInstallments = hasInstallments;
         this.id = id;
     }
 
@@ -65,6 +67,10 @@ export class Expense {
         return this.sourceAccountId ?? 0;
     }
 
+    getHasInstallments() {
+        return this.hasInstallments;
+    }
+
     setId(id: number) {
         if (this.id === undefined || !this.id) {
             this.id = id;
@@ -81,7 +87,8 @@ export class Expense {
             Number(dto.idCreditCard) || 0,
             Number(dto.installments) || 0,
             dto.typeOfInstallment,
-            dto.sourceAccountId,
+            Number(dto.sourceAccountId) || 0,
+            dto.hasInstallments || false,
             dto.id,
         )
     }

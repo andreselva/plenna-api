@@ -24,12 +24,13 @@ export class ExpensesRepository {
             row.installments,
             row.typeOfInstallments,
             row.sourceAccountId,
+            row.hasInstallments,
             row.id,
         ));
     }
 
     async createExpense(expense: Expense): Promise<Expense> {
-        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard, installments, typeOfInstallments, sourceAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard, installments, typeOfInstallments, sourceAccountId, hasInstallments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         const result = await this.database.execute(
             query,
             [
@@ -41,7 +42,8 @@ export class ExpensesRepository {
                 expense.getIdCreditCard(),
                 expense.getInstallments(),
                 expense.getTypeOfInstallments(),
-                expense.getSourceAccountId()
+                expense.getSourceAccountId(),
+                expense.getHasInstallments()
             ]
         );
 
@@ -92,7 +94,10 @@ export class ExpensesRepository {
                 expense.getValue(),
                 expense.getInvoiceDueDate(),
                 expense.getIdCategory(),
-                expense.getIdCreditCard()
+                expense.getIdCreditCard(),
+                expense.getTypeOfInstallments(),
+                expense.getSourceAccountId(),
+                expense.getHasInstallments()
             );
         }
         throw new Error('Failed to update category');

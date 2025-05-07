@@ -7,5 +7,6 @@ export interface RevenueRowDTO {
     installments: number;
     typeOfInstallments: string;
     sourceAccountId: number;
+    hasInstallments: boolean;
     id?: number;
 }

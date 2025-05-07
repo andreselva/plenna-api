@@ -1,27 +1,18 @@
 import { RevenueDTO } from "../DTOs/RevenueDTO";
 
 export default class Revenue {
-    name: string;
-    description: string;
-    value: number;
-    invoiceDueDate: string;
-    idCategory: number
-    id?: number;
-    installments?: number = 0;
-    typeOfInstallments?: string = 'U';
-    sourceAccountId?: number = 0;
+    public name: string;
+    public description: string;
+    public value: number;
+    public invoiceDueDate: string;
+    public idCategory: number
+    public installments: number = 0;
+    public typeOfInstallments: string = 'U';
+    public sourceAccountId: number = 0;
+    public hasInstallments: boolean = false;
+    public id?: number;
 
-    constructor(
-        name: string,
-        description: string,
-        value: number,
-        invoiceDueDate: string,
-        idCategory: number,
-        installments: number = 0,
-        typeOfInstallments: string = 'U',
-        sourceAccountId: number = 0,
-        id?: number,
-    ) {
+    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, installments: number = 0, typeOfInstallments: string = 'U', sourceAccountId: number = 0, hasInstallments: boolean = false, id?: number) {
         this.name = name;
         this.description = description;
         this.value = value;
@@ -30,6 +21,7 @@ export default class Revenue {
         this.installments = installments;
         this.typeOfInstallments = typeOfInstallments;
         this.sourceAccountId = sourceAccountId;
+        this.hasInstallments = hasInstallments;
         this.id = id;
     }
 
@@ -69,6 +61,10 @@ export default class Revenue {
         return this.sourceAccountId ?? 0;
     }
 
+    getHasInstallments() {
+        return this.hasInstallments;
+    }
+
     setId(id: number) {
         if (this.id === undefined || !this.id) {
             this.id = id;
@@ -85,6 +81,7 @@ export default class Revenue {
             Number(dto.installments),
             dto.typeOfInstallment,
             dto.sourceAccountId,
+            dto.hasInstallments || false,
             dto.id,
         );
     }

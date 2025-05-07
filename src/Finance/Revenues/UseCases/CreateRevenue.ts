@@ -47,6 +47,10 @@ export default class CreateRevenue {
                 revenue.getValue(),
                 revenue.getInvoiceDueDate(),
                 revenue.getIdCategory(),
+                revenue.getInstallments(),
+                revenue.getTypeOfInstallments(),
+                revenue.getSourceAccountId(),
+                revenue.getHasInstallments()
             ));
         }
 
@@ -57,7 +61,11 @@ export default class CreateRevenue {
             revenueCreated.getDescription(),
             revenueCreated.getValue(),
             revenueCreated.getInvoiceDueDate(),
-            revenueCreated.getIdCategory()
+            revenueCreated.getIdCategory(),
+            revenueCreated.getInstallments(),
+            revenueCreated.getTypeOfInstallments(),
+            revenueCreated.getSourceAccountId(),
+            revenueCreated.getHasInstallments()
         )
     }
 

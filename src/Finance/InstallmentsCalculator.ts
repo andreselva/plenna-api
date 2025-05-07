@@ -44,7 +44,8 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
                         this.entity.getIdCategory(),
                         0, // A parcela não pode ter parcelas
                         this.entity.getTypeOfInstallments(),
-                        this.entity.getId(), // Salvamos o id da conta de origem
+                        this.entity.getId(),// Salvamos o id da conta de origem
+                        this.entity.getHasInstallments(),
                         0 // Id é zero ao gerar a parcela
                     ) as T;
                 } else {

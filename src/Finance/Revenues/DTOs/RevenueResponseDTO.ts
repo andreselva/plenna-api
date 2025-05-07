@@ -7,5 +7,9 @@ export class RevenueResponseDTO {
         public readonly value: number,
         public readonly invoiceDueDate: string,
         public readonly idCategory: number,
+        public readonly installments: number,
+        public readonly typeOfInstallments: string,
+        public readonly sourceAccountId: number,
+        public readonly hasInstallments: boolean
     ) {}
 }

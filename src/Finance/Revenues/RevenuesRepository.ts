@@ -23,12 +23,13 @@ export default class RevenuesRepository {
             row.installments,
             row.typeOfInstallments,
             row.sourceAccountId,
+            row.hasInstallments,
             row.id,
         ));
     }
 
     async createRevenue(revenue: Revenue): Promise<Revenue> {
-        const query = "INSERT INTO revenue (name, description, value, invoiceDueDate, idCategory, installments, typeOfInstallments, sourceAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO revenue (name, description, value, invoiceDueDate, idCategory, installments, typeOfInstallments, sourceAccountId, hasInstallments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         const params = [
             revenue.getName(),
             revenue.getDescription(),
@@ -37,7 +38,8 @@ export default class RevenuesRepository {
             revenue.getIdCategory(),
             revenue.getInstallments(),
             revenue.getTypeOfInstallments(),
-            revenue.getSourceAccountId()
+            revenue.getSourceAccountId(),
+            revenue.getHasInstallments()
         ];
         const result = await this.database.execute(query, params);
 
@@ -65,7 +67,14 @@ export default class RevenuesRepository {
         const query = "UPDATE revenue SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ? WHERE id = ?";
         const result = await this.database.execute(
             query,
-            [revenue.getName(), revenue.getDescription(), revenue.getValue(), revenue.getInvoiceDueDate(), revenue.getIdCategory(), revenue.getId()]
+            [
+                revenue.getName(),
+                revenue.getDescription(),
+                revenue.getValue(),
+                revenue.getInvoiceDueDate(),
+                revenue.getIdCategory(),
+                revenue.getId()
+            ]
         )
 
         if (result.affectedRows > 0) {
@@ -75,7 +84,11 @@ export default class RevenuesRepository {
                 revenue.getDescription(),
                 revenue.getValue(),
                 revenue.getInvoiceDueDate(),
-                revenue.getIdCategory()
+                revenue.getIdCategory(),
+                revenue.getInstallments(),
+                revenue.getTypeOfInstallments(),
+                revenue.getSourceAccountId(),
+                revenue.getHasInstallments()
             )
         }
         throw new Error('Failed to update revenue');

@@ -25,6 +25,17 @@ export default class RevenuesService {
     }
 
     async createRevenue(revenue: RevenueDTO) {
+        if (
+            (
+                revenue.typeOfInstallment === 'P' 
+                && revenue.installments 
+                && revenue.installments > 0
+            )
+            || revenue.typeOfInstallment === 'F'
+        ) {
+            revenue.hasInstallments = true;
+        }
+        
         return await this.createRevenueUseCase.execute(revenue)
     }
 

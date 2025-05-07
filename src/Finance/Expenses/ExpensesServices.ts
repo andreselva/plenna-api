@@ -20,6 +20,17 @@ export class ExpensesServices {
     }
 
     async createExpense(dto: ExpenseDTO) {
+        if (
+            (
+                dto.typeOfInstallment === 'P'
+                && dto.installments
+                && dto.installments > 0
+            )
+            || dto.typeOfInstallment === 'F'
+        ) {
+            dto.hasInstallments = true;
+        }
+        
         return await this.createExpenseUseCase.execute(dto);
     }
 

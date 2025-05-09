@@ -9,4 +9,5 @@ export class RevenueDTO {
     typeOfInstallment?: string;
     sourceAccountId?: number;
     hasInstallments?: boolean;
+    updateInstallments?: boolean;
 }

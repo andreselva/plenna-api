@@ -3,6 +3,7 @@ import Revenue from "./Entity/Revenue";
 import { Injectable } from "@nestjs/common";
 import { RevenueRowDTO } from "./DTOs/RevenueRowDTO";
 import { RevenueResponseDTO } from "./DTOs/RevenueResponseDTO";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
 
 @Injectable()
 export default class RevenuesRepository {
@@ -23,7 +24,7 @@ export default class RevenuesRepository {
             row.installments,
             row.typeOfInstallments,
             row.sourceAccountId,
-            row.hasInstallments,
+            Boolean(row.hasInstallments),
             row.id,
         ));
     }
@@ -92,5 +93,23 @@ export default class RevenuesRepository {
             )
         }
         throw new Error('Failed to update revenue');
+    }
+
+    async searchForRelatedInstallments(idInstallment: number): Promise<Revenue[]> {
+        const query = "SELECT * FROM revenue WHERE (sourceAccountId = ? OR id = ?) ORDER BY id ASC";
+        const rows = await this.database.select(query, [idInstallment, idInstallment]) as RevenueRowDTO[];
+
+        return rows.map(row => new Revenue(
+            String(row.name),
+            String(row.description),
+            Number(row.value),
+            FormatDate.formatToYYYYMMDD(row.invoiceDueDate),
+            Number(row.idCategory),
+            Number(row.installments),
+            String(row.typeOfInstallments),
+            Number(row.sourceAccountId),
+            Boolean(row.hasInstallments),
+            Number(row.id),
+        ))
     }
 }

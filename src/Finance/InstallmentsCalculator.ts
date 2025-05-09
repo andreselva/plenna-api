@@ -69,7 +69,7 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
         }
     }
 
-    setQuantityInstallments(installments: number) {
+    private setQuantityInstallments(installments: number) {
         this.quantityInstallments = installments;
     }
 }

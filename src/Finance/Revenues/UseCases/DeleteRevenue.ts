@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import RevenuesRepository from "../RevenuesRepository";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
 
 @Injectable()
 export class DeleteRevenue {
@@ -24,7 +25,11 @@ export class DeleteRevenue {
                 if (isSuccess) {
                     return {
                         message: 'All installments have been deleted successfully.',
-                        statusCode: HttpStatus.OK
+                        statusCode: HttpStatus.OK,
+                        revenues: (await this.repository.getRevenues()).map(revenue => ({
+                            ...revenue,
+                            invoiceDueDate: FormatDate.formatToYYYYMMDD(revenue.invoiceDueDate),
+                        }))
                     }
                 }
 
@@ -35,6 +40,15 @@ export class DeleteRevenue {
             }
         }
 
-        return await this.repository.deleteRevenue(Number(id));
+        if ((await this.repository.deleteRevenue(Number(id))).isSuccess === true) {
+            return {
+                message: 'Revenue have been deleted successfully.',
+                statusCode: HttpStatus.OK,
+                revenues: (await this.repository.getRevenues()).map(revenue => ({
+                    ...revenue,
+                    invoiceDueDate: FormatDate.formatToYYYYMMDD(revenue.invoiceDueDate)
+                }))
+            }
+        }
     }
 }

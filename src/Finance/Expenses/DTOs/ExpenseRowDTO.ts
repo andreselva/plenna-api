@@ -9,5 +9,5 @@ export class ExpenseRowDTO {
     typeOfInstallments: string;
     sourceAccountId: number;
     hasInstallments: boolean;
-    id?: number;
+    id: number;
 }

@@ -2,9 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { RevenueDTO } from "../DTOs/RevenueDTO";
 import Revenue from "../Entity/Revenue";
 import RevenuesRepository from "../RevenuesRepository";
-import { RevenueProps } from "../Interfaces/RevenuePropsI";
 import DateCalculator from "src/Shared/Utils/DateCalculator";
+import { getChangedFields } from "src/Shared/Utils/CompareChanges";
 import { RevenueResponseDTO } from "../DTOs/RevenueResponseDTO";
+import { InstallmentUpdater } from "src/Finance/InstallmentsServices/InstallmentsUpdater";
 
 @Injectable()
 export class UpdateRevenue {
@@ -24,70 +25,28 @@ export class UpdateRevenue {
                 return await this.repository.updateRevenue(entity);
             }
 
-            const changedFields = this.setChangeFields(installments, entity);
+            const changedFields = getChangedFields(installments[0], entity);
 
             if (changedFields) {
                 installments[0] = entity;
-                return await this.#updateInstallments(installments, changedFields);
+                const dates = DateCalculator.calculate(changedFields.invoiceDueDate as string, installments.length);
+                const results: RevenueResponseDTO[] = await InstallmentUpdater<Revenue, RevenueResponseDTO>({
+                    items: installments,
+                    changedFields,
+                    dynamicFieldProcessors: {
+                        invoiceDueDate: (i) => dates[i],
+                    },
+                    updateFn: (item) => this.repository.updateRevenue(item),
+                });
+
+                if (results) {
+                    return results;
+                }
+
+                return await this.repository.updateRevenue(entity);
             }
         }
 
         return await this.repository.updateRevenue(entity);
-    }
-
-    private setChangeFields(installments: Revenue[], entity: Revenue): Partial<RevenueProps> {
-        const original = installments[0];
-        const updatedFields: Partial<RevenueProps> = {};
-
-        for (const key of Object.keys(entity) as (keyof Revenue)[]) {
-            const originalValue = original[key];
-            const newValue = entity[key];
-
-            if (key === 'value') {
-                Number(newValue);
-                Number(originalValue);
-            }
-
-            if (originalValue !== newValue) {
-                updatedFields[key] = newValue;
-            }
-        }
-
-        return updatedFields;
-    }
-
-    async #updateInstallments(installments: Revenue[], changedFields: RevenueProps) {
-        let dates: string[];
-
-        if (changedFields.invoiceDueDate) {
-            dates = DateCalculator.calculate(changedFields.invoiceDueDate, installments.length)
-        }
-
-        for (let i = 1; i < installments.length; i++) {
-            const installment = installments[i];
-
-            Object.keys(changedFields).forEach((field) => {
-                const key = field as keyof Revenue;
-
-                if (key === 'invoiceDueDate') {
-                    installment[key] = dates[i];
-                } else {
-                    if (key === 'value' && typeof changedFields[key] === 'number') {
-                        installment[key] = changedFields[key];
-                    }
-                }
-            });
-        }
-
-        const result: RevenueResponseDTO[] = [];
-
-        for (const installment of installments) {
-            const updated = await this.repository.updateRevenue(installment);
-            result.push(updated);
-        }
-
-        if (result) {
-            return result;
-        }
     }
 }

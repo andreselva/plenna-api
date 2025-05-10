@@ -11,11 +11,12 @@ export default class RevenuesRepository {
         private readonly database: MySQLDatabase,
     ) { }
 
-    async getRevenues(): Promise<Revenue[]> {
+    async getRevenues(): Promise<RevenueResponseDTO[]> {
         const query = "SELECT * FROM revenue";
         const rows = await this.database.select(query) as RevenueRowDTO[];
 
-        return rows.map(row => new Revenue(
+        return rows.map(row => new RevenueResponseDTO(
+            row.id,
             row.name,
             row.description,
             row.value,
@@ -25,7 +26,6 @@ export default class RevenuesRepository {
             row.typeOfInstallments,
             row.sourceAccountId,
             Boolean(row.hasInstallments),
-            row.id,
         ));
     }
 

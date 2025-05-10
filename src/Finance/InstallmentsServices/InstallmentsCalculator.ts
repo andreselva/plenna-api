@@ -1,6 +1,6 @@
-import { Expense } from "./Expenses/Entity/Expense";
-import Revenue from "./Revenues/Entity/Revenue";
 import { DateTime } from "luxon";
+import Revenue from "../Revenues/Entity/Revenue";
+import { Expense } from "../Expenses/Entity/Expense";
 
 export default class InstallmentsCalculator<T extends Revenue | Expense> {
     private readonly type: 'P' | 'F';

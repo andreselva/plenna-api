@@ -9,5 +9,6 @@ export class ExpenseDTO {
     typeOfInstallment: string;
     sourceAccountId: number;
     hasInstallments: boolean;
+    updateInstallments: boolean;
     id?: number;
 }

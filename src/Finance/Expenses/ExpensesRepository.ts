@@ -10,22 +10,22 @@ export class ExpensesRepository {
         private readonly database: MySQLDatabase,
     ) { }
 
-    async getExpenses(): Promise<Expense[]> {
+    async getExpenses(): Promise<ExpenseResponseDTO[]> {
         const query = "SELECT * FROM expense";
         const rows = await this.database.select(query) as ExpenseRowDTO[];
 
-        return rows.map(row => new Expense(
+        return rows.map(row => new ExpenseResponseDTO(
+            row.id,
             row.name,
             row.description,
             row.value,
             row.invoiceDueDate,
             row.idCategory,
             row.idCreditCard,
-            row.installments,
             row.typeOfInstallments,
             row.sourceAccountId,
             row.hasInstallments,
-            row.id,
+            row.installments,
         ));
     }
 
@@ -97,9 +97,29 @@ export class ExpensesRepository {
                 expense.getIdCreditCard(),
                 expense.getTypeOfInstallments(),
                 expense.getSourceAccountId(),
-                expense.getHasInstallments()
+                expense.getHasInstallments(),
+                expense.getInstallments()
             );
         }
         throw new Error('Failed to update category');
+    }
+
+    async searchForRelatedInstallments(idInstallment: number): Promise<Expense[]> {
+        const query = "SELECT * FROM expense WHERE (sourceAccountId = ? OR id = ?) ORDER BY id ASC";
+        const rows = await this.database.select(query, [idInstallment, idInstallment]) as ExpenseRowDTO[];
+
+        return rows.map(row => new Expense(
+            String(row.name),
+            String(row.description),
+            Number(row.value),
+            String(row.invoiceDueDate),
+            Number(row.idCategory),
+            Number(row.idCreditCard),
+            Number(row.installments),
+            String(row.typeOfInstallments),
+            Number(row.sourceAccountId),
+            Boolean(row.hasInstallments),
+            Number(row.id)
+        ))
     }
 }

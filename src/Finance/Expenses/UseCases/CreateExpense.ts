@@ -2,8 +2,8 @@ import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 import { ExpensesRepository } from "../ExpensesRepository";
 import { Expense } from "../Entity/Expense";
 import { Injectable } from "@nestjs/common";
-import InstallmentsCalculator from "src/Finance/InstallmentsCalculator";
 import { ExpenseResponseDTO } from "../DTOs/ExpenseResponseDTO";
+import InstallmentsCalculator from "src/Finance/InstallmentsServices/InstallmentsCalculator";
 
 @Injectable()
 export class CreateExpense {
@@ -51,7 +51,8 @@ export class CreateExpense {
                 expense.getIdCreditCard(),
                 expense.getTypeOfInstallments(),
                 expense.getSourceAccountId(),
-                expense.getHasInstallments()
+                expense.getHasInstallments(),
+                expense.getInstallments()
             ));
         }
 
@@ -66,7 +67,8 @@ export class CreateExpense {
             firstExpense.getIdCreditCard(),
             firstExpense.getTypeOfInstallments(),
             firstExpense.getSourceAccountId(),
-            firstExpense.getHasInstallments()
+            firstExpense.getHasInstallments(),
+            firstExpense.getInstallments()
         )
     }
 }

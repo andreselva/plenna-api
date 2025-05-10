@@ -7,9 +7,10 @@ export class ExpenseResponseDTO {
         public readonly invoiceDueDate: string,
         public readonly idCategory: number,
         public readonly idCreditCard: number,
-        public readonly typeOfInstallment: string,
+        public readonly typeOfInstallments: string,
         public readonly sourceAccountId: number,
-        public readonly hasInstallments: boolean
+        public readonly hasInstallments: boolean,
+        public readonly installments: number
     ) {
     }
 }

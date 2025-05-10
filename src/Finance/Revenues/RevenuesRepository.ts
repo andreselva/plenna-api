@@ -58,6 +58,7 @@ export default class RevenuesRepository {
 
         if (result.affectedRows > 0) {
             return {
+                isSuccess: true,
                 message: 'Revenue deleted successfully',
             }
         }

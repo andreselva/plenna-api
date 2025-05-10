@@ -39,8 +39,9 @@ export default class RevenuesService {
         return await this.createRevenueUseCase.execute(revenue)
     }
 
-    async deleteRevenue(id: string) {
-        return await this.deleteRevenueUseCase.execute(id);
+    async deleteRevenue(id: string, deleteInstallments: string, sourceAccountId: string) {
+        const deleteAnotherInstallments = deleteInstallments === 'false' ? false : true;
+        return await this.deleteRevenueUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId));
     }
 
     async updateRevenue(id: string, revenue: RevenueDTO) {

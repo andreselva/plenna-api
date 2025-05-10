@@ -23,12 +23,12 @@ export class DeleteExpense {
 
                 if (isSuccess) {
                     return {
-                        message: "Todas as despesas foram excluídas com sucesso!",
+                        message: "All installments have been deleted successfully.",
                         statusCode: HttpStatus.OK
                     }
                 }
                 return {
-                    message: "Ocorreu um erro ao excluir as despesas!",
+                    message: "An error occurred while deleting the installments!",
                     statusCode: HttpStatus.BAD_REQUEST
                 }
             }

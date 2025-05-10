@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Dependencies, Get, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Dependencies, Get, Param, Post, Put, Query } from "@nestjs/common";
 import RevenuesService from "./RevenuesService";
 import { RevenueDTO } from "./DTOs/RevenueDTO";
 
@@ -20,8 +20,12 @@ export default class RevenuesController {
     }
 
     @Delete(':id')
-    async DeleteRevenue(@Param('id') id: string) {
-        return await this.revenuesService.deleteRevenue(id);
+    async DeleteRevenue(
+        @Param('id') id: string,
+        @Query('deleteInstallments') deleteInstallments: string = 'false',
+        @Query('sourceAccountId') sourceAccountId: string = '0'
+    ) {
+        return await this.revenuesService.deleteRevenue(id, deleteInstallments, sourceAccountId);
     }
 
     @Put(':id')

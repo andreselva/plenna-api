@@ -15,17 +15,17 @@ export class ExpensesRepository {
         const rows = await this.database.select(query) as ExpenseRowDTO[];
 
         return rows.map(row => new ExpenseResponseDTO(
-            row.id,
-            row.name,
-            row.description,
-            row.value,
+            Number(row.id),
+            String(row.name),
+            String(row.description),
+            Number(row.value),
             row.invoiceDueDate,
-            row.idCategory,
-            row.idCreditCard,
-            row.typeOfInstallments,
-            row.sourceAccountId,
-            row.hasInstallments,
-            row.installments,
+            Number(row.idCategory),
+            Number(row.idCreditCard),
+            String(row.typeOfInstallments),
+            Number(row.sourceAccountId),
+            Boolean(row.hasInstallments),
+            Number(row.installments),
         ));
     }
 
@@ -61,6 +61,7 @@ export class ExpensesRepository {
 
         if (result.affectedRows > 0) {
             return {
+                isSuccess: true,
                 message: 'Expense deleted successfully',
             };
         }

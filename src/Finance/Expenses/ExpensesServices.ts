@@ -34,8 +34,9 @@ export class ExpensesServices {
         return await this.createExpenseUseCase.execute(dto);
     }
 
-    async deleteExpense(id: string) {
-        return await this.deleteExpenseUseCase.execute(id);
+    async deleteExpense(id: string, deleteInstallments: string, sourceAccountId: string) {
+        const deleteAnotherInstallments = deleteInstallments === 'false' ? false : true; 
+        return await this.deleteExpenseUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId));
     }
 
     async updateExpense(id: string, expense: ExpenseDTO) {

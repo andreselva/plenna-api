@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Dependencies, Get, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Dependencies, Get, HttpStatus, Param, Post, Put, Query } from "@nestjs/common";
 import { ExpensesServices } from "./ExpensesServices";
 import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 
@@ -20,8 +20,18 @@ export class ExpensesController {
     }
 
     @Delete(':id')
-    async deleteExpense(@Param('id') id: string) {
-        return await this.service.deleteExpense(id);
+    async deleteExpense(
+        @Param('id') id: string,
+        @Query('deleteInstallments') deleteInstallments: string = 'false',
+        @Query('sourceAccountId') sourceAccountId: string = '0'
+    ) {
+        if (Number(id) <= 0) {
+            return {
+                message: "Invalid ID!",
+                statusCode: HttpStatus.BAD_REQUEST
+            }
+        }
+        return await this.service.deleteExpense(id, deleteInstallments, sourceAccountId);
     }
 
     @Put(':id')

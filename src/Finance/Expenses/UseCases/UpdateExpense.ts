@@ -18,19 +18,26 @@ export class UpdateExpense {
         const entity = Expense.fromDTO(expense);
 
         if (expense.updateInstallments) {
+            //Define id considerado para buscar as outras parcelas
             const queryId = Number(expense.sourceAccountId && expense.sourceAccountId > 0 ? expense.sourceAccountId : id);
             const installments = await this.repository.searchForRelatedInstallments(queryId);
 
+            //Se não retornar nada, atualizamos somente a entity.
             if (!installments) {
                 return await this.repository.updateExpense(entity);
             }
 
+            //Compara os campos que estão diferentes.
             const changedFields = getChangedFields(installments[0], entity);
 
-            if (changedFields) {
+            //Se changedFields existir e não for vazio, prosseguimos com a atualização das outras parcelas.
+            if (changedFields && Object.keys(changedFields).length > 0) {
                 installments[0] = entity;
+                //Calcula novamente as datas a partir da data da parcela recebida.
                 const dates = DateCalculator.calculate(changedFields.invoiceDueDate as string, installments.length);
 
+                //Delega a função de atualização das parcelas para InstallmentUpdater. InstallmentUpdater é uma função higher order,
+                //então, ela recebe o método updateExpense por parâmetro.
                 const results: ExpenseResponseDTO[] = await InstallmentUpdater<Expense, ExpenseResponseDTO>({
                     items: installments,
                     changedFields,
@@ -44,10 +51,9 @@ export class UpdateExpense {
                     return results;
                 }
 
+                //Se a atualização acima falhar, atualizamos somente a entity
                 return await this.repository.updateExpense(entity);
             }
-
-
         }
         return await this.repository.updateExpense(entity)
     }

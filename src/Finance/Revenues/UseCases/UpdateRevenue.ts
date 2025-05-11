@@ -27,7 +27,7 @@ export class UpdateRevenue {
 
             const changedFields = getChangedFields(installments[0], entity);
 
-            if (changedFields) {
+            if (changedFields && Object.keys(changedFields).length > 0) {
                 installments[0] = entity;
                 const dates = DateCalculator.calculate(changedFields.invoiceDueDate as string, installments.length);
                 const results: RevenueResponseDTO[] = await InstallmentUpdater<Revenue, RevenueResponseDTO>({

@@ -3,6 +3,7 @@ import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import { ExpenseRowDTO } from "./DTOs/ExpenseRowDTO";
 import { Expense } from "./Entity/Expense";
 import { ExpenseResponseDTO } from "./DTOs/ExpenseResponseDTO";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
 
 @Injectable()
 export class ExpensesRepository {
@@ -113,7 +114,7 @@ export class ExpensesRepository {
             String(row.name),
             String(row.description),
             Number(row.value),
-            String(row.invoiceDueDate),
+            FormatDate.formatToYYYYMMDD(row.invoiceDueDate),
             Number(row.idCategory),
             Number(row.idCreditCard),
             Number(row.installments),

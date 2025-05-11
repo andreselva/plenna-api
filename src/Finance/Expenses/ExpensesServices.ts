@@ -1,0 +1,45 @@
+import { Dependencies, Injectable } from "@nestjs/common";
+import { GetExpenses } from "./UseCases/GetExpenses";
+import { ExpenseDTO } from "./DTOs/ExpenseDTO";
+import { CreateExpense } from "./UseCases/CreateExpense";
+import { DeleteExpense } from "./UseCases/DeleteExpense";
+import { UpdateExpense } from "./UseCases/UpdateExpense";
+
+@Injectable()
+@Dependencies(GetExpenses, CreateExpense, DeleteExpense, UpdateExpense)
+export class ExpensesServices {
+    constructor(
+        private readonly getExpensesUseCase: GetExpenses,
+        private readonly createExpenseUseCase: CreateExpense,
+        private readonly deleteExpenseUseCase: DeleteExpense,
+        private readonly updateExpenseUseCase: UpdateExpense,
+    ) { }
+
+    async getExpenses() {
+        return await this.getExpensesUseCase.execute();
+    }
+
+    async createExpense(dto: ExpenseDTO) {
+        if (
+            (
+                dto.typeOfInstallment === 'P'
+                && dto.installments
+                && dto.installments > 0
+            )
+            || dto.typeOfInstallment === 'F'
+        ) {
+            dto.hasInstallments = true;
+        }
+        
+        return await this.createExpenseUseCase.execute(dto);
+    }
+
+    async deleteExpense(id: string, deleteInstallments: string, sourceAccountId: string) {
+        const deleteAnotherInstallments = deleteInstallments === 'false' ? false : true; 
+        return await this.deleteExpenseUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId));
+    }
+
+    async updateExpense(id: string, expense: ExpenseDTO) {
+        return await this.updateExpenseUseCase.execute(id, expense);
+    }
+}

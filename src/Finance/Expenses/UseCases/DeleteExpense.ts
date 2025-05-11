@@ -1,0 +1,53 @@
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { ExpensesRepository } from "../ExpensesRepository";
+import { FormatDate } from "src/Shared/Utils/FormatDate";
+
+@Injectable()
+export class DeleteExpense {
+    constructor(
+        private readonly repository: ExpensesRepository,
+    ) { }
+
+    async execute(id: number, deleteInstallments: boolean, sourceAccountId: number) {
+        if (deleteInstallments && sourceAccountId >= 0) {
+            const queryId = sourceAccountId > 0 ? sourceAccountId : id;
+            const installments = await this.repository.searchForRelatedInstallments(queryId);
+
+            const result: { isSuccess: boolean; message: string }[] = [];
+
+            if (installments) {
+                for (let i = 0; i < installments.length; i++) {
+                    result[i] = (await this.repository.deleteExpense(installments[i].getId()));
+                }
+
+                const isSuccess = result.every(obj => obj.isSuccess === true);
+
+                if (isSuccess) {
+                    return {
+                        message: "All installments have been deleted successfully.",
+                        statusCode: HttpStatus.OK,
+                        expenses: (await this.repository.getExpenses()).map(expense => ({
+                            ...expense,
+                            invoiceDueDate: FormatDate.formatToYYYYMMDD(expense.invoiceDueDate)
+                        }))
+                    }
+                }
+                return {
+                    message: "An error occurred while deleting the installments!",
+                    statusCode: HttpStatus.BAD_REQUEST
+                }
+            }
+        }
+
+        if ((await this.repository.deleteExpense(Number(id))).isSuccess === true) {
+            return {
+                message: "Expense have been deleted successfully.",
+                statusCode: HttpStatus.OK,
+                expenses: (await this.repository.getExpenses()).map(expense => ({
+                    ...expense,
+                    invoiceDueDate: FormatDate.formatToYYYYMMDD(expense.invoiceDueDate)
+                }))
+            }
+        }
+    }
+}

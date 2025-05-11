@@ -47,7 +47,7 @@ export class UpdateExpense {
                     updateFn: (item) => this.repository.updateExpense(item)
                 });
 
-                if (results) {
+                if (results && results.length > 0) {
                     return results;
                 }
 

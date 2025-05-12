@@ -42,4 +42,20 @@ export default class UsersRepository {
             return user;
         }
     }
+
+    async findUserById(id: number) {
+        const query = "SELECT id, username, email, name FROM user WHERE id = ?";
+        const result = await this.database.select(query, [id]) as UserRowDTO[];
+
+        if (result) {
+            const user = result[0];
+            return new User(
+                user.username,
+                user.password,
+                user.email,
+                user.name,
+                user.id
+            )
+        }
+    }
 }

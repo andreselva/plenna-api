@@ -20,4 +20,8 @@ export class UsersService {
         const entity = User.fromDTO(user);
         return await this.repository.createUser(entity);
     }
+
+    async findUserById(id: string) {
+        return await this.repository.findUserById(Number(id));
+    }
 }

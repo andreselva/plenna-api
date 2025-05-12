@@ -10,6 +10,9 @@ import { UsersService } from './UserService';
     UsersRepository,
     MySQLDatabase,
   ],
-  controllers: [UsersController]
+  controllers: [UsersController],
+  exports: [
+    UsersService
+  ],
 })
 export class UsersModule { }

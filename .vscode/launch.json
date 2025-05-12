@@ -1,22 +1,24 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "Debug NestJS",
-        "runtimeArgs": [
-          "-r",
-          "ts-node/register",
-          "-r",
-          "tsconfig-paths/register",
-          "src/main.ts"
-        ],
-        "sourceMaps": true,
-        "cwd": "${workspaceFolder}",
-        "protocol": "inspector",
-        "internalConsoleOptions": "openOnSessionStart"
-      }
-    ]
-  }
-  
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug NestJS",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register",
+        "-r",
+        "tsconfig-paths/register"
+      ],
+      "args": ["src/main.ts"],
+      "env": {
+        "TS_NODE_PROJECT": "tsconfig.json"
+      },
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}",
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart"
+    }
+  ]
+}

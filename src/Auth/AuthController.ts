@@ -1,10 +1,8 @@
-import {
-    Controller, Post, Body, UnauthorizedException,
-    Res, Get, Req
-} from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, Res, Get, Req } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './AuthService';
 import { LoginDto } from './DTOs/dto.login';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -12,6 +10,7 @@ export class AuthController {
         private authService: AuthService
     ) { }
 
+    @Public()
     @Post('login')
     async login(
         @Body() loginDto: LoginDto,
@@ -30,7 +29,7 @@ export class AuthController {
             httpOnly: true,
             secure: false, // Defina como true em produção com HTTPS
             sameSite: 'lax',
-            maxAge: 10 * 1000,//3600 * 1000, // 1h
+            maxAge: 900 * 1000,//15min
         });
 
         // Define o cookie do Refresh Token
@@ -56,7 +55,7 @@ export class AuthController {
             httpOnly: true,
             secure: false, // Defina como true em produção com HTTPS
             sameSite: 'lax',
-            maxAge: 3600 * 1000, // 1h
+            maxAge: 900 * 1000, // 15min
         });
 
         // Atualiza o cookie do Refresh Token

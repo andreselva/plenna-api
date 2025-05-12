@@ -51,6 +51,7 @@ import UsersRepository from './Users/UserRepository';
 import { AuthController } from './Auth/AuthController';
 import { AuthService } from './Auth/AuthService';
 import { JwtService } from '@nestjs/jwt';
+import AuthRepository from './Auth/AuthRepository';
 
 const services = [
   CategoriesService,
@@ -118,6 +119,7 @@ const repositories = [
     AuthController,
     AuthService,
     JwtService,
+    AuthRepository
   ],
 })
 

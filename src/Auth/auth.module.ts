@@ -8,6 +8,8 @@ import { AuthController } from './AuthController';
 import { JwtStrategy } from './JwtStrategy';
 
 import { UsersModule } from '../Users/users.module';
+import AuthRepository from './AuthRepository';
+import MySQLDatabase from 'src/Config/Database/MySQLDatabase';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { UsersModule } from '../Users/users.module';
   controllers: [AuthController],
   providers: [
     AuthService,     // lógica de validação e geração de token
-    JwtStrategy,     // extrai o JWT do cookie e valida
+    JwtStrategy,    // extrai o JWT do cookie e valida
+    AuthRepository,
+    MySQLDatabase
   ],
   exports: [
     PassportModule,  // para que outros módulos possam usar Guards

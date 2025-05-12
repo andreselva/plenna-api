@@ -8,7 +8,9 @@ import { LoginDto } from './DTOs/dto.login';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService
+    ) { }
 
     @Post('login')
     async login(
@@ -21,31 +23,77 @@ export class AuthController {
         );
         if (!user) throw new UnauthorizedException('Credenciais inválidas');
 
-        const jwt = this.authService.generateToken(user);
+        const { accessToken, refreshToken } = await this.authService.generateTokens(user);
 
-        res.cookie('access_token', jwt, {
+        // Define o cookie do Access Token
+        res.cookie('access_token', accessToken, {
             httpOnly: true,
-            secure: false,       // em dev sem HTTPS
-            sameSite: 'lax',     // permite enviar em GET/POST do seu front
-            maxAge: 3_600_000,   // 1h
+            secure: false, // Defina como true em produção com HTTPS
+            sameSite: 'lax',
+            maxAge: 10 * 1000,//3600 * 1000, // 1h
+        });
+
+        // Define o cookie do Refresh Token
+        res.cookie('refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: false, // Defina como true em produção com HTTPS
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
         });
 
         return { user };
     }
 
+    @Post('refresh')
+    async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+        const refreshToken = req.cookies['refresh_token'] as string;
+        if (!refreshToken) throw new UnauthorizedException('Refresh token não fornecido');
+
+        const { accessToken, newRefreshToken } = await this.authService.refreshAccessToken(refreshToken);
+
+        // Atualiza o cookie do Access Token
+        res.cookie('access_token', accessToken, {
+            httpOnly: true,
+            secure: false, // Defina como true em produção com HTTPS
+            sameSite: 'lax',
+            maxAge: 3600 * 1000, // 1h
+        });
+
+        // Atualiza o cookie do Refresh Token
+        res.cookie('refresh_token', newRefreshToken, {
+            httpOnly: true,
+            secure: false, // Defina como true em produção com HTTPS
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
+        });
+
+        return { message: 'Access token renovado' };
+    }
+
     @Post('logout')
-    logout(@Res({ passthrough: true }) res: Response) {
+    async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+        const refreshToken = req.cookies['refresh_token'] as string;
+
+        if (refreshToken) {
+            await this.authService.revokeRefreshToken(refreshToken);
+        }
+
         res.clearCookie('access_token', {
             httpOnly: true,
             sameSite: 'lax',
             secure: false,
         });
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: false,
+        })
         return { message: 'Logout realizado' };
     }
 
     @Get()
     async getAuthenticatedUser(@Req() req: Request) {
-        const token = req.cookies['access_token'];
+        const token = req.cookies['access_token'] as string;
         if (!token) throw new UnauthorizedException('Sem token');
 
         const user = await this.authService.getUserFromToken(token);

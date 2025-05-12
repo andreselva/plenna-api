@@ -43,6 +43,7 @@ export class AuthController {
         return { user };
     }
 
+    @Public()
     @Post('refresh')
     async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         const refreshToken = req.cookies['refresh_token'] as string;
@@ -69,6 +70,7 @@ export class AuthController {
         return { message: 'Access token renovado' };
     }
 
+    @Public()
     @Post('logout')
     async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         const refreshToken = req.cookies['refresh_token'] as string;

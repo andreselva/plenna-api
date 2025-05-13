@@ -10,7 +10,11 @@ export class DashboardController {
     ) { }
 
     @Get()
-    async getDashboardData(@Headers('periodo') periodo: string) {
+    async getDashboardData(
+        @Headers('periodo') periodo: string
+        // @Req() req -> pra usar dps
+    ) {
+        // const user = req.user; -> pra usar depois
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         const args = new DashboardArgs(newPeriodo.start, newPeriodo.end);
         return await this.service.getDashboardData(args);

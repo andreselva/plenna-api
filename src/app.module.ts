@@ -34,6 +34,8 @@ import { DashboardServices } from './Dashboard/DashboardServices';
 import { DashboardController } from './Dashboard/DashboardController';
 import { MonthlyProgressServices } from './Dashboard/MonthlyProgress/MonthlyProgressServices';
 import { MonthlyProgressRepository } from './Dashboard/MonthlyProgress/MonthlyProgressRepository';
+import { AuthModule } from './Auth/auth.module';
+import { UsersModule } from './Users/users.module';
 import BankAccountsService from './Finance/BankAccounts/BankAccountsServices';
 import GetBankAccounts from './Finance/BankAccounts/UseCases/GetBankAccounts';
 import CreateBankAccount from './Finance/BankAccounts/UseCases/CreateBankAccount';
@@ -43,6 +45,7 @@ import DeleteBankAccount from './Finance/BankAccounts/UseCases/DeleteBankAccount
 import UpdateBankAccount from './Finance/BankAccounts/UseCases/UpdateBankAccount';
 import CreditCardStatementsService from './Dashboard/CreditCardStatements/CreditCardStatementsService';
 import CreditCardStatementsRepository from './Dashboard/CreditCardStatements/CreditCardStatementsRepository';
+import { UsersController } from './Users/UserController';
 
 const services = [
   CategoriesService,
@@ -78,7 +81,7 @@ const repositories = [
 ]
 
 @Module({
-  imports: [],
+  imports: [AuthModule, UsersModule],
   controllers: [
     AppController,
     CategoriesController,
@@ -86,6 +89,7 @@ const repositories = [
     ExpensesController,
     DashboardController,
     BankAccountsController,
+    UsersController
   ],
   providers: [
     AppService,

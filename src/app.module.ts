@@ -46,12 +46,6 @@ import UpdateBankAccount from './Finance/BankAccounts/UseCases/UpdateBankAccount
 import CreditCardStatementsService from './Dashboard/CreditCardStatements/CreditCardStatementsService';
 import CreditCardStatementsRepository from './Dashboard/CreditCardStatements/CreditCardStatementsRepository';
 import { UsersController } from './Users/UserController';
-import { UsersService } from './Users/UserService';
-import UsersRepository from './Users/UserRepository';
-import { AuthController } from './Auth/AuthController';
-import { AuthService } from './Auth/AuthService';
-import { JwtService } from '@nestjs/jwt';
-import AuthRepository from './Auth/AuthRepository';
 
 const services = [
   CategoriesService,
@@ -113,13 +107,7 @@ const repositories = [
     MonthlyProgressServices,
     MonthlyProgressRepository,
     CreditCardStatementsService,
-    CreditCardStatementsRepository,
-    UsersService,
-    UsersRepository,
-    AuthController,
-    AuthService,
-    JwtService,
-    AuthRepository
+    CreditCardStatementsRepository
   ],
 })
 

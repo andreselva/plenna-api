@@ -42,6 +42,7 @@ export class AuthService {
     async refreshAccessToken(refreshToken: string) {
         try {
             const decoded = jwt.verify(refreshToken, this.refreshSecret) as { sub: string; username: string };
+            //Valida se o refreshToken existe no banco de dados.
             const isRefreshTokenValid = await this.repository.isRefreshTokenValid(refreshToken, Number(decoded.sub))
             if (isRefreshTokenValid === true) {
                 const user = await this.userService.findUserById(decoded.sub);

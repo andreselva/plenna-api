@@ -8,7 +8,8 @@ export default class AuthRepository {
     ) { }
 
     async saveRefreshToken(idUser: number, refreshToken: string) {
-        await this.deleteRefreshToken(idUser);//Apagar o antigo antes de salvar um novo.
+        //Apagar o antigo antes de salvar um novo.
+        await this.deleteRefreshToken(idUser);
         const query = "INSERT refresh_token (refresh_token, idUser) VALUES (?, ?)";
         const result = await this.database.execute(query, [refreshToken, idUser]);
 

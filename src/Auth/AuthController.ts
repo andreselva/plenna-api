@@ -27,7 +27,7 @@ export class AuthController {
         // Define o cookie do Access Token
         res.cookie('access_token', accessToken, {
             httpOnly: true,
-            secure: false, // Defina como true em produção com HTTPS
+            secure: false,
             sameSite: 'lax',
             maxAge: 900 * 1000,//15min
         });
@@ -35,7 +35,7 @@ export class AuthController {
         // Define o cookie do Refresh Token
         res.cookie('refresh_token', refreshToken, {
             httpOnly: true,
-            secure: false, // Defina como true em produção com HTTPS
+            secure: false,
             sameSite: 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
         });
@@ -54,7 +54,7 @@ export class AuthController {
         // Atualiza o cookie do Access Token
         res.cookie('access_token', accessToken, {
             httpOnly: true,
-            secure: false, // Defina como true em produção com HTTPS
+            secure: false,
             sameSite: 'lax',
             maxAge: 900 * 1000, // 15min
         });
@@ -62,7 +62,7 @@ export class AuthController {
         // Atualiza o cookie do Refresh Token
         res.cookie('refresh_token', newRefreshToken, {
             httpOnly: true,
-            secure: false, // Defina como true em produção com HTTPS
+            secure: false,
             sameSite: 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
         });

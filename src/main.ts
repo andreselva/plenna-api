@@ -13,7 +13,6 @@ async function bootstrap() {
   //Habilitar o guards em todas as rotas. Rotas públicas devem usar @Public.
   app.useGlobalGuards(new GlobalAuthGuard(reflector));
 
-  // Habilita CORS para o seu front (porta 3000), com credenciais
   app.enableCors({
     origin: 'http://localhost:3000',
     credentials: true,

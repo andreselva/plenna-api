@@ -26,6 +26,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "install": "^0.13.0",
     "luxon": "^3.6.1",
     "mysql2": "^3.14.0",

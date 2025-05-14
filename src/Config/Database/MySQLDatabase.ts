@@ -1,12 +1,18 @@
 import * as mysql from 'mysql2/promise';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
-import DatabaseConfig from "./DatabaseConfig";
+import DatabaseConfig from './DatabaseConfig';
 
 export default class MySQLDatabase {
     private pool: mysql.Pool;
 
     constructor() {
-        this.pool = mysql.createPool(DatabaseConfig.getConfig());
+        const config = DatabaseConfig.getConfig();
+
+        if (config.port) {
+            config.port = typeof config.port === 'string' ? Number(config.port) : config.port;
+        }
+
+        this.pool = mysql.createPool(config as mysql.PoolOptions);
     }
 
     private async getConnection(): Promise<mysql.PoolConnection> {

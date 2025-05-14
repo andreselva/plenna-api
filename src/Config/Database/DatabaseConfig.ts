@@ -1,11 +1,11 @@
 export default class DatabaseConfig {
     static getConfig() {
         return {
-            host: 'localhost',
-            user: 'root',
-            password: '123456',
-            database: 'system',
-            port: 3306
+            host: process.env.DB_HOST || 'localhost',
+            user: process.env.DB_USER || 'root',
+            password: process.env.DB_PASSWORD || '123456',
+            database: process.env.DB_NAME || 'system',
+            port: process.env.DB_PORT || 3306
         }
     }
 }

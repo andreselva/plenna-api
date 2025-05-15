@@ -1,21 +1,27 @@
 import * as mysql from 'mysql2/promise';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
-import DatabaseConfig from "./DatabaseConfig";
+import DatabaseConfig from './DatabaseConfig';
 
 export default class MySQLDatabase {
     private pool: mysql.Pool;
 
     constructor() {
-        this.pool = mysql.createPool(DatabaseConfig.getConfig());
+        const config = DatabaseConfig.getConfig();
+        console.log("Configurações mysql:", config);
+        this.pool = mysql.createPool(config as mysql.PoolOptions);
     }
 
     private async getConnection(): Promise<mysql.PoolConnection> {
+        const config = DatabaseConfig.getConfig();
+        console.log("Configurações mysql:", config);
+        console.log('Tentando pegar a conexão.')
         return this.pool.getConnection();
     }
 
     public async execute(query: string, params: any[] = []): Promise<ResultSetHeader> {
         const connection = await this.getConnection();
         try {
+            console.log('Tentou executar!');
             const [results] = await connection.execute<ResultSetHeader>(query, params);
             return results;
         } finally {

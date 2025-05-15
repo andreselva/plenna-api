@@ -1,0 +1,18 @@
+# Dockerfile.dev
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+# Copia só os arquivos de dependência para aproveitar cache
+COPY package*.json ./
+
+RUN npm install
+
+# Copia todo o código fonte
+COPY . .
+
+# Expõe a porta padrão do Nest no modo dev
+EXPOSE 8000
+
+# Comando para rodar o modo de desenvolvimento com hot reload
+CMD ["npm", "run", "start:dev"]

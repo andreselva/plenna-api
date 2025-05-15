@@ -35,7 +35,7 @@ export default class UsersRepository {
             user.getEmail(),
             user.getName()
         ];
-
+        
         const result = await this.database.execute(query, params);
 
         if (result.affectedRows > 0) {

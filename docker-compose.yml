@@ -1,13 +1,10 @@
-version: '3.8'
-
 services:
   backend:
-    build: .
-    container_name: nest-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "8000:8000" # Mapeia a porta 8000 do contêiner para a 8000 do host
-    depends_on:
-      - db # Garante que o MySQL será iniciado antes do backend
+      - "8001:3000"
     environment:
       - NODE_ENV=production
       - DB_HOST=db
@@ -15,19 +12,21 @@ services:
       - DB_USER=root
       - DB_PASSWORD=password
       - DB_NAME=system
+    depends_on:
+      - db
     networks:
       - backend-network
 
   db:
-    image: mysql:8.0 # Usando a versão 8.0 do MySQL
+    image: mysql:8.0
     container_name: mysql-db
     environment:
-      MYSQL_ROOT_PASSWORD: password # Senha do usuário root do MySQL
-      MYSQL_DATABASE: system # Cria o banco de dados 'system' ao iniciar
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: system
     volumes:
-      - mysql-data:/var/lib/mysql # Volumes para persistir dados do banco
+      - mysql-data:/var/lib/mysql
     ports:
-      - "3306:3306" # Mapeia a porta 3306 do MySQL para a 3306 do host
+      - "3307:3306"
     networks:
       - backend-network
 

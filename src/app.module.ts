@@ -46,6 +46,7 @@ import UpdateBankAccount from './Finance/BankAccounts/UseCases/UpdateBankAccount
 import CreditCardStatementsService from './Dashboard/CreditCardStatements/CreditCardStatementsService';
 import CreditCardStatementsRepository from './Dashboard/CreditCardStatements/CreditCardStatementsRepository';
 import { UsersController } from './Users/UserController';
+import { ConfigModule } from '@nestjs/config';
 
 const services = [
   CategoriesService,
@@ -81,7 +82,13 @@ const repositories = [
 ]
 
 @Module({
-  imports: [AuthModule, UsersModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    AuthModule,
+    UsersModule
+  ],
   controllers: [
     AppController,
     CategoriesController,

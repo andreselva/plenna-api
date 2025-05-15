@@ -4,7 +4,6 @@ import UserDTO from './DTOs/UserDTO';
 import User from './Entity/User';
 import * as bcrypt from 'bcryptjs';
 
-
 @Injectable()
 export class UsersService {
     constructor(

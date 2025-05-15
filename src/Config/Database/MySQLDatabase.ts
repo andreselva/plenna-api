@@ -7,21 +7,21 @@ export default class MySQLDatabase {
 
     constructor() {
         const config = DatabaseConfig.getConfig();
-
-        if (config.port) {
-            config.port = typeof config.port === 'string' ? Number(config.port) : config.port;
-        }
-
+        console.log("Configurações mysql:", config);
         this.pool = mysql.createPool(config as mysql.PoolOptions);
     }
 
     private async getConnection(): Promise<mysql.PoolConnection> {
+        const config = DatabaseConfig.getConfig();
+        console.log("Configurações mysql:", config);
+        console.log('Tentando pegar a conexão.')
         return this.pool.getConnection();
     }
 
     public async execute(query: string, params: any[] = []): Promise<ResultSetHeader> {
         const connection = await this.getConnection();
         try {
+            console.log('Tentou executar!');
             const [results] = await connection.execute<ResultSetHeader>(query, params);
             return results;
         } finally {

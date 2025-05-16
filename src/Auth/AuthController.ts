@@ -32,13 +32,13 @@ export class AuthController {
             maxAge: 900 * 1000,//15min
         });
 
-        // Define o cookie do Refresh Token
-        res.cookie('refresh_token', refreshToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
-        });
+        // // Define o cookie do Refresh Token
+        // res.cookie('refresh_token', refreshToken, {
+        //     httpOnly: true,
+        //     secure: false,
+        //     sameSite: 'lax',
+        //     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
+        // });
 
         return { user };
     }

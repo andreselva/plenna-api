@@ -26,12 +26,11 @@ export class AuthController {
 
         res.cookie('access_token', accessToken, {
             httpOnly: true,
-            secure: false,        // para localhost sem https
-            sameSite: 'lax',      // pode testar 'none' se usar https
+            secure: false, // ou true se usar HTTPS
+            sameSite: 'none',
             maxAge: 900 * 1000,
-            path: '/',            // importante para o cookie valer para toda a rota
         });
-        
+
         // Define o cookie do Refresh Token
         res.cookie('refresh_token', refreshToken, {
             httpOnly: true,

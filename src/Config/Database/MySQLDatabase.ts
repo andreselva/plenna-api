@@ -17,7 +17,6 @@ export default class MySQLDatabase {
     public async execute(query: string, params: any[] = []): Promise<ResultSetHeader> {
         const connection = await this.getConnection();
         try {
-            console.log('Tentou executar!');
             const [results] = await connection.execute<ResultSetHeader>(query, params);
             return results;
         } finally {

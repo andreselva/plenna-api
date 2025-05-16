@@ -35,7 +35,6 @@ export class ExpensesServices {
     }
 
     async deleteExpense(id: string, deleteInstallments: string, sourceAccountId: string) {
-        console.log("Entrando no serviço intermediário!", deleteInstallments);
         const deleteAnotherInstallments = deleteInstallments === 'false' ? false : true; 
         return await this.deleteExpenseUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId));
     }

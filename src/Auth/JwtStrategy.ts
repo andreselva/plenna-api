@@ -8,7 +8,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
                 (req) => {
-                    return req?.cookies?.['access_token'] || null;
+                    const token = req?.cookies?.['access_token'] || null;
+                    console.log('Token extraído do cookie:', token);
+                    return token;
                 },
             ]),
             ignoreExpiration: false,
@@ -17,6 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     validate(payload: any) {
+        console.log("Validando payload!");
         return { userId: payload.sub, username: payload.username };
     }
 }

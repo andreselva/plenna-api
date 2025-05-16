@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from './UserService';
 import UserDTO from './DTOs/UserDTO';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -12,6 +12,9 @@ export class UsersController {
     @Public()
     @Post('register')
     async createUser(@Body() user: UserDTO) {
+        if (user.email !== "selvaandre99@gmail.com" && user.email !== "samanta.goin@gmail.com") {
+            throw new UnauthorizedException("Você não pode usar esse serviço!");
+        }
         return await this.service.createUser(user);
     }
 }

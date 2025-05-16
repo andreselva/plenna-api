@@ -22,7 +22,7 @@ export class AuthController {
         );
         if (!user) throw new UnauthorizedException('Credenciais inválidas');
 
-        const { accessToken, refreshToken } = await this.authService.generateTokens(user);
+        const { accessToken } = await this.authService.generateTokens(user);
 
         // Define o cookie do Access Token
         res.cookie('access_token', accessToken, {

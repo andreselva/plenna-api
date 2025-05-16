@@ -5,6 +5,7 @@ import { GlobalAuthGuard } from './common/guards/global-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.set('trust proxy', 1);
   const reflector = app.get(Reflector);
 
   // Habilita cookie parser

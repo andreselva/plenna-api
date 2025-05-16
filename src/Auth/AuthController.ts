@@ -27,8 +27,8 @@ export class AuthController {
         // Define o cookie do Access Token
         res.cookie('access_token', accessToken, {
             httpOnly: true,
-            secure: false,
-            sameSite: 'lax',
+            secure: true,
+            sameSite: 'none',
             maxAge: 60 * 60 * 1000,//1h
         });
 

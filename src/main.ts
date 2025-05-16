@@ -14,7 +14,7 @@ async function bootstrap() {
   app.useGlobalGuards(new GlobalAuthGuard(reflector));
 
   app.enableCors({
-    origin: 'https://financial-system-production.up.railway.app',
+    origin: 'https://plenna.me',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

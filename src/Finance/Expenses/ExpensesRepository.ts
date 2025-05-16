@@ -57,6 +57,7 @@ export class ExpensesRepository {
     }
 
     async deleteExpense(id: number) {
+        console.log("Apagando despesa!");
         const query = "DELETE FROM expense WHERE id = ?";
         const result = await this.database.execute(query, [id]);
 

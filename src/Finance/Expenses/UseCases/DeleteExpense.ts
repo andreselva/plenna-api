@@ -9,6 +9,7 @@ export class DeleteExpense {
     ) { }
 
     async execute(id: number, deleteInstallments: boolean, sourceAccountId: number) {
+        console.log("Entrando no caso de uso!");
         if (deleteInstallments && sourceAccountId >= 0) {
             const queryId = sourceAccountId > 0 ? sourceAccountId : id;
             const installments = await this.repository.searchForRelatedInstallments(queryId);

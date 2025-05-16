@@ -25,6 +25,7 @@ export class ExpensesController {
         @Query('deleteInstallments') deleteInstallments: string = 'false',
         @Query('sourceAccountId') sourceAccountId: string = '0'
     ) {
+        console.log("Recebendo requisição para apagar despesa.");
         if (Number(id) <= 0) {
             return {
                 message: "Invalid ID!",

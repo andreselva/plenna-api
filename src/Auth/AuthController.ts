@@ -24,14 +24,14 @@ export class AuthController {
 
         const { accessToken, refreshToken } = await this.authService.generateTokens(user);
 
-        // Define o cookie do Access Token
         res.cookie('access_token', accessToken, {
             httpOnly: true,
-            secure: false,
-            sameSite: 'lax',
-            maxAge: 900 * 1000,//15min
+            secure: false,        // para localhost sem https
+            sameSite: 'lax',      // pode testar 'none' se usar https
+            maxAge: 900 * 1000,
+            path: '/',            // importante para o cookie valer para toda a rota
         });
-
+        
         // Define o cookie do Refresh Token
         res.cookie('refresh_token', refreshToken, {
             httpOnly: true,

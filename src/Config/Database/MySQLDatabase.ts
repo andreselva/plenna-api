@@ -7,14 +7,10 @@ export default class MySQLDatabase {
 
     constructor() {
         const config = DatabaseConfig.getConfig();
-        console.log("Configurações mysql:", config);
         this.pool = mysql.createPool(config as mysql.PoolOptions);
     }
 
     private async getConnection(): Promise<mysql.PoolConnection> {
-        const config = DatabaseConfig.getConfig();
-        console.log("Configurações mysql:", config);
-        console.log('Tentando pegar a conexão.')
         return this.pool.getConnection();
     }
 

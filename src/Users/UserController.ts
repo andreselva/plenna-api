@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from './UserService';
 import UserDTO from './DTOs/UserDTO';
 import { Public } from 'src/common/decorators/public.decorator';

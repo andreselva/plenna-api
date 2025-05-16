@@ -24,11 +24,12 @@ export class AuthController {
 
         const { accessToken, refreshToken } = await this.authService.generateTokens(user);
 
+        // Define o cookie do Access Token
         res.cookie('access_token', accessToken, {
             httpOnly: true,
-            secure: false, // ou true se usar HTTPS
-            sameSite: 'none',
-            maxAge: 900 * 1000,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 900 * 1000,//15min
         });
 
         // Define o cookie do Refresh Token

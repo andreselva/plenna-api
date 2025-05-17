@@ -2,20 +2,26 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "8001:8001"
+      - "9229:9229"
+    command: node --inspect=0.0.0.0:9229 -r ts-node/register -r tsconfig-paths/register src/main.ts
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - DB_HOST=db
       - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=password
       - DB_NAME=system
+      - JWT_SECRET=samantinha
     depends_on:
       - db
     networks:
       - backend-network
+    volumes:
+      - ./:/app
+      - /app/node_modules
 
   db:
     image: mysql:8.0
@@ -36,4 +42,3 @@ networks:
 
 volumes:
   mysql-data:
-    driver: local

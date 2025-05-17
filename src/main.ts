@@ -15,12 +15,13 @@ async function bootstrap() {
   app.useGlobalGuards(new GlobalAuthGuard(reflector));
 
   app.enableCors({
-    origin: 'https://plenna.me',
+    origin: process.env.NODE_ENV === 'development' ? true : 'https://plenna.me',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
-  
-  const port = process.env.PORT || 3000;
+
+  const port = process.env.PORT || 8001;
   await app.listen(port);
 }
+
 bootstrap();

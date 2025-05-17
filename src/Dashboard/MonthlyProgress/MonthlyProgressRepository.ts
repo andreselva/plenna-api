@@ -29,8 +29,8 @@ export class MonthlyProgressRepository {
                         expense
                     WHERE
                         invoiceDueDate BETWEEN ? AND ?
-                    GROUP BY invoiceDueDate
-                    ORDER BY invoiceDueDate ASC`;
+                    GROUP BY month
+                    ORDER BY month ASC`;
         const rows = await this.database.select(query, [startDate, endDate]) as MonthlyProgressRowDTO[];
 
         return rows.map(row => new MonthlyProgressRowDTO(
@@ -60,8 +60,8 @@ export class MonthlyProgressRepository {
                         revenue
                     WHERE
                         invoiceDueDate BETWEEN ? AND ?
-                    GROUP BY invoiceDueDate
-                    ORDER BY invoiceDueDate ASC`;
+                    GROUP BY month
+                    ORDER BY month ASC`;
         const rows = await this.database.select(query, [startDate, endDate]) as MonthlyProgressRowDTO[];
         return rows.map(row => new MonthlyProgressRowDTO(
             row.value,

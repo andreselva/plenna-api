@@ -54,7 +54,7 @@ export class AuthController {
     async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         try {
             const refreshToken = req.cookies['refresh_token'] as string;
-            if (refreshToken.length > 0) {
+            if (refreshToken) {
                 await this.authService.revokeRefreshToken(refreshToken);
             }
             res.clearCookie('access_token', AuthCookieOptions.clearToken());

@@ -4,16 +4,17 @@ import { ExpenseRowDTO } from "./DTOs/ExpenseRowDTO";
 import { Expense } from "./Entity/Expense";
 import { ExpenseResponseDTO } from "./DTOs/ExpenseResponseDTO";
 import { FormatDate } from "src/Shared/Utils/FormatDate";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Injectable()
-export class ExpensesRepository {
+export class ExpensesRepository {   
     constructor(
         private readonly database: MySQLDatabase,
     ) { }
 
-    async getExpenses(): Promise<ExpenseResponseDTO[]> {
-        const query = "SELECT * FROM expense";
-        const rows = await this.database.select(query) as ExpenseRowDTO[];
+    async getExpenses(periodo: PeriodoDTO): Promise<ExpenseResponseDTO[]> {
+        const query = "SELECT * FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
+        const rows = await this.database.select(query, [periodo.start, periodo.end]) as ExpenseRowDTO[];
 
         return rows.map(row => new ExpenseResponseDTO(
             Number(row.id),

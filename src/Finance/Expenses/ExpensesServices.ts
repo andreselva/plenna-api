@@ -4,6 +4,7 @@ import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 import { CreateExpense } from "./UseCases/CreateExpense";
 import { DeleteExpense } from "./UseCases/DeleteExpense";
 import { UpdateExpense } from "./UseCases/UpdateExpense";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Injectable()
 @Dependencies(GetExpenses, CreateExpense, DeleteExpense, UpdateExpense)
@@ -15,8 +16,8 @@ export class ExpensesServices {
         private readonly updateExpenseUseCase: UpdateExpense,
     ) { }
 
-    async getExpenses() {
-        return await this.getExpensesUseCase.execute();
+    async getExpenses(periodo: PeriodoDTO) {
+        return await this.getExpensesUseCase.execute(periodo);
     }
 
     async createExpense(dto: ExpenseDTO) {
@@ -30,13 +31,13 @@ export class ExpensesServices {
         ) {
             dto.hasInstallments = true;
         }
-        
+
         return await this.createExpenseUseCase.execute(dto);
     }
 
-    async deleteExpense(id: string, deleteInstallments: string, sourceAccountId: string) {
-        const deleteAnotherInstallments = deleteInstallments === 'false' ? false : true; 
-        return await this.deleteExpenseUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId));
+    async deleteExpense(id: string, deleteInstallments: string, sourceAccountId: string, periodo: PeriodoDTO) {
+        const deleteAnotherInstallments = deleteInstallments === 'false' ? false : true;
+        return await this.deleteExpenseUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId), periodo);
     }
 
     async updateExpense(id: string, expense: ExpenseDTO) {

@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import RevenuesRepository from "../RevenuesRepository";
 import { FormatDate } from "src/Shared/Utils/FormatDate";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Injectable()
 export class DeleteRevenue {
@@ -8,7 +9,7 @@ export class DeleteRevenue {
         private readonly repository: RevenuesRepository
     ) { }
 
-    async execute(id: number, deleteInstallments: boolean, sourceAccountId: number) {
+    async execute(id: number, deleteInstallments: boolean, sourceAccountId: number, periodo: PeriodoDTO) {
         if (deleteInstallments) {
             const queryId = sourceAccountId > 0 ? sourceAccountId : id;
             const installments = await this.repository.searchForRelatedInstallments(queryId);
@@ -26,7 +27,7 @@ export class DeleteRevenue {
                     return {
                         message: 'All installments have been deleted successfully.',
                         statusCode: HttpStatus.OK,
-                        revenues: (await this.repository.getRevenues()).map(revenue => ({
+                        revenues: (await this.repository.getRevenues(periodo)).map(revenue => ({
                             ...revenue,
                             invoiceDueDate: FormatDate.formatToYYYYMMDD(revenue.invoiceDueDate),
                         }))
@@ -44,7 +45,7 @@ export class DeleteRevenue {
             return {
                 message: 'Revenue have been deleted successfully.',
                 statusCode: HttpStatus.OK,
-                revenues: (await this.repository.getRevenues()).map(revenue => ({
+                revenues: (await this.repository.getRevenues(periodo)).map(revenue => ({
                     ...revenue,
                     invoiceDueDate: FormatDate.formatToYYYYMMDD(revenue.invoiceDueDate)
                 }))

@@ -4,6 +4,7 @@ import GetRevenues from "./UseCases/GetRevenues";
 import { RevenueDTO } from "./DTOs/RevenueDTO";
 import { DeleteRevenue } from "./UseCases/DeleteRevenue";
 import { UpdateRevenue } from "./UseCases/UpdateRevenue";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Injectable()
 @Dependencies(
@@ -20,8 +21,8 @@ export default class RevenuesService {
         private readonly updateRevenueUseCase: UpdateRevenue,
     ) { }
 
-    async getRevenues() {
-        return await this.getRevenuesUseCase.execute();
+    async getRevenues(periodo: PeriodoDTO) {
+        return await this.getRevenuesUseCase.execute(periodo);
     }
 
     async createRevenue(revenue: RevenueDTO) {
@@ -39,9 +40,9 @@ export default class RevenuesService {
         return await this.createRevenueUseCase.execute(revenue)
     }
 
-    async deleteRevenue(id: string, deleteInstallments: string, sourceAccountId: string) {
+    async deleteRevenue(id: string, deleteInstallments: string, sourceAccountId: string, periodo: PeriodoDTO) {
         const deleteAnotherInstallments = deleteInstallments === 'false' ? false : true;
-        return await this.deleteRevenueUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId));
+        return await this.deleteRevenueUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId), periodo);
     }
 
     async updateRevenue(id: string, revenue: RevenueDTO) {

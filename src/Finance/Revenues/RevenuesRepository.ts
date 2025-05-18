@@ -4,6 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { RevenueRowDTO } from "./DTOs/RevenueRowDTO";
 import { RevenueResponseDTO } from "./DTOs/RevenueResponseDTO";
 import { FormatDate } from "src/Shared/Utils/FormatDate";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Injectable()
 export default class RevenuesRepository {
@@ -11,9 +12,9 @@ export default class RevenuesRepository {
         private readonly database: MySQLDatabase,
     ) { }
 
-    async getRevenues(): Promise<RevenueResponseDTO[]> {
-        const query = "SELECT * FROM revenue";
-        const rows = await this.database.select(query) as RevenueRowDTO[];
+    async getRevenues(periodo: PeriodoDTO): Promise<RevenueResponseDTO[]> {
+        const query = "SELECT * FROM revenue WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
+        const rows = await this.database.select(query, [periodo.start, periodo.end]) as RevenueRowDTO[];
 
         return rows.map(row => new RevenueResponseDTO(
             row.id,

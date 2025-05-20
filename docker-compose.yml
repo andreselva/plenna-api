@@ -6,7 +6,7 @@ services:
     ports:
       - "8001:8001"
       - "9229:9229"
-    command: node --inspect=0.0.0.0:9229 -r ts-node/register -r tsconfig-paths/register src/main.ts
+    command: npm run start:dev
     environment:
       - NODE_ENV=development
       - DB_HOST=db
@@ -21,7 +21,7 @@ services:
       - backend-network
     volumes:
       - ./:/app
-      - /app/node_modules
+      - backend_node_modules:/app/node_modules
 
   db:
     image: mysql:8.0
@@ -42,3 +42,4 @@ networks:
 
 volumes:
   mysql-data:
+  backend_node_modules:

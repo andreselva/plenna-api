@@ -107,9 +107,18 @@ export class ExpensesRepository {
         throw new Error('Failed to update category');
     }
 
-    async searchForRelatedInstallments(idInstallment: number): Promise<Expense[]> {
-        const query = "SELECT * FROM expense WHERE (sourceAccountId = ? OR id = ?) ORDER BY id ASC";
-        const rows = await this.database.select(query, [idInstallment, idInstallment]) as ExpenseRowDTO[];
+    async searchForRelatedInstallments(consideredId: number, expenseId: number = 0): Promise<Expense[]> {
+        let query = "SELECT * FROM expense WHERE (sourceAccountId = ? OR id = ?)";
+        const params = [consideredId, consideredId];
+
+        if (expenseId > 0) {
+            query += " AND id >= ?";
+            params.push(expenseId);
+        }
+
+        query += " ORDER BY id ASC";
+        
+        const rows = await this.database.select(query, params) as ExpenseRowDTO[];
 
         return rows.map(row => new Expense(
             String(row.name),

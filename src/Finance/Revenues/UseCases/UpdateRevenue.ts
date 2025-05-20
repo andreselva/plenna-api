@@ -19,8 +19,7 @@ export class UpdateRevenue {
 
         if (revenue.updateInstallments) {
             //Define o id considerado para buscar as outras parcelas relacionadas
-            const queryId = Number(revenue.sourceAccountId && revenue.sourceAccountId > 0 ? revenue.sourceAccountId : id);
-            const installments = await this.repository.searchForRelatedInstallments(queryId);
+            const installments = await this.searchRelatedInstallments(revenue);
 
             if (!installments) {
                 return await this.repository.updateRevenue(entity);
@@ -32,9 +31,12 @@ export class UpdateRevenue {
             //Se changedFields existe e não for vazio, prosseguimos com a atualização das demais parcelas.
             if (changedFields && Object.keys(changedFields).length > 0) {
                 installments[0] = entity;
-                //Recalculamos as datas conforme a parcela alterada
-                const dates = DateCalculator.calculate(changedFields.invoiceDueDate as string, installments.length);
-                //Delega a função de atualização das parcelas para InstallmentUpdater. InstallmentUpdater é uma função higher order,
+                let dates: string[] = [];
+                if (changedFields.invoiceDueDate !== undefined) {
+                    //Recalculamos as datas conforme a parcela alterada
+                    dates = DateCalculator.calculate(changedFields.invoiceDueDate, installments.length);
+                }
+                //Delega a atualização das parcelas para InstallmentUpdater. InstallmentUpdater é uma função higher order,
                 //então, ela recebe o método updateRevenue por parâmetro.
                 const results: RevenueResponseDTO[] = await InstallmentUpdater<Revenue, RevenueResponseDTO>({
                     items: installments,
@@ -55,5 +57,17 @@ export class UpdateRevenue {
         }
 
         return await this.repository.updateRevenue(entity);
+    }
+
+    private async searchRelatedInstallments(revenue: RevenueDTO) {
+        if (revenue.sourceAccountId && revenue.sourceAccountId > 0) {
+            const consideredId = revenue.sourceAccountId;
+            return await this.repository.searchForRelatedInstallments(consideredId, revenue.id);
+        }
+
+        if (revenue.id && revenue.id !== undefined && revenue.id > 0) {
+            return await this.repository.searchForRelatedInstallments(revenue.id);
+        }
+        throw new Error("Considered ID invalid!");
     }
 }

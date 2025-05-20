@@ -97,9 +97,18 @@ export default class RevenuesRepository {
         throw new Error('Failed to update revenue');
     }
 
-    async searchForRelatedInstallments(idInstallment: number): Promise<Revenue[]> {
-        const query = "SELECT * FROM revenue WHERE (sourceAccountId = ? OR id = ?) ORDER BY id ASC";
-        const rows = await this.database.select(query, [idInstallment, idInstallment]) as RevenueRowDTO[];
+    async searchForRelatedInstallments(consideredId: number, revenueId: number = 0): Promise<Revenue[]> {
+        let query = "SELECT * FROM revenue WHERE (sourceAccountId = ? OR id = ?)";
+        const params = [consideredId, consideredId];
+
+        if (revenueId > 0) {
+            query += " AND id >= ?";
+            params.push(revenueId);
+        }
+
+        query += " ORDER BY id ASC";
+        
+        const rows = await this.database.select(query, params) as RevenueRowDTO[];
 
         return rows.map(row => new Revenue(
             String(row.name),

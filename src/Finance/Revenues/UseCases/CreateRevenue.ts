@@ -1,17 +1,19 @@
-import { Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import Revenue from "../Entity/Revenue";
 import { RevenueDTO } from "../DTOs/RevenueDTO";
 import RevenuesRepository from "../RevenuesRepository";
-import { RevenueResponseDTO } from "../DTOs/RevenueResponseDTO";
 import InstallmentsCalculator from "src/Finance/InstallmentsServices/InstallmentsCalculator";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import GetRevenues from "./GetRevenues";
 
 @Injectable()
 export default class CreateRevenue {
     constructor(
-        private readonly revenueRepository: RevenuesRepository
+        private readonly revenueRepository: RevenuesRepository,
+        private readonly getRevenuesUseCase: GetRevenues,
     ) { }
 
-    async execute(dto: RevenueDTO) {
+    async execute(dto: RevenueDTO, periodo: PeriodoDTO) {
         const entity = Revenue.fromDTO(dto);
         const revenueCreated = await this.revenueRepository.createRevenue(entity);
 
@@ -39,34 +41,38 @@ export default class CreateRevenue {
                 revenuesCreated.push(await this.revenueRepository.createRevenue(otherInstallments[i]));
             }
 
-            //Mapeia para retornar pro front
-            return revenuesCreated.map(revenue => new RevenueResponseDTO(
-                revenue.getId(),
-                revenue.getName(),
-                revenue.getDescription(),
-                revenue.getValue(),
-                revenue.getInvoiceDueDate(),
-                revenue.getIdCategory(),
-                revenue.getInstallments(),
-                revenue.getTypeOfInstallments(),
-                revenue.getSourceAccountId(),
-                revenue.getHasInstallments()
-            ));
+            if (!revenueCreated && !(revenuesCreated.length > 0)) {
+                return {
+                    message: "Failed to create revenue",
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    revenues: await this.getRevenuesUseCase.execute(periodo),
+                    isSuccess: false,
+                }
+            }
+
+            return {
+                message: "Revenue created successfully",
+                stastusCode: HttpStatus.CREATED,
+                revenues: await this.getRevenuesUseCase.execute(periodo),
+                isSuccess: true,
+            }
         }
 
-        //Se não houver parcelas, retorna diretamente a conta criada
-        return new RevenueResponseDTO(
-            revenueCreated.getId(),
-            revenueCreated.getName(),
-            revenueCreated.getDescription(),
-            revenueCreated.getValue(),
-            revenueCreated.getInvoiceDueDate(),
-            revenueCreated.getIdCategory(),
-            revenueCreated.getInstallments(),
-            revenueCreated.getTypeOfInstallments(),
-            revenueCreated.getSourceAccountId(),
-            revenueCreated.getHasInstallments()
-        )
+        if (!revenueCreated) {
+            return {
+                message: "Failed to create revenue",
+                statusCode: HttpStatus.BAD_REQUEST,
+                revenues: await this.getRevenuesUseCase.execute(periodo),
+                isSuccess: false,
+            }
+        }
+
+        return {
+            message: "Revenue created successfully",
+            statusCode: HttpStatus.CREATED,
+            revenues: await this.getRevenuesUseCase.execute(periodo),
+            isSuccess: true,
+        }
     }
 
 }

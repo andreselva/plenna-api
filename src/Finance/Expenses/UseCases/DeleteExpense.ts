@@ -1,14 +1,16 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { ExpensesRepository } from "../ExpensesRepository";
-import { FormatDate } from "src/Shared/Utils/FormatDate";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import { GetExpenses } from "./GetExpenses";
 
 @Injectable()
 export class DeleteExpense {
     constructor(
         private readonly repository: ExpensesRepository,
+        private readonly getExpensesUseCase: GetExpenses,
     ) { }
 
-    async execute(id: number, deleteInstallments: boolean, sourceAccountId: number) {
+    async execute(id: number, deleteInstallments: boolean, sourceAccountId: number, periodo: PeriodoDTO) {
         if (deleteInstallments && sourceAccountId >= 0) {
             const queryId = sourceAccountId > 0 ? sourceAccountId : id;
             const installments = await this.repository.searchForRelatedInstallments(queryId);
@@ -26,15 +28,15 @@ export class DeleteExpense {
                     return {
                         message: "All installments have been deleted successfully.",
                         statusCode: HttpStatus.OK,
-                        expenses: (await this.repository.getExpenses()).map(expense => ({
-                            ...expense,
-                            invoiceDueDate: FormatDate.formatToYYYYMMDD(expense.invoiceDueDate)
-                        }))
+                        expenses: await this.getExpensesUseCase.execute(periodo),
+                        isSuccess: true
                     }
                 }
                 return {
                     message: "An error occurred while deleting the installments!",
-                    statusCode: HttpStatus.BAD_REQUEST
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    expenses: await this.getExpensesUseCase.execute(periodo),
+                    isSuccess: false
                 }
             }
         }
@@ -43,11 +45,16 @@ export class DeleteExpense {
             return {
                 message: "Expense have been deleted successfully.",
                 statusCode: HttpStatus.OK,
-                expenses: (await this.repository.getExpenses()).map(expense => ({
-                    ...expense,
-                    invoiceDueDate: FormatDate.formatToYYYYMMDD(expense.invoiceDueDate)
-                }))
+                expenses: await this.getExpensesUseCase.execute(periodo),
+                isSuccess: true
             }
+        }
+
+        return {
+            message: "An error occurred while deleting the expense!",
+            statusCode: HttpStatus.BAD_REQUEST,
+            expenses: await this.getExpensesUseCase.execute(periodo),
+            isSuccess: false
         }
     }
 }

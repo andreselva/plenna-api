@@ -1,7 +1,7 @@
 import { Controller, Get, Headers } from "@nestjs/common";
 import { DashboardServices } from "./DashboardServices";
 import DashboardArgs from "./Args/DashboardArgs";
-import PeriodoDTO from "./DTOs/PeriodoDTO";
+import PeriodoDTO from "../DTOs/PeriodoDTO";
 
 @Controller('/dashboard')
 export class DashboardController {

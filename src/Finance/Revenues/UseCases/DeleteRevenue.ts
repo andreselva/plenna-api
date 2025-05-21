@@ -1,14 +1,16 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import RevenuesRepository from "../RevenuesRepository";
-import { FormatDate } from "src/Shared/Utils/FormatDate";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import GetRevenues from "./GetRevenues";
 
 @Injectable()
 export class DeleteRevenue {
     constructor(
-        private readonly repository: RevenuesRepository
+        private readonly repository: RevenuesRepository,
+        private readonly getRevenuesUseCase: GetRevenues,
     ) { }
 
-    async execute(id: number, deleteInstallments: boolean, sourceAccountId: number) {
+    async execute(id: number, deleteInstallments: boolean, sourceAccountId: number, periodo: PeriodoDTO) {
         if (deleteInstallments) {
             const queryId = sourceAccountId > 0 ? sourceAccountId : id;
             const installments = await this.repository.searchForRelatedInstallments(queryId);
@@ -26,16 +28,16 @@ export class DeleteRevenue {
                     return {
                         message: 'All installments have been deleted successfully.',
                         statusCode: HttpStatus.OK,
-                        revenues: (await this.repository.getRevenues()).map(revenue => ({
-                            ...revenue,
-                            invoiceDueDate: FormatDate.formatToYYYYMMDD(revenue.invoiceDueDate),
-                        }))
+                        revenues: await this.getRevenuesUseCase.execute(periodo),
+                        isSuccess: true
                     }
                 }
 
                 return {
                     message: 'An error occurred while deleting the installments.',
-                    statusCode: HttpStatus.BAD_REQUEST
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    revenues: await this.getRevenuesUseCase.execute(periodo),
+                    isSuccess: false
                 }
             }
         }
@@ -44,11 +46,16 @@ export class DeleteRevenue {
             return {
                 message: 'Revenue have been deleted successfully.',
                 statusCode: HttpStatus.OK,
-                revenues: (await this.repository.getRevenues()).map(revenue => ({
-                    ...revenue,
-                    invoiceDueDate: FormatDate.formatToYYYYMMDD(revenue.invoiceDueDate)
-                }))
+                revenues: await this.getRevenuesUseCase.execute(periodo),
+                isSuccess: true
             }
+        }
+
+        return {
+            message: 'An error occurred while deleting the revenue.',
+            statusCode: HttpStatus.BAD_REQUEST,
+            revenues: await this.getRevenuesUseCase.execute(periodo),
+            isSuccess: false
         }
     }
 }

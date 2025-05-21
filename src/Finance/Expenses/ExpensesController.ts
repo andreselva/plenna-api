@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Dependencies, Get, HttpStatus, Param, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Dependencies, Get, Headers, HttpStatus, Param, Post, Put, Query } from "@nestjs/common";
 import { ExpensesServices } from "./ExpensesServices";
 import { ExpenseDTO } from "./DTOs/ExpenseDTO";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Controller('/expenses')
 @Dependencies(ExpensesServices)
@@ -10,20 +11,26 @@ export class ExpensesController {
     ) { }
 
     @Get()
-    async getExpenses() {
-        return await this.service.getExpenses();
+    async getExpenses(@Headers('x-periodo') periodo: string) {
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.service.getExpenses(newPeriodo);
     }
 
     @Post()
-    async createExpense(@Body() expense: ExpenseDTO) {
-        return await this.service.createExpense(expense);
+    async createExpense(
+        @Body() expense: ExpenseDTO,
+        @Headers('x-periodo') periodo: string
+    ) {
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.service.createExpense(expense, newPeriodo);
     }
 
     @Delete(':id')
     async deleteExpense(
         @Param('id') id: string,
         @Query('deleteInstallments') deleteInstallments: string = 'false',
-        @Query('sourceAccountId') sourceAccountId: string = '0'
+        @Query('sourceAccountId') sourceAccountId: string = '0',
+        @Headers('x-periodo') periodo: string
     ) {
         if (Number(id) <= 0) {
             return {
@@ -31,11 +38,17 @@ export class ExpensesController {
                 statusCode: HttpStatus.BAD_REQUEST
             }
         }
-        return await this.service.deleteExpense(id, deleteInstallments, sourceAccountId);
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.service.deleteExpense(id, deleteInstallments, sourceAccountId, newPeriodo);
     }
 
     @Put(':id')
-    async updateExpense(@Param('id') id: string, @Body() expense: ExpenseDTO) {
-        return await this.service.updateExpense(id, expense);
+    async updateExpense(
+        @Param('id') id: string,
+        @Body() expense: ExpenseDTO,
+        @Headers('x-periodo') periodo: string
+    ) {
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.service.updateExpense(id, expense, newPeriodo);
     }
 }

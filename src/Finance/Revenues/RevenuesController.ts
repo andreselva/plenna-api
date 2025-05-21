@@ -11,14 +11,15 @@ export default class RevenuesController {
     ) { }
 
     @Get()
-    async getRevenues(@Headers('periodo') periodo: string) {
+    async getRevenues(@Headers('x-periodo') periodo: string) {
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         return await this.revenuesService.getRevenues(newPeriodo);
     }
 
     @Post()
-    async createRevenue(@Body() revenue: RevenueDTO) {
-        return await this.revenuesService.createRevenue(revenue);
+    async createRevenue(@Body() revenue: RevenueDTO, @Headers('x-periodo') periodo: string) {
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.revenuesService.createRevenue(revenue, newPeriodo);
     }
 
     @Delete(':id')
@@ -26,14 +27,19 @@ export default class RevenuesController {
         @Param('id') id: string,
         @Query('deleteInstallments') deleteInstallments: string = 'false',
         @Query('sourceAccountId') sourceAccountId: string = '0',
-        @Headers('periodo') periodo: string
+        @Headers('x-periodo') periodo: string
     ) {
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         return await this.revenuesService.deleteRevenue(id, deleteInstallments, sourceAccountId, newPeriodo);
     }
 
     @Put(':id')
-    async updateRevenue(@Param('id') id: string, @Body() revenue: RevenueDTO) {
-        return await this.revenuesService.updateRevenue(id, revenue);
+    async updateRevenue(
+        @Param('id') id: string, 
+        @Body() revenue: RevenueDTO,
+        @Headers('x-periodo') periodo: string
+    ) {
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.revenuesService.updateRevenue(id, revenue, newPeriodo);
     }
 }

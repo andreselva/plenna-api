@@ -25,7 +25,7 @@ export default class RevenuesService {
         return await this.getRevenuesUseCase.execute(periodo);
     }
 
-    async createRevenue(revenue: RevenueDTO) {
+    async createRevenue(revenue: RevenueDTO, periodo: PeriodoDTO) {
         if (
             (
                 revenue.typeOfInstallment === 'P' 
@@ -37,7 +37,7 @@ export default class RevenuesService {
             revenue.hasInstallments = true;
         }
         
-        return await this.createRevenueUseCase.execute(revenue)
+        return await this.createRevenueUseCase.execute(revenue, periodo)
     }
 
     async deleteRevenue(id: string, deleteInstallments: string, sourceAccountId: string, periodo: PeriodoDTO) {
@@ -45,7 +45,7 @@ export default class RevenuesService {
         return await this.deleteRevenueUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId), periodo);
     }
 
-    async updateRevenue(id: string, revenue: RevenueDTO) {
-        return await this.updateRevenueUseCase.execute(id, revenue);
+    async updateRevenue(id: string, revenue: RevenueDTO, periodo: PeriodoDTO) {
+        return await this.updateRevenueUseCase.execute(id, revenue, periodo);
     }
 }

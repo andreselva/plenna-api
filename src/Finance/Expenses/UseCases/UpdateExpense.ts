@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 import { Expense } from "../Entity/Expense";
 import { ExpensesRepository } from "../ExpensesRepository";
@@ -6,14 +6,17 @@ import { getChangedFields } from "src/Shared/Utils/CompareChanges";
 import DateCalculator from "src/Shared/Utils/DateCalculator";
 import { ExpenseResponseDTO } from "../DTOs/ExpenseResponseDTO";
 import { InstallmentUpdater } from "src/Finance/InstallmentsServices/InstallmentsUpdater";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import { GetExpenses } from "./GetExpenses";
 
 @Injectable()
 export class UpdateExpense {
     constructor(
         private readonly repository: ExpensesRepository,
+        private readonly getExpensesUseCase: GetExpenses,
     ) { }
 
-    async execute(id: string, expense: ExpenseDTO) {
+    async execute(id: string, expense: ExpenseDTO, periodo: PeriodoDTO) {
         expense.id = Number(id);
         const entity = Expense.fromDTO(expense);
 
@@ -50,15 +53,53 @@ export class UpdateExpense {
                     updateFn: (item) => this.repository.updateExpense(item)
                 });
 
-                if (results && results.length > 0) {
-                    return results;
-                }
+                if (!results || (results.length > 0)) {
+                    const result = await this.repository.updateExpense(entity);
+                    if (!result) {
+                        return {
+                            message: "Failed to update installments",
+                            statusCode: HttpStatus.BAD_REQUEST,
+                            expenses: await this.getExpensesUseCase.execute(periodo),
+                            isSuccess: false,
+                        }
+                    }
 
-                //Se a atualização acima falhar, atualizamos somente a entity
-                return await this.repository.updateExpense(entity);
+                    return {
+                        message: "Installment updated successfully, but the other installments were not updated.",
+                        statusCode: HttpStatus.MULTI_STATUS,
+                        results: [
+                            {
+                                revenue: 'mainEntity',
+                                isSuccess: true,
+                            },
+                            {
+                                revenue: 'installments',
+                                isSuccess: false,
+                            }
+                        ],
+                        expenses: await this.getExpensesUseCase.execute(periodo),
+                        isSuccess: false,
+                    }
+                }
             }
         }
-        return await this.repository.updateExpense(entity)
+
+        const result = await this.repository.updateExpense(entity);
+        if (!result) {
+            return {
+                message: "Failed to update installments",
+                statusCode: HttpStatus.BAD_REQUEST,
+                expenses: await this.getExpensesUseCase.execute(periodo),
+                isSuccess: false,
+            }
+        }
+
+        return {
+            message: "Installment updated successfully",
+            statusCode: HttpStatus.OK,
+            expenses: await this.getExpensesUseCase.execute(periodo),
+            isSuccess: true,
+        }
     }
 
     private async searchRelatedInstallments(expense: ExpenseDTO) {

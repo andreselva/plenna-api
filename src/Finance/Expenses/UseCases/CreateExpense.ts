@@ -2,16 +2,18 @@ import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 import { ExpensesRepository } from "../ExpensesRepository";
 import { Expense } from "../Entity/Expense";
 import { Injectable } from "@nestjs/common";
-import { ExpenseResponseDTO } from "../DTOs/ExpenseResponseDTO";
 import InstallmentsCalculator from "src/Finance/InstallmentsServices/InstallmentsCalculator";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import { GetExpenses } from "./GetExpenses";
 
 @Injectable()
 export class CreateExpense {
     constructor(
         private readonly repository: ExpensesRepository,
+        private readonly getExpensesUseCase: GetExpenses,
     ) { }
 
-    async execute(expense: ExpenseDTO) {
+    async execute(expense: ExpenseDTO, periodo: PeriodoDTO) {
         const entity = Expense.fromDTO(expense);
         const firstExpense = await this.repository.createExpense(entity);
 
@@ -40,35 +42,37 @@ export class CreateExpense {
                 expensesCreated.push(await this.repository.createExpense(otherInstallments[i]));
             }
 
-            //Mapeia para retornar pro front
-            return expensesCreated.map(expense => new ExpenseResponseDTO(
-                expense.getId(),
-                expense.getName(),
-                expense.getDescription(),
-                expense.getValue(),
-                expense.getInvoiceDueDate(),
-                expense.getIdCategory(),
-                expense.getIdCreditCard(),
-                expense.getTypeOfInstallments(),
-                expense.getSourceAccountId(),
-                expense.getHasInstallments(),
-                expense.getInstallments()
-            ));
+            if (!firstExpense && !(expensesCreated.length > 0)) {
+                return {
+                    message: "Failed to create expense",
+                    statusCode: 400,
+                    expenses: await this.getExpensesUseCase.execute(periodo),
+                    isSucess: false,
+                }
+            }
+
+            return {
+                message: "Expense created successfully",
+                statusCode: 201,
+                expenses: await this.getExpensesUseCase.execute(periodo),
+                isSucess: true,
+            }
         }
 
-        //Se não houver parcelas, retorna diretamente a conta criada
-        return new ExpenseResponseDTO(
-            firstExpense.getId(),
-            firstExpense.getName(),
-            firstExpense.getDescription(),
-            firstExpense.getValue(),
-            firstExpense.getInvoiceDueDate(),
-            firstExpense.getIdCategory(),
-            firstExpense.getIdCreditCard(),
-            firstExpense.getTypeOfInstallments(),
-            firstExpense.getSourceAccountId(),
-            firstExpense.getHasInstallments(),
-            firstExpense.getInstallments()
-        )
+        if (!firstExpense) {
+            return {
+                message: "Failed to create expense",
+                statusCode: 400,
+                expenses: await this.getExpensesUseCase.execute(periodo),
+                isSucess: false,
+            }
+        }
+
+        return {
+            message: "Expense created successfully",
+            statusCode: 201,
+            expenses: await this.getExpensesUseCase.execute(periodo),
+            isSucess: true,
+        }
     }
 }

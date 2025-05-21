@@ -11,14 +11,18 @@ export class ExpensesController {
     ) { }
 
     @Get()
-    async getExpenses(@Headers('periodo') periodo: string) {
+    async getExpenses(@Headers('x-periodo') periodo: string) {
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         return await this.service.getExpenses(newPeriodo);
     }
 
     @Post()
-    async createExpense(@Body() expense: ExpenseDTO) {
-        return await this.service.createExpense(expense);
+    async createExpense(
+        @Body() expense: ExpenseDTO,
+        @Headers('x-periodo') periodo: string
+    ) {
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.service.createExpense(expense, newPeriodo);
     }
 
     @Delete(':id')
@@ -26,7 +30,7 @@ export class ExpensesController {
         @Param('id') id: string,
         @Query('deleteInstallments') deleteInstallments: string = 'false',
         @Query('sourceAccountId') sourceAccountId: string = '0',
-        @Headers('periodo') periodo: string
+        @Headers('x-periodo') periodo: string
     ) {
         if (Number(id) <= 0) {
             return {
@@ -39,7 +43,12 @@ export class ExpensesController {
     }
 
     @Put(':id')
-    async updateExpense(@Param('id') id: string, @Body() expense: ExpenseDTO) {
-        return await this.service.updateExpense(id, expense);
+    async updateExpense(
+        @Param('id') id: string,
+        @Body() expense: ExpenseDTO,
+        @Headers('x-periodo') periodo: string
+    ) {
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.service.updateExpense(id, expense, newPeriodo);
     }
 }

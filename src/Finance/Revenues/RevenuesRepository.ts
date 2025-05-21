@@ -107,9 +107,8 @@ export default class RevenuesRepository {
         }
 
         query += " ORDER BY id ASC";
-        
+    
         const rows = await this.database.select(query, params) as RevenueRowDTO[];
-
         return rows.map(row => new Revenue(
             String(row.name),
             String(row.description),

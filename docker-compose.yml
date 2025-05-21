@@ -1,5 +1,6 @@
 services:
   backend:
+    container_name: plenna-api
     build:
       context: .
       dockerfile: Dockerfile.dev

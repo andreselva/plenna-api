@@ -21,6 +21,7 @@ export class AuthService {
     }
 
     async generateTokens(user: any): Promise<{ accessToken: string; refreshToken: string }> {
+        console.log(this.jwtSecret, this.refreshSecret);
         const accessToken = this.generateToken(user);
         const refreshToken = this.generateRefreshToken(user);
 

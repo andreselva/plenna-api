@@ -63,7 +63,7 @@ export class AuthController {
         } catch (err) {
             console.error('Erro:', err);
             try {
-                res.clearCookie('acess_token', AuthCookieOptions.clearToken());
+                res.clearCookie('access_token', AuthCookieOptions.clearToken());
                 res.clearCookie('refresh_token', AuthCookieOptions.clearToken())
             } catch (error) {
                 console.error('Erro ao tentar limpar as credenciais', error);

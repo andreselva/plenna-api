@@ -7,14 +7,18 @@ import AuthRepository from './AuthRepository';
 
 @Injectable()
 export class AuthService {
-    private readonly jwtSecret = process.env.JWT_SECRET || 'chave-secreta';
-    private readonly refreshSecret = process.env.JWT_REFRESH_SECRET || 'chave-secreta-refresh';
+    private readonly jwtSecret = process.env.JWT_SECRET;
+    private readonly refreshSecret = process.env.JWT_REFRESH_SECRET;
 
     constructor(
         private userService: UsersService,
         private jwtService: JwtService,
         private repository: AuthRepository
-    ) { }
+    ) {
+        if (!this.jwtSecret || !this.refreshSecret) {
+            throw new Error('Segredos JWT (JWT_SECRET, JWT_REFRESH_SECRET) não foram definidos.');
+        }
+    }
 
     async generateTokens(user: any): Promise<{ accessToken: string; refreshToken: string }> {
         const accessToken = this.generateToken(user);
@@ -41,21 +45,25 @@ export class AuthService {
 
     async refreshAccessToken(refreshToken: string) {
         try {
-            const decoded = jwt.verify(refreshToken, this.refreshSecret) as { sub: string; username: string };
-            //Valida se o refreshToken existe no banco de dados.
-            const isRefreshTokenValid = await this.repository.isRefreshTokenValid(refreshToken, Number(decoded.sub))
-            if (isRefreshTokenValid === true) {
-                const user = await this.userService.findUserById(decoded.sub);
-                if (!user) throw new UnauthorizedException('Usuário não encontrado');
-                const newAccessToken = this.generateToken(user);
-                const newRefreshToken = this.generateRefreshToken(user);
-                await this.repository.updateRefreshToken(newRefreshToken, Number(user.getId()));
-                return { accessToken: newAccessToken, newRefreshToken };
-            }
-            throw new UnauthorizedException('Refresh token inválido ou expirado!');
+            const decoded = await this.jwtService.verifyAsync<jwt.JwtPayload>(refreshToken, {
+                secret: this.refreshSecret,
+            });
+            if (!decoded || !decoded.sub) throw new UnauthorizedException('Token inválido');
+
+            const isRefreshTokenValid = await this.repository.isRefreshTokenValid(refreshToken, Number(decoded.sub));
+            if (!isRefreshTokenValid) throw new UnauthorizedException('Refresh token inválido ou revogado!');
+
+            const user = await this.userService.findUserById(decoded.sub);
+            if (!user) throw new UnauthorizedException('Usuário não encontrado');
+            
+            const newAccessToken = this.generateToken(user);
+            const newRefreshToken = this.generateRefreshToken(user);
+            await this.repository.updateRefreshToken(newRefreshToken, Number(user.getId()));
+            return { accessToken: newAccessToken, newRefreshToken };
 
         } catch (err) {
-            throw new UnauthorizedException(`Refresh token inválido ou expirado, ${err}`);
+            console.error('Falha no refresh do token:', err);
+            throw new UnauthorizedException('Refresh token inválido ou expirado.');
         }
     }
 
@@ -70,16 +78,23 @@ export class AuthService {
         return null;
     }
 
-    async getUserFromToken(token: string): Promise<any> {
+    async getUserFromToken(token: string | undefined): Promise<any> {
+        if (!token) {
+            throw new UnauthorizedException('Token não fornecido');
+        }
+
         try {
-            const decoded = jwt.verify(token, this.jwtSecret) as {
-                sub: string;
-                username: string;
-            };
+            if (!this.jwtSecret) throw new Error('JWT_SECRET não definido.');
+            const decoded = jwt.verify(token, this.jwtSecret) as jwt.JwtPayload;
+
+            if (!decoded || !decoded.sub) throw new UnauthorizedException('Token inválido');
             const user = await this.userService.findUserById(decoded.sub);
-            if (!user) throw new UnauthorizedException('Usuário não encontrado');
+            if (!user) {
+                throw new UnauthorizedException('Usuário não encontrado');
+            }
             return { id: user.getId(), username: user.getUserName(), name: user.getName() };
-        } catch {
+        } catch (error) {
+            console.error('Erro ao verificar o token:', error);
             throw new UnauthorizedException('Token inválido ou expirado');
         }
     }

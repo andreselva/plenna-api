@@ -16,6 +16,7 @@ services:
       - DB_PASSWORD=password
       - DB_NAME=system
       - JWT_SECRET=samantinha
+      - JWT_REFRESH_SECRET=samantinha
     depends_on:
       - db
     networks:

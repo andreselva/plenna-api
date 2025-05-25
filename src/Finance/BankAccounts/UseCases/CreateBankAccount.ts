@@ -13,7 +13,7 @@ export default class CreateBankAccount {
         if (!bankAccount.icon) {
             bankAccount.icon = "";
         }
-        const entity = new BankAccount(bankAccount.name, bankAccount.icon);
+        const entity = new BankAccount(bankAccount.name, bankAccount.generateInvoice, bankAccount.icon);
         return await this.repository.createBankAccount(entity);
     }
 }

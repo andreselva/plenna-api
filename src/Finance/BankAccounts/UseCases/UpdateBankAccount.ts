@@ -17,8 +17,8 @@ export default class UpdateBankAccount {
         if (bankAccount.icon === "" || bankAccount.icon === undefined) {
             bankAccount.icon = "";
         }
-        
-        const entity = new BankAccount(bankAccount.name, bankAccount.icon, Number(id));
+
+        const entity = new BankAccount(bankAccount.name, Boolean(bankAccount.generateInvoice), bankAccount.icon, Number(id));
         return await this.repository.updateBankAccount(entity);
     }
 }

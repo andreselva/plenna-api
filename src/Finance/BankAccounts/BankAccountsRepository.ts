@@ -18,23 +18,26 @@ export default class BankAccountsRepository {
             id: row.id,
             name: row.name,
             icon: row.icon,
+            generateInvoice: Boolean(row.generateInvoice)
         }));
     }
 
     async createBankAccount(bankAccount: BankAccount): Promise<BankAccountResponseDTO> {
         const params = [
             bankAccount.getName(),
-            bankAccount.getIcon() || ""
+            bankAccount.getIcon(),
+            bankAccount.getGenerateInvoice(),
         ];
         const placeholders = QueryBuilder.getPlaceholders(params);
-        const query = `INSERT INTO bank_account (name, icon) VALUES (${placeholders})`;
+        const query = `INSERT INTO bank_account (name, icon, gerenateInvoice) VALUES (${placeholders})`;
         const result = await this.database.execute(query, params);
 
         if (result.affectedRows > 0) {
             return new BankAccountResponseDTO(
                 result.insertId,
                 bankAccount.getName(),
-                bankAccount.getIcon()
+                bankAccount.getGenerateInvoice(),
+                bankAccount.getIcon(),
             );
         }
         throw new Error("Failed to create bank account");
@@ -56,10 +59,11 @@ export default class BankAccountsRepository {
             throw new Error("Bank account ID is required for update");
         }
 
-        const query = "UPDATE bank_account SET name = ?, icon = ? WHERE id = ?";
+        const query = "UPDATE bank_account SET name = ?, icon = ?, generateInvoice = ? WHERE id = ?";
         const params = [
             bankAccount.getName(),
             bankAccount.getIcon() || "",
+            bankAccount.getGenerateInvoice(),
             id
         ];
         const result = await this.database.execute(query, params);
@@ -67,6 +71,7 @@ export default class BankAccountsRepository {
             return new BankAccountResponseDTO(
                 id,
                 bankAccount.getName(),
+                bankAccount.getGenerateInvoice(),
                 bankAccount.getIcon()
             );
         }

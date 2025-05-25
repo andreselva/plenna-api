@@ -3,12 +3,16 @@ export default class BankAccount {
     name: string;
     generateInvoice: boolean;
     icon?: string;
+    dueDate?: string;
+    closingDate?: string;
 
-    constructor(name: string, generateInvoice: boolean, icon: string = "", id?: number) {
-        this.icon = icon;
+    constructor(name: string, generateInvoice: boolean, icon: string = "", dueDate?: string, closingDate?: string, id?: number) {
         this.id = id;
+        this.icon = icon;
         this.name = name;
         Boolean(this.generateInvoice = generateInvoice);
+        this.dueDate = dueDate;
+        this.closingDate = closingDate;
     }
 
     getId() {
@@ -25,5 +29,13 @@ export default class BankAccount {
 
     getGenerateInvoice() {
         return this.generateInvoice;
+    }
+
+    getDueDate() {
+        return this.dueDate;
+    }
+
+    getClosingDate() {
+        return this.closingDate;
     }
 }

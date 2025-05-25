@@ -18,7 +18,9 @@ export default class BankAccountsRepository {
             id: row.id,
             name: row.name,
             icon: row.icon,
-            generateInvoice: Boolean(row.generateInvoice)
+            generateInvoice: Boolean(row.generateInvoice),
+            dueDate: row.dueDate,
+            closingDate: row.closingDate
         }));
     }
 
@@ -27,6 +29,8 @@ export default class BankAccountsRepository {
             bankAccount.getName(),
             bankAccount.getIcon(),
             bankAccount.getGenerateInvoice(),
+            bankAccount.getDueDate(),
+            bankAccount.getClosingDate()
         ];
         const placeholders = QueryBuilder.getPlaceholders(params);
         const query = `INSERT INTO bank_account (name, icon, gerenateInvoice) VALUES (${placeholders})`;
@@ -38,6 +42,8 @@ export default class BankAccountsRepository {
                 bankAccount.getName(),
                 bankAccount.getGenerateInvoice(),
                 bankAccount.getIcon(),
+                bankAccount.getDueDate(),
+                bankAccount.getClosingDate(),
             );
         }
         throw new Error("Failed to create bank account");
@@ -59,11 +65,13 @@ export default class BankAccountsRepository {
             throw new Error("Bank account ID is required for update");
         }
 
-        const query = "UPDATE bank_account SET name = ?, icon = ?, generateInvoice = ? WHERE id = ?";
+        const query = "UPDATE bank_account SET name = ?, icon = ?, generateInvoice = ?, dueDate = ?, closingDate = ? WHERE id = ?";
         const params = [
             bankAccount.getName(),
             bankAccount.getIcon() || "",
             bankAccount.getGenerateInvoice(),
+            bankAccount.getDueDate(),
+            bankAccount.getClosingDate(),
             id
         ];
         const result = await this.database.execute(query, params);
@@ -72,7 +80,9 @@ export default class BankAccountsRepository {
                 id,
                 bankAccount.getName(),
                 bankAccount.getGenerateInvoice(),
-                bankAccount.getIcon()
+                bankAccount.getIcon(),
+                bankAccount.getDueDate(),
+                bankAccount.getClosingDate()
             );
         }
         throw new Error("Failed to update bank account");

@@ -14,11 +14,26 @@ export default class UpdateBankAccount {
             throw new Error("ID is required to update a bank account.");
         }
 
-        if (bankAccount.icon === "" || bankAccount.icon === undefined) {
+        if (!bankAccount.icon) {
             bankAccount.icon = "";
         }
 
-        const entity = new BankAccount(bankAccount.name, Boolean(bankAccount.generateInvoice), bankAccount.icon, Number(id));
+        if (!bankAccount.dueDate) {
+            bankAccount.dueDate = "";
+        }
+
+        if (!bankAccount.closingDate) {
+            bankAccount.closingDate = "";
+        }
+
+        const entity = new BankAccount(
+            bankAccount.name,
+            Boolean(bankAccount.generateInvoice),
+            bankAccount.icon,
+            bankAccount.dueDate,
+            bankAccount.closingDate,
+            Number(id)
+        );
         return await this.repository.updateBankAccount(entity);
     }
 }

@@ -3,4 +3,6 @@ export default class BankAccountsRowDTO {
     name: string;
     icon?: string;
     generateInvoice: boolean;
+    dueDate?: string;
+    closingDate?: string;
 }

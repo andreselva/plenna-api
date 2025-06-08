@@ -47,6 +47,7 @@ import CreditCardStatementsService from './Dashboard/CreditCardStatements/Credit
 import CreditCardStatementsRepository from './Dashboard/CreditCardStatements/CreditCardStatementsRepository';
 import { UsersController } from './Users/UserController';
 import { ConfigModule } from '@nestjs/config';
+import { InvoicesModule } from './Finance/Invoices/invoices.module';
 
 const services = [
   CategoriesService,
@@ -87,7 +88,8 @@ const repositories = [
       isGlobal: true,
     }),
     AuthModule,
-    UsersModule
+    UsersModule,
+    InvoicesModule
   ],
   controllers: [
     AppController,

@@ -86,7 +86,7 @@ export class InvoicesController {
     createInvoices(@Body() invoiceSettings: InvoiceSettingsDTO) {
         try {
             if (invoiceSettings) {
-                this.service.create(invoiceSettings);
+                this.service.createInvoice(invoiceSettings);
             }
         } catch (err) {
             console.error(err);

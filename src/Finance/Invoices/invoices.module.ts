@@ -3,9 +3,10 @@ import { InvoicesService } from './invoices.service';
 import { InvoicesController } from './invoices.controller';
 import InvoicesRepository from './invoices.repository';
 import MySQLDatabase from 'src/Config/Database/MySQLDatabase';
+import CreateInvoiceUseCase from './UseCases/CreateInvoiceUseCase';
 
 @Module({
-  providers: [InvoicesService, InvoicesRepository, MySQLDatabase],
+  providers: [InvoicesService, InvoicesRepository, CreateInvoiceUseCase, MySQLDatabase],
   controllers: [InvoicesController]
 })
 export class InvoicesModule { }

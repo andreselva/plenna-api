@@ -17,12 +17,13 @@ export default class GetInvoicesUseCase {
         const mappedInvoices = invoicesList.map(invoice => {
             const closingDate = DateHelper.toISODate(invoice.closingDate) as string;
             const dueDate = DateHelper.toISODate(invoice.dueDate) as string;
+            const name = `${invoice.name} - ${DateHelper.toMonthYear(closingDate)} - Vencimento: ${DateHelper.toBrazilianDate(dueDate)}`;
 
             return new Invoice(
                 closingDate,
                 dueDate,
                 invoice.idBankAccount,
-                invoice.name,
+                name,
                 invoice.id,
                 invoice.status
             );

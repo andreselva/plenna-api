@@ -3,8 +3,8 @@ import Revenue from "./Entity/Revenue";
 import { Injectable } from "@nestjs/common";
 import { RevenueRowDTO } from "./DTOs/RevenueRowDTO";
 import { RevenueResponseDTO } from "./DTOs/RevenueResponseDTO";
-import { FormatDate } from "src/Shared/Utils/FormatDate";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export default class RevenuesRepository {
@@ -113,7 +113,7 @@ export default class RevenuesRepository {
             String(row.name),
             String(row.description),
             Number(row.value),
-            FormatDate.formatToYYYYMMDD(row.invoiceDueDate),
+            DateHelper.toISODate(row.invoiceDueDate) as string,
             Number(row.idCategory),
             Number(row.installments),
             String(row.typeOfInstallments),

@@ -21,4 +21,36 @@ export default class DateHelper {
 
         return null;
     }
+
+    /**
+     * Extrai e formata o mês e o ano de uma string de data.
+     * Recebe uma data no formato 'YYYY-MM-DD' e retorna 'MM/YYYY'.
+     * Retorna null se a data de entrada for inválida.
+     * @param isoDate A string da data no formato 'YYYY-MM-DD'.
+     */
+    static toMonthYear(isoDate: string): string | null {
+        const luxonDateTime = DateTime.fromISO(isoDate);
+
+        if (luxonDateTime.isValid) {
+            return luxonDateTime.toFormat('MM/yyyy');
+        }
+
+        return null;
+    }
+
+    /**
+     * Converte uma string de data do formato 'YYYY-MM-DD' para 'DD/MM/YYYY'.
+     * Retorna null se a data de entrada for inválida.
+     * @param isoDate A string da data no formato 'YYYY-MM-DD'.
+     */
+    static toBrazilianDate(isoDate: string): string | null {
+        const luxonDateTime = DateTime.fromISO(isoDate);
+
+        if (luxonDateTime.isValid) {
+            return luxonDateTime.toFormat('dd/MM/yyyy');
+        }
+
+        return null;
+    }
+
 }

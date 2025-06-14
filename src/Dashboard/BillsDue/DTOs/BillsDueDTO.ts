@@ -1,4 +1,4 @@
-import { FormatDate } from "src/Shared/Utils/FormatDate";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 export class BillsDueDTO {
     public readonly invoiceDueDate: string;
@@ -8,6 +8,6 @@ export class BillsDueDTO {
         invoiceDueDate: string,
         public readonly value: number
     ) {
-        this.invoiceDueDate = FormatDate.formatDateToDDMMYYYY(invoiceDueDate);
+        this.invoiceDueDate = DateHelper.toBrazilianDate(invoiceDueDate) as string;
     }
 }

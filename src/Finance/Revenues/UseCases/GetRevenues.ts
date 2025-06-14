@@ -1,7 +1,7 @@
 import { Dependencies, Injectable } from "@nestjs/common";
 import RevenuesRepository from "../RevenuesRepository";
-import { FormatDate } from "src/Shared/Utils/FormatDate";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 @Dependencies(RevenuesRepository)
@@ -14,7 +14,7 @@ export default class GetRevenues {
         const revenues = await this.revenuesRepository.getRevenues(periodo);
         const formattedRevenues = revenues.map(revenue => ({
             ...revenue,
-            invoiceDueDate: FormatDate.formatToYYYYMMDD(revenue.invoiceDueDate)
+            invoiceDueDate: DateHelper.toISODate(revenue.invoiceDueDate)
         }));
         return formattedRevenues;
     }

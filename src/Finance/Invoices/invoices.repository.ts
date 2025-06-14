@@ -2,8 +2,7 @@ import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import Invoice from "./Entity/invoice";
 import { Injectable } from "@nestjs/common";
 import InvoiceRowDTO from "./DTOs/invoice.row.dto";
-import { FormatDate } from "src/Shared/Utils/FormatDate";
-import { DateTime } from 'luxon';
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export default class InvoicesRepository {
@@ -38,8 +37,8 @@ export default class InvoicesRepository {
             if (result && result.length > 0) {
                 const invoice = result[0];
                 return new Invoice(
-                    FormatDate.formatToYYYYMMDD(invoice.closingDate),
-                    FormatDate.formatToYYYYMMDD(invoice.dueDate),
+                    DateHelper.toISODate(invoice.closingDate) as string,
+                    DateHelper.toISODate(invoice.dueDate) as string,
                     invoice.idBankAccount,
                     invoice.name,
                     invoice.id

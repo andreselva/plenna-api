@@ -10,10 +10,12 @@ export class Expense {
     public installments: number = 0;
     public typeOfInstallments: string = 'U';
     public sourceAccountId: number = 0;
-    public hasInstallments: boolean = false;
+    public hasInstallments: boolean;
+    public linkToInvoice: boolean;
+    public idInvoice: number;
     public id?: number;
 
-    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, idCreditCard: number, installments: number, typeOfInstallments: string, sourceAccountId: number, hasInstallments: boolean, id?: number) {
+    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, idCreditCard: number, installments: number, typeOfInstallments: string, sourceAccountId: number, hasInstallments: boolean, linkToInvoice: boolean, idInvoice: number, id?: number) {
         this.name = name;
         this.description = description;
         this.value = value;
@@ -24,6 +26,8 @@ export class Expense {
         this.typeOfInstallments = typeOfInstallments;
         this.sourceAccountId = sourceAccountId;
         this.hasInstallments = hasInstallments;
+        this.linkToInvoice = linkToInvoice;
+        this.idInvoice = idInvoice;
         this.id = id;
     }
 
@@ -71,6 +75,14 @@ export class Expense {
         return this.hasInstallments;
     }
 
+    getLinkToInvoice() {
+        return this.linkToInvoice;
+    }
+
+    getIdInvoice() {
+        return this.idInvoice;
+    }
+
     setId(id: number) {
         if (this.id === undefined || !this.id) {
             this.id = id;
@@ -89,6 +101,8 @@ export class Expense {
             dto.typeOfInstallment,
             Number(dto.sourceAccountId) || 0,
             dto.hasInstallments || false,
+            dto.linkToInvoice || false,
+            Number(dto.idInvoice),
             dto.id,
         )
     }

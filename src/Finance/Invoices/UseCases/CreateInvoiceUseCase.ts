@@ -21,10 +21,8 @@ export default class CreateInvoiceUseCase {
                 const lastDueDate = lastInvoice.getDueDate();
                 const nextClosingDateDt = DateTime.fromISO(lastClosingDate).plus({ months: 1 });
                 const nextDueDateDt = DateTime.fromISO(lastDueDate).plus({ months: 1 });
-
                 closingDate = nextClosingDateDt.toISODate() as string;
                 dueDate = nextDueDateDt.toISODate() as string;
-
             } else {
                 const now = DateTime.now();
                 let closingDateDt = now.set({ day: invoiceSettings.closingDate });
@@ -50,7 +48,8 @@ export default class CreateInvoiceUseCase {
                 closingDate,
                 dueDate,
                 invoiceSettings.idAccount,
-                invoiceSettings.nameAccount
+                invoiceSettings.nameAccount,
+                undefined,
             );
 
             await this.repository.createInvoice(entity);

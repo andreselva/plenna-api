@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import PeriodoDTO from 'src/DTOs/PeriodoDTO';
 import { InvoicesService } from './invoices.service';
 import InvoiceSettingsDTO from './DTOs/invoice.settings.dto';
@@ -58,27 +58,10 @@ export class InvoicesController {
         };
     }
 
-    @Get('/related')
-    searchForRelatedOpenInvoices() {
-        return {
-            invoices: [
-                {
-                    id: 4,
-                    name: 'faturinha',
-                    invoiceDueDate: '2023-02-28',
-                    closingDate: '2023-03-05',
-                    paymentDate: null,
-                    status: 'Pendente',
-                    value: 1892,
-                    expenses: [
-                        { id: 25, name: 'Despesa Fixa A', value: 200, dueDate: '2023-02-10' },
-                        { id: 29, name: 'Compra Online M', value: 350, dueDate: '2023-02-15' },
-                        { id: 34, name: 'Supermercado N', value: 450, dueDate: '2023-02-20' },
-                        { id: 34, name: 'Restaurante O', value: 150, dueDate: '2023-02-22' },
-                        { id: 56, name: 'Assinatura Streaming P', value: 50, dueDate: '2023-02-05' },
-                    ]
-                }
-            ]
+    @Get('/related/:idBankAccount')
+    async  searchForRelatedOpenInvoices(@Param('idBankAccount') idBankAccount: string) {
+        if (idBankAccount && idBankAccount.length > 0) {    
+            return await this.service.getRelatedInvoicesIdBankAccount(idBankAccount);   
         }
     }
 

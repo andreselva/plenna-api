@@ -25,7 +25,6 @@ export default class BankAccountsController {
 
     @Put(':id')
     async updateBankAccount(@Param('id') id: string, @Body() bankAccount: BankAccountDTO) {
-        console.log(bankAccount);
         return await this.service.updateBankAccount(id, bankAccount);
     }
 }

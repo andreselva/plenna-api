@@ -21,7 +21,6 @@ export class ExpensesController {
         @Body() expense: ExpenseDTO,
         @Headers('x-periodo') periodo: string
     ) {
-        console.log(expense);
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         return await this.service.createExpense(expense, newPeriodo);
     }
@@ -49,7 +48,6 @@ export class ExpensesController {
         @Body() expense: ExpenseDTO,
         @Headers('x-periodo') periodo: string
     ) {
-        console.log(expense);
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         return await this.service.updateExpense(id, expense, newPeriodo);
     }

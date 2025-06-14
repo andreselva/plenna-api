@@ -3,6 +3,7 @@ import Invoice from "./Entity/invoice";
 import { Injectable } from "@nestjs/common";
 import InvoiceRowDTO from "./DTOs/invoice.row.dto";
 import { FormatDate } from "src/Shared/Utils/FormatDate";
+import { DateTime } from 'luxon';
 
 @Injectable()
 export default class InvoicesRepository {
@@ -49,5 +50,14 @@ export default class InvoicesRepository {
         } catch (err) {
             throw new Error(`Erro ao buscar fatura: ${err}`);
         }
+    }
+
+    async getRelatedInvoiceBankAccount(idBankAccount: number) {
+        const query = "SELECT * FROM invoices WHERE idBankAccount = ? AND status = 'pending'";
+        const result = await this.database.select(query, [idBankAccount]);
+        if (result && result.length > 0) {
+            return result;
+        }
+        return null;
     }
 }

@@ -4,15 +4,15 @@ export default class Invoice {
     private idBankAccount: number;
     private name: string;
     private id?: number;
-    private status?: string;
+    private status?: string = 'pending';
 
-    constructor(closingDate: string, dueDate: string, idBankAccount: number, name: string, id?: number) {
+    constructor(closingDate: string, dueDate: string, idBankAccount: number, name: string, id?: number, status?: string) {
         this.closingDate = closingDate;
         this.dueDate = dueDate;
         this.idBankAccount = idBankAccount;
         this.name = name;
         this.id = id;
-        this.status = 'pending'
+        this.status = status
     }
 
     getClosingDate() {

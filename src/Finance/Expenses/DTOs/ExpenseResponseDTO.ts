@@ -10,7 +10,9 @@ export class ExpenseResponseDTO {
         public readonly typeOfInstallments: string,
         public readonly sourceAccountId: number,
         public readonly hasInstallments: boolean,
-        public readonly installments: number
+        public readonly installments: number,
+        public readonly linkToInvoice: boolean,
+        public readonly idInvoice: number
     ) {
     }
 }

@@ -50,6 +50,7 @@ export default class CreateInvoiceUseCase {
                 invoiceSettings.idAccount,
                 invoiceSettings.nameAccount,
                 undefined,
+                'pending'
             );
 
             await this.repository.createInvoice(entity);

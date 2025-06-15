@@ -8,12 +8,14 @@ import { ExpenseResponseDTO } from "../DTOs/ExpenseResponseDTO";
 import { InstallmentUpdater } from "src/Finance/InstallmentsServices/InstallmentsUpdater";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
+import AssociateExpensesToInvoiceUseCase from "src/Finance/Invoices/UseCases/AssociateExpensesToInvoice";
 
 @Injectable()
 export class UpdateExpense {
     constructor(
         private readonly repository: ExpensesRepository,
         private readonly getExpensesUseCase: GetExpenses,
+        private readonly associateExpensesToInvoices: AssociateExpensesToInvoiceUseCase
     ) { }
 
     async execute(id: string, expense: ExpenseDTO, periodo: PeriodoDTO) {
@@ -52,6 +54,11 @@ export class UpdateExpense {
                     },
                     updateFn: (item) => this.repository.updateExpense(item)
                 });
+
+                //Associa à fatura
+                if (expense.linkToInvoice) {
+                    await this.associateExpensesToInvoices.associate(installments);
+                }
 
                 if (!results || (results.length > 0)) {
                     const result = await this.repository.updateExpense(entity);

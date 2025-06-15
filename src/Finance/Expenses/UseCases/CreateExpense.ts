@@ -38,6 +38,7 @@ export class CreateExpense {
                 expensesCreated.push(await this.repository.createExpense(otherInstallments[i]));
             }
 
+            //Associa à fatura
             if (expense.linkToInvoice) {
                 await this.associateExpensesToInvoiceUC.associate(expensesCreated);
             }

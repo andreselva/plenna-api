@@ -27,7 +27,6 @@ export default class AssociateExpensesToInvoiceUseCase {
 
         // Processa cada grupo de despesas separadamente
         for (const [idCreditCard, singleCardExpenses] of expensesByCreditCard.entries()) {
-            // Envolve o processamento de cada cartão em um try/catch para isolar erros
             try {
                 await this.processExpensesForCard(idCreditCard, singleCardExpenses);
             } catch (err) {

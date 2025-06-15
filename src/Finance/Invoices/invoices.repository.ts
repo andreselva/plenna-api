@@ -3,6 +3,7 @@ import Invoice from "./Entity/invoice";
 import { Injectable } from "@nestjs/common";
 import InvoiceRowDTO from "./DTOs/invoice.row.dto";
 import DateHelper from "src/Shared/Utils/DateHelper";
+import { Expense } from "../Expenses/Entity/Expense";
 
 @Injectable()
 export default class InvoicesRepository {
@@ -16,9 +17,10 @@ export default class InvoicesRepository {
             const result = await this.database.execute(
                 query, [invoice.getIdBankAccount(), invoice.getName(), invoice.getClosingDate(), invoice.getDueDate(), invoice.getStatus()]
             );
-            if (result.affectedRows > 0) {
+            if (result.affectedRows > 0 && result.insertId > 0) {
+                invoice.setId(result.insertId);
                 return {
-                    isSuccess: true
+                    isSuccess: true, createdInvoice: invoice
                 }
             }
             if (result.affectedRows <= 0) {
@@ -58,5 +60,19 @@ export default class InvoicesRepository {
             return result;
         }
         return null;
+    }
+
+    async updateExpense(expense: Expense) {
+        try {
+            await this.database.execute("UPDATE expense SET idInvoice = ? WHERE id = ?", [expense.getIdInvoice(), expense.getId()]);
+        } catch (err) {
+            throw new Error("Erro ao atualizar despesa na fatura! Erro: " + err);
+        }
+    }
+
+    async getSettingsInvoice(idBankAccount: number) {
+        const query = "SELECT closingDate, dueDate, id as idAccount, name as nameAccount FROM bank_account WHERE id = ? LIMIT 1";
+        const result = await this.database.select(query, [idBankAccount]);
+        return result[0];
     }
 }

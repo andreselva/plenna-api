@@ -60,6 +60,8 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
                         this.entity.getTypeOfInstallments(),
                         this.entity.getId(), // Salvamos o id da conta de origem
                         this.entity.getHasInstallments(),
+                        this.entity.getLinkToInvoice(),
+                        this.entity.getIdInvoice(),
                         0 // Id é zero ao gerar a parcela
                     ) as T;
                 }

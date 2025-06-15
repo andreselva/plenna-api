@@ -89,6 +89,10 @@ export class Expense {
         }
     }
 
+    setIdInvoice(id: number) {
+        this.idInvoice = id;
+    }
+
     static fromDTO(dto: ExpenseDTO): Expense {
         return new Expense(
             dto.name,

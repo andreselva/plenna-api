@@ -53,7 +53,7 @@ export default class CreateInvoiceUseCase {
                 'pending'
             );
 
-            await this.repository.createInvoice(entity);
+            return this.repository.createInvoice(entity);
         } catch (err) {
             console.error("Erro ao criar a fatura:", err);
             throw new Error("Ocorreu um erro ao tentar criar a fatura.");

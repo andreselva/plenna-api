@@ -38,4 +38,8 @@ export default class Invoice {
     getStatus() {
         return this.status;
     }
+
+    setId(id: number) {
+        this.id = id;
+    }
 }

@@ -4,5 +4,6 @@ CREATE TABLE invoices (
     name VARCHAR(20),
     closingDate DATE,
     dueDate DATE,
+    paymentDate DATE DEFAULT NULL,
     status VARCHAR(20)
 );

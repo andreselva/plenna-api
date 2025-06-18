@@ -1,3 +1,5 @@
+import { Expense } from "src/Finance/Expenses/Entity/Expense";
+
 export default class Invoice {
     private closingDate: string;
     private dueDate: string;
@@ -5,14 +7,18 @@ export default class Invoice {
     private name: string;
     private id?: number;
     private status?: string = 'pending';
+    private paymentDate?: string | null;
+    private expenses: Expense[];
+    private value: number;
 
-    constructor(closingDate: string, dueDate: string, idBankAccount: number, name: string, id?: number, status?: string) {
+    constructor(closingDate: string, dueDate: string, idBankAccount: number, name: string, id?: number, status?: string, paymentDate?: string | null) {
         this.closingDate = closingDate;
         this.dueDate = dueDate;
         this.idBankAccount = idBankAccount;
         this.name = name;
         this.id = id;
         this.status = status
+        this.paymentDate = paymentDate;
     }
 
     getClosingDate() {
@@ -39,7 +45,31 @@ export default class Invoice {
         return this.status;
     }
 
+    getPaymentDate() {
+        return this.paymentDate;
+    }
+
+    getExpenses() {
+        return this.expenses;
+    }
+
+    getValue() {
+        return this.value;
+    }
+
     setId(id: number) {
         this.id = id;
+    }
+
+    setPaymentDate(date: string) {
+        this.paymentDate = date
+    }
+
+    setExpenses(expenses: Expense[] | []) {
+        this.expenses = expenses;
+    }
+
+    setValue(value: number) {
+        this.value = value;
     }
 }

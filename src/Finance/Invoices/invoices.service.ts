@@ -18,4 +18,8 @@ export class InvoicesService {
         return await this.getInvoicesUC.getRelatedInvoiceBankAccount(Number(idBankAccount));
     }
 
+    async getInvoices() {
+        return await this.getInvoicesUC.get();
+    }
+
 }

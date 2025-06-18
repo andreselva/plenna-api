@@ -60,7 +60,6 @@ export default class AssociateExpensesToInvoiceUseCase {
                     const newInvoice = createResult.createdInvoice;
                     availableInvoices.set(newInvoice.getDueDate(), newInvoice);
                     invoiceToExpense = newInvoice;
-
                 } else {
                     this.logger.error(`A criação da fatura para a data ${dueDate} falhou e não retornou um resultado válido.`);
                 }

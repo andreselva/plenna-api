@@ -4,5 +4,6 @@ export default class InvoiceRowDTO {
     name: string
     closingDate: string;
     dueDate: string;
-    status: string
+    paymentDate: string;
+    status: string;
 }

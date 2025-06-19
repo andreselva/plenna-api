@@ -13,7 +13,7 @@ export class InvoicesController {
     async getInvoices(@Headers('x-periodo') periodo: string) {
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         console.log(newPeriodo);
-        const invoices = await this.service.getInvoices();
+        const invoices = await this.service.getInvoices(newPeriodo);
 
         if (invoices) {
             return { invoices: invoices };

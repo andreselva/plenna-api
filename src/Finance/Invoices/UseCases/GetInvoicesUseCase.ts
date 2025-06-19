@@ -3,6 +3,7 @@ import InvoiceRowDTO from "../DTOs/invoice.row.dto";
 import Invoice from "../Entity/invoice";
 import InvoicesRepository from "../invoices.repository";
 import DateHelper from "src/Shared/Utils/DateHelper";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Injectable()
 export default class GetInvoicesUseCase {
@@ -12,9 +13,9 @@ export default class GetInvoicesUseCase {
         private readonly repository: InvoicesRepository
     ) { }
 
-    async get(): Promise<Invoice[]> {
+    async get(periodo: PeriodoDTO): Promise<Invoice[]> {
         try {
-            const invoices = await this.repository.getInvoices();
+            const invoices = await this.repository.getInvoices(periodo);
             if (invoices && invoices.length > 0) {
                 for (const invoice of invoices) {
                     const expenses = await this.repository.getRelatedExpenses(invoice.getId() ?? 0);

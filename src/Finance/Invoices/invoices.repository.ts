@@ -5,6 +5,7 @@ import InvoiceRowDTO from "./DTOs/invoice.row.dto";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import { Expense } from "../Expenses/Entity/Expense";
 import { ExpenseRowDTO } from "../Expenses/DTOs/ExpenseRowDTO";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 // import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Injectable()
@@ -13,10 +14,10 @@ export default class InvoicesRepository {
         private readonly database: MySQLDatabase
     ) { }
 
-    async getInvoices(): Promise<Invoice[]> {
+    async getInvoices(periodo: PeriodoDTO): Promise<Invoice[]> {
         try {
-            const query = "SELECT * FROM invoices";
-            const rows = await this.database.select(query) as InvoiceRowDTO[];
+            const query = "SELECT * FROM invoices WHERE dueDate >= ? AND dueDate <= ?";
+            const rows = await this.database.select(query, [periodo.start, periodo.end]) as InvoiceRowDTO[];
             if (rows && rows.length > 0) {
                 return rows.map(row => new Invoice(
                     DateHelper.toISODate(row.closingDate) as string,

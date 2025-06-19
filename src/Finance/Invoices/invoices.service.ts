@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import CreateInvoiceUseCase from './UseCases/CreateInvoiceUseCase';
 import InvoiceSettingsDTO from './DTOs/invoice.settings.dto';
 import GetInvoicesUseCase from './UseCases/GetInvoicesUseCase';
+import PeriodoDTO from 'src/DTOs/PeriodoDTO';
 
 @Injectable()
 export class InvoicesService {
@@ -18,8 +19,8 @@ export class InvoicesService {
         return await this.getInvoicesUC.getRelatedInvoiceBankAccount(Number(idBankAccount));
     }
 
-    async getInvoices() {
-        return await this.getInvoicesUC.get();
+    async getInvoices(periodo: PeriodoDTO) {
+        return await this.getInvoicesUC.get(periodo);
     }
 
 }

@@ -3,6 +3,7 @@ import { BillsDueDTO } from "./DTOs/BillsDueDTO";
 import { ExpenseRowDTO } from "./DTOs/ExpenseRowDTO";
 import { Injectable } from "@nestjs/common";
 import DashboardArgs from "../Args/DashboardArgs";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export class BillsDueRepository {
@@ -21,7 +22,7 @@ export class BillsDueRepository {
 
         return rows.map((row) => new BillsDueDTO(
             row.name,
-            row.invoiceDueDate,
+            DateHelper.toISODate(row.invoiceDueDate) as string,
             row.value
         ));
     }

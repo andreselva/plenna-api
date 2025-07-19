@@ -17,20 +17,9 @@ export default class GetInvoicesUseCase {
         try {
             const invoices = await this.repository.getInvoices(periodo);
             if (invoices && invoices.length > 0) {
-                for (const invoice of invoices) {
-                    const expenses = await this.repository.getRelatedExpenses(invoice.getId() ?? 0);
-                    if (expenses && expenses.length > 0) {
-                        const totalValue = expenses.reduce((acc, expense) => acc + expense.getValue(), 0);
-                        invoice.setExpenses(expenses);
-                        invoice.setValue(totalValue);
-                    } else {
-                        invoice.setExpenses([]);
-                        invoice.setValue(0);
-                    }
-                }
-                return invoices;
+                return await this.setExpensesAndPayments(invoices);
             }
-
+            this.logger.warn("Nenhuma fatura encontrada no período especificado.");
             return [];
         } catch (err) {
             this.logger.error("Erro capturado ao buscar as faturas! Erro: " + err);
@@ -59,5 +48,34 @@ export default class GetInvoicesUseCase {
         });
 
         return { invoices: mappedInvoices };
+    }
+
+    private async setExpensesAndPayments(invoices: Invoice[]): Promise<Invoice[]> {
+        try {
+            for (const invoice of invoices) {
+                const expenses = await this.repository.getRelatedExpenses(invoice.getId());
+                const payments = await this.repository.getPayments(invoice.getId());
+    
+                if (expenses && expenses.length > 0) {
+                    const totalValue = expenses.reduce((acc, expense) => acc + expense.getValue(), 0);
+                    invoice.setExpenses(expenses);
+                    invoice.setValue(totalValue);
+                } else {
+                    invoice.setExpenses([]);
+                    invoice.setValue(0);
+                }
+    
+                if (payments && payments.length > 0) {
+                    const totalPaid = payments.reduce((acc, payment) => acc + payment.getValue(), 0);
+                    invoice.setTotalPaid(totalPaid);
+                } else {
+                    invoice.setTotalPaid(0);
+                }
+            }
+            return invoices;
+        } catch (err) {
+            this.logger.error("Erro ao buscar despesas e pagamentos relacionados às faturas! Erro: " + err);
+            throw new Error("Erro: " + err);
+        }
     }
 }

@@ -15,7 +15,6 @@ export default class PaymentRegister {
             payment.paymentInformation.date,
             payment.invoice.expenses,
             payment.invoice.id,
-
         );
         return await this.paymentRepository.save(entity);
     }

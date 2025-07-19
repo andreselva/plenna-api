@@ -1,4 +1,5 @@
 import { Expense } from "src/Finance/Expenses/Entity/Expense";
+import { InvoiceStatus } from "../Types/invoice.status.type";
 
 export default class Invoice {
     private closingDate: string;
@@ -6,16 +7,17 @@ export default class Invoice {
     private idBankAccount: number;
     private name: string;
     private id?: number;
-    private status?: string = 'pending';
+    private status?: InvoiceStatus = 'pending';
     private paymentDate?: string | null;
     private expenses: Expense[];
     private value: number;
+    private totalPaid: number = 0;
 
-    public static STATUS_PAID = 'paid';
-    public static STATUS_PENDING = 'pending';
-    public static STATUS_PARCIAL = 'parcial';
+    public static readonly STATUS_PAID: InvoiceStatus = 'paid';
+    public static readonly STATUS_PENDING: InvoiceStatus = 'pending';
+    public static readonly STATUS_PARCIAL: InvoiceStatus = 'parcial';
 
-    constructor(closingDate: string, dueDate: string, idBankAccount: number, name: string, id?: number, status?: string, paymentDate?: string | null) {
+    constructor(closingDate: string, dueDate: string, idBankAccount: number, name: string, id?: number, status?: InvoiceStatus, paymentDate?: string | null) {
         this.closingDate = closingDate;
         this.dueDate = dueDate;
         this.idBankAccount = idBankAccount;
@@ -42,6 +44,9 @@ export default class Invoice {
     }
 
     getId() {
+        if (!this.id) {
+            return 0;
+        }
         return this.id;
     }
 
@@ -77,7 +82,15 @@ export default class Invoice {
         this.value = value;
     }
 
-    setStatus(status: string) {
+    setStatus(status: InvoiceStatus) {
         this.status = status;
+    }
+
+    getTotalPaid() {
+        return this.totalPaid;
+    }
+    
+    setTotalPaid(totalPaid: number) {
+        this.totalPaid = totalPaid;
     }
 }

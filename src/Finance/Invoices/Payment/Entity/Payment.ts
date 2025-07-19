@@ -6,7 +6,7 @@ export default class Payment {
     private id?: number;
 
     constructor(value: number, paymentDate: string, expenses: object[], idInvoice?: number, id?: number) {
-        this.value = value;
+        this.value = Number(value);
         this.paymentDate = paymentDate;
         this.expenses = expenses;
         this.idInvoice = idInvoice;
@@ -21,7 +21,10 @@ export default class Payment {
         this.id = id;
     }
 
-    public getIdInvoice(): number | undefined {
+    public getIdInvoice(): number {
+        if (!this.idInvoice) {
+            return 0;
+        }
         return this.idInvoice;
     }
 

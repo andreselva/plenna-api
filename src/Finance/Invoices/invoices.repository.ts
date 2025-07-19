@@ -149,4 +149,47 @@ export default class InvoicesRepository {
             throw new Error("Erro ao buscar pagamentos relacionados à fatura! Erro: " + err);
         }
     }
+
+    async getById(id: number): Promise<Invoice > {
+        try {
+            const query = "SELECT * FROM invoices WHERE id = ?";
+            const result = await this.database.select(query, [id]) as InvoiceRowDTO[];
+            if (result && result.length > 0) {
+                const row = result[0];
+                return new Invoice(
+                    DateHelper.toISODate(row.closingDate) as string,
+                    DateHelper.toISODate(row.dueDate) as string,
+                    row.idBankAccount,
+                    row.name,
+                    row.id,
+                    row.status,
+                    DateHelper.toISODate(row.paymentDate)
+                );
+            }
+            throw new Error("Invoice not found");
+        } catch (err) {
+            throw new Error("Erro ao buscar fatura por ID! Erro: " + err);
+        }
+    }
+
+    async update(invoice: Invoice): Promise<Invoice> {
+        try {
+            const query = "UPDATE invoices SET idBankAccount = ?, name = ?, closingDate = ?, dueDate = ?, status = ? WHERE id = ?";
+            const result = await this.database.execute(query, [
+                invoice.getIdBankAccount(),
+                invoice.getName(),
+                invoice.getClosingDate(),
+                invoice.getDueDate(),
+                invoice.getStatus(),
+                invoice.getId()
+            ]);
+            if (result.affectedRows > 0) {
+                return invoice;
+            } else {
+                throw new Error("Fatura não encontrada ou não atualizada.");
+            }
+        } catch (err) {
+            throw new Error("Erro ao atualizar fatura! Erro: " + err);
+        }
+    }
 }

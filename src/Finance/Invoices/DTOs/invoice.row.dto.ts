@@ -1,3 +1,5 @@
+import { InvoiceStatus } from "../Types/invoice.status.type";
+
 export default class InvoiceRowDTO {
     id: number
     idBankAccount: number
@@ -5,5 +7,5 @@ export default class InvoiceRowDTO {
     closingDate: string;
     dueDate: string;
     paymentDate: string;
-    status: string;
+    status: InvoiceStatus;
 }

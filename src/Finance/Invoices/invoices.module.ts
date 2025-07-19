@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import { InvoicesController } from './invoices.controller';
 import InvoicesRepository from './invoices.repository';
@@ -7,17 +7,19 @@ import CreateInvoiceUseCase from './UseCases/CreateInvoiceUseCase';
 import GetInvoicesUseCase from './UseCases/GetInvoicesUseCase';
 import AssociateExpensesToInvoiceUseCase from './UseCases/AssociateExpensesToInvoice';
 import { PaymentModule } from './Payment/payment.module';
+import UpdateStatusInvoice from './UseCases/UpdateStatusInvoice';
 @Module({
-  imports: [PaymentModule],
+  imports: [forwardRef(() => PaymentModule)],
   providers: [
     InvoicesService,
     InvoicesRepository,
     CreateInvoiceUseCase,
     GetInvoicesUseCase,
+    UpdateStatusInvoice,
     AssociateExpensesToInvoiceUseCase,
     MySQLDatabase],
   controllers: [InvoicesController],
-  exports: [AssociateExpensesToInvoiceUseCase]
+  exports: [AssociateExpensesToInvoiceUseCase, InvoicesService]
 
 })
 export class InvoicesModule { }

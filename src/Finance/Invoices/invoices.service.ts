@@ -8,7 +8,7 @@ import PeriodoDTO from 'src/DTOs/PeriodoDTO';
 export class InvoicesService {
     constructor(
         private readonly createInvoiceUC: CreateInvoiceUseCase,
-        private readonly getInvoicesUC: GetInvoicesUseCase
+        private readonly getInvoicesUC: GetInvoicesUseCase,
     ) { }
 
     async createInvoice(invoiceSettings: InvoiceSettingsDTO) {
@@ -22,5 +22,4 @@ export class InvoicesService {
     async getInvoices(periodo: PeriodoDTO) {
         return await this.getInvoicesUC.get(periodo);
     }
-
 }

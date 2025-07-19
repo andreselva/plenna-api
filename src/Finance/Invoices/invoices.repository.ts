@@ -6,7 +6,8 @@ import DateHelper from "src/Shared/Utils/DateHelper";
 import { Expense } from "../Expenses/Entity/Expense";
 import { ExpenseRowDTO } from "../Expenses/DTOs/ExpenseRowDTO";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
-// import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import Payment from "./Payment/Entity/Payment";
+import PaymentRowDTO from "./Payment/DTOs/PaymentRowDTO";
 
 @Injectable()
 export default class InvoicesRepository {
@@ -129,6 +130,23 @@ export default class InvoicesRepository {
         } catch (err) {
             throw new Error("Ocorreu um erro ao buscar as despesas relacionadas à fatura! Erro: " + err);
         }
+    }
 
+    async getPayments(idInvoice: number) {
+        try {
+            const query = "SELECT * FROM payment WHERE id_invoice = ?";
+            const result = await this.database.select(query, [idInvoice]) as PaymentRowDTO[];
+            if (result && result.length > 0) {
+                return result.map(payment => new Payment(
+                    payment.value,
+                    DateHelper.toISODate(payment.paymentDate) as string,
+                    [],
+                    payment.idInvoice,
+                    payment.id
+                ));
+            }
+        } catch (err) {
+            throw new Error("Erro ao buscar pagamentos relacionados à fatura! Erro: " + err);
+        }
     }
 }

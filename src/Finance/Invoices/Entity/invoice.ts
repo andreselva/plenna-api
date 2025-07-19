@@ -11,6 +11,10 @@ export default class Invoice {
     private expenses: Expense[];
     private value: number;
 
+    public static STATUS_PAID = 'paid';
+    public static STATUS_PENDING = 'pending';
+    public static STATUS_PARCIAL = 'parcial';
+
     constructor(closingDate: string, dueDate: string, idBankAccount: number, name: string, id?: number, status?: string, paymentDate?: string | null) {
         this.closingDate = closingDate;
         this.dueDate = dueDate;
@@ -71,5 +75,9 @@ export default class Invoice {
 
     setValue(value: number) {
         this.value = value;
+    }
+
+    setStatus(status: string) {
+        this.status = status;
     }
 }

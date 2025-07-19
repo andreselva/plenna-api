@@ -5,5 +5,5 @@ CREATE TABLE invoices (
     closingDate DATE,
     dueDate DATE,
     paymentDate DATE DEFAULT NULL,
-    status VARCHAR(20)
+    status status ENUM('paid', 'pending', 'parcial')
 );

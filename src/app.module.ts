@@ -89,7 +89,7 @@ const repositories = [
     }),
     AuthModule,
     UsersModule,
-    InvoicesModule
+    InvoicesModule,
   ],
   controllers: [
     AppController,

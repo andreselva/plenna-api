@@ -9,6 +9,7 @@ export default class CreditCardStatementsRepository {
         private readonly database: MySQLDatabase
     ) { }
 
+    //Atualmente em desuso, pois o serviço de faturas já retorna as despesas relacionadas
     async getExpenses(args: DashboardArgs): Promise<CreditCardStatementsDTO[]> {
         const query = `SELECT 
                             SUM(e.value) AS value, ba.name AS card

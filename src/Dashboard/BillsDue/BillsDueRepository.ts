@@ -17,6 +17,7 @@ export class BillsDueRepository {
                         FROM
                             expense
                         WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?
+                        AND  (idCreditCard <= 0 OR idCreditCard is null OR idCreditCard = "")
                         ORDER BY invoiceDueDate`;
         const rows = await this.database.select(query, [args.startDate, args.endDate]) as ExpenseRowDTO[];
 

@@ -79,7 +79,7 @@ export default class InvoicesRepository {
     }
 
     async getRelatedInvoiceBankAccount(idBankAccount: number) {
-        const query = "SELECT * FROM invoices WHERE idBankAccount = ? AND status = 'pending'";
+        const query = "SELECT * FROM invoices WHERE idBankAccount = ?";
         const result = await this.database.select(query, [idBankAccount]);
         if (result && result.length > 0) {
             return result;

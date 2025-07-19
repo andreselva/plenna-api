@@ -1,24 +1,28 @@
 import { Injectable } from "@nestjs/common";
 import CreditCardStatementsChartConfig from "./ChartConfig/CreditCardStatementsChartConfig";
-import CreditCardStatementsRepository from "./CreditCardStatementsRepository";
 import DashboardCreditCardDatasetDTO from "./DTOs/DashboardCreditCardDatasetDTO";
 import DashboardCreditCardStatementsDTO from "./DTOs/DashboardCreditCardStatementsDTO";
 import DashboardArgs from "../Args/DashboardArgs";
+import { InvoicesService } from "src/Finance/Invoices/invoices.service";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Injectable()
 export default class CreditCardStatementsService {
     constructor(
-        private readonly repository: CreditCardStatementsRepository
+        private readonly invoicesService: InvoicesService
     ) { }
 
     async getData(args: DashboardArgs) {
-        const expenses = await this.repository.getExpenses(args);
+        const periodo = new PeriodoDTO();
+        periodo.start = args.startDate;
+        periodo.end = args.endDate;
+        const invoices = await this.invoicesService.getInvoices(periodo);
         const labels: string[] = [];
         const values: number[] = [];
 
-        expenses.forEach((expense) => {
-            labels.push(expense.card);
-            values.push(expense.value);
+        invoices.forEach((invoice) => {
+            labels.push(invoice.getName());
+            values.push(invoice.getValue());
         });
 
         const data = new DashboardCreditCardStatementsDTO(

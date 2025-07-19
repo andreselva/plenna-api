@@ -10,5 +10,7 @@ export class ExpenseDTO {
     sourceAccountId: number;
     hasInstallments: boolean;
     updateInstallments: boolean;
+    linkToInvoice: boolean;
+    idInvoice: number;
     id?: number;
 }

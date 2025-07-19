@@ -9,5 +9,7 @@ export class ExpenseRowDTO {
     typeOfInstallments: string;
     sourceAccountId: number;
     hasInstallments: boolean;
+    linkToInvoice: boolean;
+    idInvoice: number;
     id: number;
 }

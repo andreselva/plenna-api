@@ -13,7 +13,23 @@ export default class CreateBankAccount {
         if (!bankAccount.icon) {
             bankAccount.icon = "";
         }
-        const entity = new BankAccount(bankAccount.name, bankAccount.icon);
+
+        if (!bankAccount.dueDate) {
+            bankAccount.dueDate = "";
+        }
+
+        if (bankAccount.closingDate) {
+            bankAccount.closingDate = "";
+        }
+
+        const entity = new BankAccount(
+            bankAccount.name,
+            bankAccount.generateInvoice,
+            bankAccount.icon,
+            bankAccount.dueDate,
+            bankAccount.closingDate
+        );
+        
         return await this.repository.createBankAccount(entity);
     }
 }

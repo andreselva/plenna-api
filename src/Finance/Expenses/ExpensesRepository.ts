@@ -3,11 +3,11 @@ import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import { ExpenseRowDTO } from "./DTOs/ExpenseRowDTO";
 import { Expense } from "./Entity/Expense";
 import { ExpenseResponseDTO } from "./DTOs/ExpenseResponseDTO";
-import { FormatDate } from "src/Shared/Utils/FormatDate";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
-export class ExpensesRepository {   
+export class ExpensesRepository {
     constructor(
         private readonly database: MySQLDatabase,
     ) { }
@@ -28,11 +28,13 @@ export class ExpensesRepository {
             Number(row.sourceAccountId),
             Boolean(row.hasInstallments),
             Number(row.installments),
+            Boolean(row.linkToInvoice),
+            Number(row.idInvoice)
         ));
     }
 
     async createExpense(expense: Expense): Promise<Expense> {
-        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard, installments, typeOfInstallments, sourceAccountId, hasInstallments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard, installments, typeOfInstallments, sourceAccountId, hasInstallments, linkToInvoice, idInvoice) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         const result = await this.database.execute(
             query,
             [
@@ -45,7 +47,9 @@ export class ExpensesRepository {
                 expense.getInstallments(),
                 expense.getTypeOfInstallments(),
                 expense.getSourceAccountId(),
-                expense.getHasInstallments()
+                expense.getHasInstallments(),
+                expense.getLinkToInvoice(),
+                expense.getIdInvoice()
             ]
         );
 
@@ -75,7 +79,7 @@ export class ExpensesRepository {
             throw new Error('Expense ID is required for update');
         }
 
-        const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ?, idCreditCard = ? WHERE id = ?";
+        const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ?, idCreditCard = ?, linkToInvoice = ?, idInvoice = ? WHERE id = ?";
         const result = await this.database.execute(
             query,
             [
@@ -85,6 +89,8 @@ export class ExpensesRepository {
                 expense.getInvoiceDueDate(),
                 expense.getIdCategory(),
                 expense.getIdCreditCard(),
+                expense.getLinkToInvoice(),
+                expense.getIdInvoice(),
                 expense.getId()
             ]
         );
@@ -101,7 +107,9 @@ export class ExpensesRepository {
                 expense.getTypeOfInstallments(),
                 expense.getSourceAccountId(),
                 expense.getHasInstallments(),
-                expense.getInstallments()
+                expense.getInstallments(),
+                expense.getLinkToInvoice(),
+                expense.getIdInvoice()
             );
         }
         throw new Error('Failed to update category');
@@ -117,20 +125,22 @@ export class ExpensesRepository {
         }
 
         query += " ORDER BY id ASC";
-        
+
         const rows = await this.database.select(query, params) as ExpenseRowDTO[];
 
         return rows.map(row => new Expense(
             String(row.name),
             String(row.description),
             Number(row.value),
-            FormatDate.formatToYYYYMMDD(row.invoiceDueDate),
+            DateHelper.toISODate(row.invoiceDueDate) as string,
             Number(row.idCategory),
             Number(row.idCreditCard),
             Number(row.installments),
             String(row.typeOfInstallments),
             Number(row.sourceAccountId),
             Boolean(row.hasInstallments),
+            Boolean(row.linkToInvoice),
+            Number(row.idInvoice),
             Number(row.id)
         ))
     }

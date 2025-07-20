@@ -4,10 +4,10 @@ import { Injectable } from "@nestjs/common";
 import InvoiceRowDTO from "./DTOs/invoice.row.dto";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import { Expense } from "../Expenses/Entity/Expense";
-import { ExpenseRowDTO } from "../Expenses/DTOs/ExpenseRowDTO";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import Payment from "./Payment/Entity/Payment";
 import PaymentRowDTO from "./Payment/DTOs/PaymentRowDTO";
+import { ExpenseDTO } from "../Expenses/DTOs/ExpenseDTO";
 
 @Injectable()
 export default class InvoicesRepository {
@@ -107,24 +107,12 @@ export default class InvoicesRepository {
                 throw new Error("Erro ao buscar despesas relacionadas à fatura! ID zero recebido: " + idInvoice);
             }
             const query = "SELECT * FROM expense WHERE idInvoice = ?";
-            const result = await this.database.select(query, [idInvoice]) as ExpenseRowDTO[];
+            const result = await this.database.select(query, [idInvoice]) as ExpenseDTO[];
             if (result && result.length > 0) {
-                return result.map(expense => new Expense(
-                    expense.name,
-                    expense.description,
-                    Number(expense.value),
-                    DateHelper.toISODate(expense.invoiceDueDate) as string,
-                    expense.idCategory,
-                    expense.idCreditCard,
-                    expense.installments,
-                    expense.typeOfInstallments,
-                    expense.sourceAccountId,
-                    Boolean(expense.hasInstallments),
-                    Boolean(expense.linkToInvoice),
-                    expense.idInvoice,
-                    expense.id
-                ))
-            }
+                return result.map(expense =>
+                    new Expense(expense)
+                )
+            };
 
             return [];
         } catch (err) {
@@ -150,7 +138,7 @@ export default class InvoicesRepository {
         }
     }
 
-    async getById(id: number): Promise<Invoice > {
+    async getById(id: number): Promise<Invoice> {
         try {
             const query = "SELECT * FROM invoices WHERE id = ?";
             const result = await this.database.select(query, [id]) as InvoiceRowDTO[];

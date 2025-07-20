@@ -17,12 +17,16 @@ export class ExpensesController {
     }
 
     @Post()
-    async createExpense(
-        @Body() expense: ExpenseDTO,
-        @Headers('x-periodo') periodo: string
-    ) {
-        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
-        return await this.service.createExpense(expense, newPeriodo);
+    async createExpense(@Body() expense: ExpenseDTO, @Headers('x-periodo') periodo: string) {
+        try {
+            const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+            return await this.service.createExpense(expense, newPeriodo);
+        } catch (error) {
+            return {
+                message: "Error creating expense: " + error.message,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR
+            };
+        }
     }
 
     @Delete(':id')

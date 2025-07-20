@@ -20,7 +20,7 @@ export class UpdateExpense {
 
     async execute(id: string, expense: ExpenseDTO, periodo: PeriodoDTO) {
         expense.id = Number(id);
-        const entity = Expense.fromDTO(expense);
+        const entity = new Expense(expense);
 
         if (expense.updateInstallments) {
             //Define id considerado para buscar as outras parcelas
@@ -110,8 +110,8 @@ export class UpdateExpense {
     }
 
     private async searchRelatedInstallments(expense: ExpenseDTO) {
-        if (expense.sourceAccountId && expense.sourceAccountId > 0) {
-            const consideredId = expense.sourceAccountId;
+        if (expense.sourceAccountId) {
+            const consideredId = Number(expense.sourceAccountId);
             return await this.repository.searchForRelatedInstallments(consideredId, expense.id);
         }
 

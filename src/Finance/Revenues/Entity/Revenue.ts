@@ -71,6 +71,10 @@ export default class Revenue {
         }
     }
 
+    setInvoiceDueDate(date: string) {
+        this.invoiceDueDate = date;
+    }
+
     static fromDTO(dto: RevenueDTO): Revenue {
         return new Revenue(
             dto.name,

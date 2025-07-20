@@ -21,18 +21,15 @@ export class ExpensesServices {
     }
 
     async createExpense(dto: ExpenseDTO, periodo: PeriodoDTO) {
-        if (
-            (
-                dto.typeOfInstallment === 'P'
-                && dto.installments
-                && dto.installments > 0
-            )
-            || dto.typeOfInstallment === 'F'
-        ) {
-            dto.hasInstallments = true;
-        }
+        try {
+            if ((dto.typeOfInstallment === 'P' && dto.installments && dto.installments > 0) || dto.typeOfInstallment === 'F') {
+                dto.hasInstallments = true;
+            }
 
-        return await this.createExpenseUseCase.execute(dto, periodo);
+            return await this.createExpenseUseCase.execute(dto, periodo);
+        } catch (error) {
+            throw new Error("Error creating expense: " + error.message);
+        }
     }
 
     async deleteExpense(id: string, deleteInstallments: string, sourceAccountId: string, periodo: PeriodoDTO) {

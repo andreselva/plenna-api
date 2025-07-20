@@ -4,7 +4,7 @@ import { ExpenseRowDTO } from "./DTOs/ExpenseRowDTO";
 import { Expense } from "./Entity/Expense";
 import { ExpenseResponseDTO } from "./DTOs/ExpenseResponseDTO";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
-import DateHelper from "src/Shared/Utils/DateHelper";
+import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 
 @Injectable()
 export class ExpensesRepository {
@@ -15,7 +15,6 @@ export class ExpensesRepository {
     async getExpenses(periodo: PeriodoDTO): Promise<ExpenseResponseDTO[]> {
         const query = "SELECT * FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
         const rows = await this.database.select(query, [periodo.start, periodo.end]) as ExpenseRowDTO[];
-
         return rows.map(row => new ExpenseResponseDTO(
             Number(row.id),
             String(row.name),
@@ -24,17 +23,18 @@ export class ExpensesRepository {
             row.invoiceDueDate,
             Number(row.idCategory),
             Number(row.idCreditCard),
-            String(row.typeOfInstallments),
+            String(row.typeOfInstallment),
             Number(row.sourceAccountId),
             Boolean(row.hasInstallments),
             Number(row.installments),
             Boolean(row.linkToInvoice),
-            Number(row.idInvoice)
+            Number(row.idInvoice),
+            row.status,
         ));
     }
 
     async createExpense(expense: Expense): Promise<Expense> {
-        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard, installments, typeOfInstallments, sourceAccountId, hasInstallments, linkToInvoice, idInvoice) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard, installments, typeOfInstallment, sourceAccountId, hasInstallments, linkToInvoice, idInvoice, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         const result = await this.database.execute(
             query,
             [
@@ -49,7 +49,8 @@ export class ExpensesRepository {
                 expense.getSourceAccountId(),
                 expense.getHasInstallments(),
                 expense.getLinkToInvoice(),
-                expense.getIdInvoice()
+                expense.getIdInvoice(),
+                expense.getStatus()
             ]
         );
 
@@ -79,38 +80,12 @@ export class ExpensesRepository {
             throw new Error('Expense ID is required for update');
         }
 
-        const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ?, idCreditCard = ?, linkToInvoice = ?, idInvoice = ? WHERE id = ?";
-        const result = await this.database.execute(
-            query,
-            [
-                expense.getName(),
-                expense.getDescription(),
-                expense.getValue(),
-                expense.getInvoiceDueDate(),
-                expense.getIdCategory(),
-                expense.getIdCreditCard(),
-                expense.getLinkToInvoice(),
-                expense.getIdInvoice(),
-                expense.getId()
-            ]
+        const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ?, idCreditCard = ?, linkToInvoice = ?, idInvoice = ?, status = ? WHERE id = ?";
+        const result = await this.database.execute(query, [expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getIdCreditCard(), expense.getLinkToInvoice(), expense.getIdInvoice(), expense.getStatus(), expense.getId()]
         );
 
         if (result.affectedRows > 0) {
-            return new ExpenseResponseDTO(
-                expense.getId(),
-                expense.getName(),
-                expense.getDescription(),
-                expense.getValue(),
-                expense.getInvoiceDueDate(),
-                expense.getIdCategory(),
-                expense.getIdCreditCard(),
-                expense.getTypeOfInstallments(),
-                expense.getSourceAccountId(),
-                expense.getHasInstallments(),
-                expense.getInstallments(),
-                expense.getLinkToInvoice(),
-                expense.getIdInvoice()
-            );
+            return new ExpenseResponseDTO(expense.getId(), expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getIdCreditCard(), expense.getTypeOfInstallments(), expense.getSourceAccountId(), expense.getHasInstallments(), expense.getInstallments(), expense.getLinkToInvoice(), expense.getIdInvoice(), expense.getStatus());
         }
         throw new Error('Failed to update category');
     }
@@ -118,30 +93,12 @@ export class ExpensesRepository {
     async searchForRelatedInstallments(consideredId: number, expenseId: number = 0): Promise<Expense[]> {
         let query = "SELECT * FROM expense WHERE (sourceAccountId = ? OR id = ?)";
         const params = [consideredId, consideredId];
-
         if (expenseId > 0) {
             query += " AND id >= ?";
             params.push(expenseId);
         }
-
         query += " ORDER BY id ASC";
-
-        const rows = await this.database.select(query, params) as ExpenseRowDTO[];
-
-        return rows.map(row => new Expense(
-            String(row.name),
-            String(row.description),
-            Number(row.value),
-            DateHelper.toISODate(row.invoiceDueDate) as string,
-            Number(row.idCategory),
-            Number(row.idCreditCard),
-            Number(row.installments),
-            String(row.typeOfInstallments),
-            Number(row.sourceAccountId),
-            Boolean(row.hasInstallments),
-            Boolean(row.linkToInvoice),
-            Number(row.idInvoice),
-            Number(row.id)
-        ))
+        const rows = await this.database.select(query, params) as ExpenseDTO[];
+        return rows.map(row => new Expense(row))
     }
 }

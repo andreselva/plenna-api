@@ -3,15 +3,15 @@ import Payment from "./Entity/Payment";
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 
 @Injectable()
-export default class PaymentRepository {
+export class PaymentRepository {
     constructor(
         private readonly database: MySQLDatabase
     ) { }
-    
+
     async save(payment: Payment) {
         try {
-            const query = "INSERT INTO payment (value, payment_date, id_invoice) VALUES (?, ?, ?)";
-            const values = [payment.getValue(), payment.getPaymentDate(), payment.getIdInvoice()];
+            const query = "INSERT INTO payment (value, payment_date, payable_id, payable_type) VALUES (?, ?, ?, ?)";
+            const values = [payment.getValue(), payment.getPaymentDate(), payment.getPayableId(), payment.getPayableType()];
             const result = await this.database.execute(query, values);
             if (result && result.insertId > 0) {
                 payment.setId(result.insertId);

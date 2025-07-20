@@ -120,4 +120,12 @@ export class UpdateExpense {
         }
         throw new Error("Considered ID invalid!");
     }
+
+    public async updateExpenseStatus(id: number, status: string, paymentDate: string) {
+        try {
+            await this.repository.updateStatus(id, status, paymentDate);
+        } catch (error) {
+            throw new Error(`Failed to update expense status: ${error.message}`);
+        }
+    }
 }

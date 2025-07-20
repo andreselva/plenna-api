@@ -8,15 +8,16 @@ export default class UpdateStatusInvoice {
         private readonly repository: InvoicesRepository
     ) {}
 
-    async update(invoiceId: number, invoiceValue: number) {
-        const payments = await this.repository.getPayments(invoiceId);
+    async update(invoiceId: number, paymentDate: string) {
+        const totalPayments = await this.repository.getPayments(invoiceId);
 
-        if (payments && Object.keys(payments).length > 0) {
-            const totalPaid = payments.reduce((acc, payment) => acc + payment.getValue(), 0);
+        if (totalPayments > 0) {
             const invoice = await this.repository.getById(invoiceId);
+            const invoiceValue = await this.repository.getTotalInvoiceValue(invoiceId);
 
             if (invoice) {
-                invoice.setStatus(totalPaid >= invoiceValue ? Invoice.STATUS_PAID : Invoice.STATUS_PARCIAL);
+                invoice.setStatus(totalPayments >= invoiceValue ? Invoice.STATUS_PAID : Invoice.STATUS_PARCIAL);
+                invoice.setPaymentDate(paymentDate);
                 return await this.repository.update(invoice);
             } else {
                 throw new Error("Invoice not found");

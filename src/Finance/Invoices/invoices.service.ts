@@ -25,7 +25,7 @@ export class InvoicesService {
         return await this.getInvoicesUC.get(periodo);
     }
 
-    async updateInvoiceStatus(id: number, invoiceValue: number) {
-        return await this.updateInvoiceStatusUC.update(id, invoiceValue);
+    async updateInvoiceStatus(id: number, paymentDate: string) {
+        return await this.updateInvoiceStatusUC.update(id, paymentDate);
     }
 }

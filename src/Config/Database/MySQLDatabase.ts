@@ -1,7 +1,9 @@
 import * as mysql from 'mysql2/promise';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import DatabaseConfig from './DatabaseConfig';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export default class MySQLDatabase {
     private pool: mysql.Pool;
 

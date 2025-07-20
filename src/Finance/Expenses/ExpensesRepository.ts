@@ -101,4 +101,17 @@ export class ExpensesRepository {
         const rows = await this.database.select(query, params) as ExpenseDTO[];
         return rows.map(row => new Expense(row))
     }
+
+    async updateStatus(id: number, status: string, paymentDate: string) {
+        try {
+            const query = "UPDATE expense SET status = ?, paymentDate = ? WHERE id = ?";
+            const result = await this.database.execute(query, [status, paymentDate, id]);
+
+            if (result.affectedRows === 0) {
+                throw new Error("Failed to update expense status");
+            }
+        } catch (error) {
+            throw new Error(`Failed to update expense status: ${error.message}`);
+        }
+    }
 }

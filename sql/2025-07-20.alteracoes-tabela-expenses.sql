@@ -1,0 +1,1 @@
+ALTER TABLE expense ADD COLUMN paymentDate DATE DEFAULT NULL;

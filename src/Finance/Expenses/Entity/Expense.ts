@@ -115,4 +115,8 @@ export class Expense {
     setInvoiceDueDate(date: string) {
         this.invoiceDueDate = date;
     }
+
+    setIdCreditCard(id: number) {
+        this.idCreditCard = id;
+    }
 }

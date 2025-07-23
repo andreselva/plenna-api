@@ -22,6 +22,10 @@ export class UpdateExpense {
         expense.id = Number(id);
         const entity = new Expense(expense);
 
+        if (entity.getIdInvoice() === 0) {
+            entity.setIdCreditCard(0);
+        }
+
         if (expense.updateInstallments) {
             //Define id considerado para buscar as outras parcelas
             const installments = await this.searchRelatedInstallments(expense);

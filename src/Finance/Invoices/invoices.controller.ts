@@ -12,7 +12,6 @@ export class InvoicesController {
     @Get()
     async getInvoices(@Headers('x-periodo') periodo: string) {
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
-        console.log(newPeriodo);
         const invoices = await this.service.getInvoices(newPeriodo);
 
         if (invoices) {

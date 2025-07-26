@@ -4,7 +4,6 @@ import { Expense } from "../Entity/Expense";
 import { ExpensesRepository } from "../ExpensesRepository";
 import { getChangedFields } from "src/Shared/Utils/CompareChanges";
 import DateCalculator from "src/Shared/Utils/DateCalculator";
-import { ExpenseResponseDTO } from "../DTOs/ExpenseResponseDTO";
 import { InstallmentUpdater } from "src/Finance/InstallmentsServices/InstallmentsUpdater";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
@@ -51,7 +50,7 @@ export class UpdateExpense {
 
                 //Delega a atualização das parcelas para InstallmentUpdater. InstallmentUpdater é uma função higher order,
                 //então, ela recebe o método updateExpense por parâmetro.
-                const results: ExpenseResponseDTO[] = await InstallmentUpdater<Expense, ExpenseResponseDTO>({
+                const results: Expense[] = await InstallmentUpdater<Expense, Expense>({
                     items: installments,
                     changedFields,
                     dynamicFieldProcessors: {

@@ -1,8 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
-import { ExpenseRowDTO } from "./DTOs/ExpenseRowDTO";
 import { Expense } from "./Entity/Expense";
-import { ExpenseResponseDTO } from "./DTOs/ExpenseResponseDTO";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 import { ExpenseStatus } from "./Types/expense.status.type";
@@ -13,25 +11,14 @@ export class ExpensesRepository {
         private readonly database: MySQLDatabase,
     ) { }
 
-    async getExpenses(periodo: PeriodoDTO): Promise<ExpenseResponseDTO[]> {
-        const query = "SELECT * FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
-        const rows = await this.database.select(query, [periodo.start, periodo.end]) as ExpenseRowDTO[];
-        return rows.map(row => new ExpenseResponseDTO(
-            Number(row.id),
-            String(row.name),
-            String(row.description),
-            Number(row.value),
-            row.invoiceDueDate,
-            Number(row.idCategory),
-            Number(row.idCreditCard),
-            String(row.typeOfInstallment),
-            Number(row.sourceAccountId),
-            Boolean(row.hasInstallments),
-            Number(row.installments),
-            Boolean(row.linkToInvoice),
-            Number(row.idInvoice),
-            row.status,
-        ));
+    async getExpenses(periodo: PeriodoDTO): Promise<Expense[]> {
+        try {
+            const query = "SELECT * FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
+            const rows = await this.database.select(query, [periodo.start, periodo.end]) as ExpenseDTO[];
+            return rows.map(row => new Expense(row));
+        } catch (error) {
+            throw new Error(`Failed to get expenses. Error: ${error.message}`)
+        }
     }
 
     async createExpense(expense: Expense): Promise<Expense> {
@@ -76,19 +63,23 @@ export class ExpensesRepository {
         throw new Error('Failed to delete expense');
     }
 
-    async updateExpense(expense: Expense): Promise<ExpenseResponseDTO> {
-        if (!expense.getId()) {
-            throw new Error('Expense ID is required for update');
-        }
+    async updateExpense(expense: Expense): Promise<Expense> {
+        try {
+            if (!expense.getId()) {
+                throw new Error('Expense ID is required for update');
+            }
 
-        const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ?, idCreditCard = ?, linkToInvoice = ?, idInvoice = ?, status = ? WHERE id = ?";
-        const result = await this.database.execute(query, [expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getIdCreditCard(), expense.getLinkToInvoice(), expense.getIdInvoice(), expense.getStatus(), expense.getId()]
-        );
+            const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ?, idCreditCard = ?, linkToInvoice = ?, idInvoice = ?, status = ? WHERE id = ?";
+            const result = await this.database.execute(query, [expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getIdCreditCard(), expense.getLinkToInvoice(), expense.getIdInvoice(), expense.getStatus(), expense.getId()]
+            );
 
-        if (result.affectedRows > 0) {
-            return new ExpenseResponseDTO(expense.getId(), expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getIdCreditCard(), expense.getTypeOfInstallments(), expense.getSourceAccountId(), expense.getHasInstallments(), expense.getInstallments(), expense.getLinkToInvoice(), expense.getIdInvoice(), expense.getStatus());
+            if (result.affectedRows > 0) {
+                return new Expense(expense);
+            }
+            throw new Error('Failed to update expense');
+        } catch (error) {
+            throw new Error(`Failed to update expense. Error: ${error.message}`);
         }
-        throw new Error('Failed to update category');
     }
 
     async searchForRelatedInstallments(consideredId: number, expenseId: number = 0): Promise<Expense[]> {
@@ -103,7 +94,7 @@ export class ExpensesRepository {
         return rows.map(row => new Expense(row))
     }
 
-    async updateStatus(id: number, status: ExpenseStatus, paymentDate: string|null) {
+    async updateStatus(id: number, status: ExpenseStatus, paymentDate: string | null) {
         try {
             if (paymentDate === '') {
                 paymentDate = null;

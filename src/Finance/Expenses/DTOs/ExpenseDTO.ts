@@ -16,4 +16,5 @@ export class ExpenseDTO {
     idInvoice: number | string;
     status: ExpenseStatus;
     id?: number;
+    totalPaid?: number;
 }

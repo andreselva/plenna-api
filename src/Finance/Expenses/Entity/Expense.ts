@@ -3,6 +3,7 @@ import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 import { ExpenseStatus } from "../Types/expense.status.type";
 
 export class Expense {
+    public id?: number;
     public name: string;
     public description: string;
     public value: number;
@@ -16,7 +17,7 @@ export class Expense {
     public linkToInvoice: boolean;
     public idInvoice: number;
     public status: ExpenseStatus = ExpenseStatus.PENDING;
-    public id?: number;
+    public totalPaid?: number;
 
     constructor(dto: ExpenseDTO | Expense) {
         if (dto instanceof Expense) {
@@ -37,6 +38,7 @@ export class Expense {
             this.idInvoice = dto.idInvoice !== "" ? Number(dto.idInvoice) : 0;
             this.status = Object.values(ExpenseStatus).includes(dto.status) ? dto.status : ExpenseStatus.PENDING;
             this.id = dto.id;
+            this.totalPaid = dto.totalPaid;
         }
     }
 
@@ -118,5 +120,9 @@ export class Expense {
 
     setIdCreditCard(id: number) {
         this.idCreditCard = id;
+    }
+
+    setTotalPaid(totalPaid: number) {
+        this.totalPaid = totalPaid;
     }
 }

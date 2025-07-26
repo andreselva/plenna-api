@@ -22,7 +22,7 @@ export class UpdateExpense {
         expense.id = Number(id);
         const entity = new Expense(expense);
 
-        if (entity.getIdInvoice() === 0) {
+        if (entity.getIdInvoice() === 0 && !entity.linkToInvoice) {
             entity.setIdCreditCard(0);
         }
 

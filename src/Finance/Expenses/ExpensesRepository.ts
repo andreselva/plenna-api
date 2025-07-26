@@ -123,7 +123,7 @@ export class ExpensesRepository {
         try {
             const query = "SELECT SUM(value) as totalPayments FROM payment WHERE payable_type = 'expense' AND payable_id = ?";
             const result = await this.database.select(query, [id]);
-            return result[0]?.totalPayments || 0;
+            return Number(result[0]?.totalPayments) || 0;
         } catch (error) {
             throw new Error(`Failed to get payments for expense ID ${id}: ${error.message}`);
         }

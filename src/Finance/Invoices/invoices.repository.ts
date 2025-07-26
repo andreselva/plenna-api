@@ -119,14 +119,11 @@ export default class InvoicesRepository {
         }
     }
 
-    async getPayments(idInvoice: number) {
+    async getPayments(idInvoice: number): Promise<number> {
         try {
             const query = "SELECT SUM(value) as value FROM payment WHERE payable_id = ? AND payable_type = ?";
             const result = await this.database.select(query, [idInvoice, PaymentType.INVOICE]);
-
-            if (result && result.length > 0) {
-                return result[0].value ?? 0;
-            }
+            return Number(result[0]?.value) || 0;
         } catch (err) {
             throw new Error("Erro ao buscar pagamentos relacionados à fatura! Erro: " + err);
         }
@@ -176,14 +173,11 @@ export default class InvoicesRepository {
         }
     }
 
-    async getTotalInvoiceValue(idInvoice: number) {
+    async getTotalInvoiceValue(idInvoice: number): Promise<number> {
         try {
             const query = "SELECT SUM(value) as total FROM expense WHERE idInvoice = ?";
             const result = await this.database.select(query, [idInvoice]);
-            if (result && result.length > 0) {
-                return result[0].total ?? 0;
-            }
-            return 0;
+            return Number(result[0]?.total) || 0;
         } catch (err) {
             throw new Error("Erro ao buscar total da fatura! Erro: " + err);
         }

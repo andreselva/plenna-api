@@ -5,6 +5,7 @@ import { Expense } from "./Entity/Expense";
 import { ExpenseResponseDTO } from "./DTOs/ExpenseResponseDTO";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { ExpenseDTO } from "./DTOs/ExpenseDTO";
+import { ExpenseStatus } from "./Types/expense.status.type";
 
 @Injectable()
 export class ExpensesRepository {
@@ -102,8 +103,11 @@ export class ExpensesRepository {
         return rows.map(row => new Expense(row))
     }
 
-    async updateStatus(id: number, status: string, paymentDate: string) {
+    async updateStatus(id: number, status: ExpenseStatus, paymentDate: string|null) {
         try {
+            if (paymentDate === '') {
+                paymentDate = null;
+            }
             const query = "UPDATE expense SET status = ?, paymentDate = ? WHERE id = ?";
             const result = await this.database.execute(query, [status, paymentDate, id]);
 
@@ -112,6 +116,29 @@ export class ExpensesRepository {
             }
         } catch (error) {
             throw new Error(`Failed to update expense status: ${error.message}`);
+        }
+    }
+
+    async getPayments(id: number): Promise<number> {
+        try {
+            const query = "SELECT SUM(value) as totalPayments FROM payment WHERE payable_type = 'expense' AND payable_id = ?";
+            const result = await this.database.select(query, [id]);
+            return result[0]?.totalPayments || 0;
+        } catch (error) {
+            throw new Error(`Failed to get payments for expense ID ${id}: ${error.message}`);
+        }
+    }
+
+    async getExpenseById(id: number) {
+        try {
+            const query = "SELECT * FROM expense WHERE id = ?";
+            const result = await this.database.select(query, [id]) as ExpenseDTO[];
+            if (result && result.length > 0) {
+                return new Expense(result[0]);
+            }
+            throw new Error("Expense not found");
+        } catch (error) {
+            throw new Error(`Failed to get expense by ID ${id}: ${error.message}`);
         }
     }
 }

@@ -27,9 +27,9 @@ export class Expense {
             this.description = dto.description;
             this.value = Number(dto.value);
             this.invoiceDueDate = DateHelper.toISODate(dto.invoiceDueDate) ?? '';
-            this.idCategory = dto.idCategory !== "" ? Number(dto.idCategory) : 0;
-            this.idCreditCard = dto.idCreditCard !== "" ? Number(dto.idCreditCard) : 0;
-            this.installments = dto.installments;
+            this.idCategory = Number(dto.idCategory);
+            this.idCreditCard = Number(dto.idCreditCard);
+            this.installments = Number(dto.installments);
             this.typeOfInstallment = dto.typeOfInstallment;
             this.sourceAccountId = dto.sourceAccountId ? Number(dto.sourceAccountId) : 0;
             this.hasInstallments = Boolean(dto.hasInstallments);

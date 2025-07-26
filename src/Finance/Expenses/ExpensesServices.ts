@@ -5,7 +5,6 @@ import { CreateExpense } from "./UseCases/CreateExpense";
 import { DeleteExpense } from "./UseCases/DeleteExpense";
 import { UpdateExpense } from "./UseCases/UpdateExpense";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
-import { ExpenseStatus } from "./Types/expense.status.type";
 
 @Injectable()
 @Dependencies(GetExpenses, CreateExpense, DeleteExpense, UpdateExpense)
@@ -43,9 +42,8 @@ export class ExpensesServices {
     }
 
     async updateStatusExpense(id: number, paymentDate: string) {
-        const status = ExpenseStatus.PAID;
         try {
-            await this.updateExpenseUseCase.updateExpenseStatus(id, status, paymentDate);
+            await this.updateExpenseUseCase.updateExpenseStatus(id, paymentDate);
         } catch (error) {
             throw new Error(`Failed to update expense status: ${error.message}`);
         }

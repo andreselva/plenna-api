@@ -9,6 +9,7 @@ import { InstallmentUpdater } from "src/Finance/InstallmentsServices/Installment
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
 import AssociateExpensesToInvoiceUseCase from "src/Finance/Invoices/UseCases/AssociateExpensesToInvoice";
+import { ExpenseStatus } from "../Types/expense.status.type";
 
 @Injectable()
 export class UpdateExpense {
@@ -125,11 +126,28 @@ export class UpdateExpense {
         throw new Error("Considered ID invalid!");
     }
 
-    public async updateExpenseStatus(id: number, status: string, paymentDate: string) {
+    public async updateExpenseStatus(id: number, paymentDate: string) {
         try {
+            const totalPayments = await this.repository.getPayments(id);
+            const expense = await this.repository.getExpenseById(id);
+            if (!expense) {
+                throw new Error("Expense not found");
+            }
+            const expenseValue = expense.getValue();
+            const status = this.defineStatus(totalPayments, expenseValue);
             await this.repository.updateStatus(id, status, paymentDate);
         } catch (error) {
             throw new Error(`Failed to update expense status: ${error.message}`);
+        }
+    }
+
+    private defineStatus(totalPayments: number, expenseValue: number): ExpenseStatus {
+        if (totalPayments >= expenseValue) {
+            return ExpenseStatus.PAID;
+        } else if (totalPayments > 0) {
+            return ExpenseStatus.PARTIAL;
+        } else {
+            return ExpenseStatus.PENDING;
         }
     }
 }

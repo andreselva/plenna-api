@@ -70,7 +70,7 @@ export default class Invoice {
         this.id = id;
     }
 
-    setPaymentDate(date: string) {
+    setPaymentDate(date: string|null) {
         this.paymentDate = date
     }
 

@@ -1,6 +1,9 @@
+import DateHelper from "src/Shared/Utils/DateHelper";
 import { ExpenseDTO } from "../DTOs/ExpenseDTO";
+import { ExpenseStatus } from "../Types/expense.status.type";
 
 export class Expense {
+    public id?: number;
     public name: string;
     public description: string;
     public value: number;
@@ -8,27 +11,35 @@ export class Expense {
     public idCategory: number;
     public idCreditCard: number = 0;
     public installments: number = 0;
-    public typeOfInstallments: string = 'U';
-    public sourceAccountId: number = 0;
+    public typeOfInstallment: string = 'U';
+    public sourceAccountId: number;
     public hasInstallments: boolean;
     public linkToInvoice: boolean;
     public idInvoice: number;
-    public id?: number;
+    public status: ExpenseStatus = ExpenseStatus.PENDING;
+    public totalPaid?: number;
 
-    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, idCreditCard: number, installments: number, typeOfInstallments: string, sourceAccountId: number, hasInstallments: boolean, linkToInvoice: boolean, idInvoice: number, id?: number) {
-        this.name = name;
-        this.description = description;
-        this.value = value;
-        this.invoiceDueDate = invoiceDueDate;
-        this.idCategory = idCategory;
-        this.idCreditCard = idCreditCard;
-        this.installments = installments;
-        this.typeOfInstallments = typeOfInstallments;
-        this.sourceAccountId = sourceAccountId;
-        this.hasInstallments = hasInstallments;
-        this.linkToInvoice = linkToInvoice;
-        this.idInvoice = idInvoice;
-        this.id = id;
+    constructor(dto: ExpenseDTO | Expense) {
+        if (dto instanceof Expense) {
+            // Se for uma instância de Expense, copia os valores diretamente
+            Object.assign(this, dto);
+        } else {
+            this.name = dto.name;
+            this.description = dto.description;
+            this.value = Number(dto.value);
+            this.invoiceDueDate = DateHelper.toISODate(dto.invoiceDueDate) ?? '';
+            this.idCategory = Number(dto.idCategory);
+            this.idCreditCard = Number(dto.idCreditCard);
+            this.installments = Number(dto.installments);
+            this.typeOfInstallment = dto.typeOfInstallment;
+            this.sourceAccountId = dto.sourceAccountId ? Number(dto.sourceAccountId) : 0;
+            this.hasInstallments = Boolean(dto.hasInstallments);
+            this.linkToInvoice = Boolean(dto.linkToInvoice);
+            this.idInvoice = dto.idInvoice !== "" ? Number(dto.idInvoice) : 0;
+            this.status = Object.values(ExpenseStatus).includes(dto.status) ? dto.status : ExpenseStatus.PENDING;
+            this.id = dto.id;
+            this.totalPaid = dto.totalPaid;
+        }
     }
 
     getName() {
@@ -64,7 +75,7 @@ export class Expense {
     }
 
     getTypeOfInstallments() {
-        return this.typeOfInstallments ?? 'U';
+        return this.typeOfInstallment ?? 'U';
     }
 
     getSourceAccountId() {
@@ -83,31 +94,35 @@ export class Expense {
         return this.idInvoice;
     }
 
+    getStatus(): ExpenseStatus {
+        return this.status;
+    }
+
+    setStatus(status: ExpenseStatus) {
+        this.status = status;
+    }
+
     setId(id: number) {
-        if (this.id === undefined || !this.id) {
-            this.id = id;
-        }
+        this.id = id;
     }
 
     setIdInvoice(id: number) {
         this.idInvoice = id;
     }
 
-    static fromDTO(dto: ExpenseDTO): Expense {
-        return new Expense(
-            dto.name,
-            dto.description,
-            dto.value,
-            dto.invoiceDueDate,
-            Number(dto.idCategory),
-            Number(dto.idCreditCard) || 0,
-            Number(dto.installments) || 0,
-            dto.typeOfInstallment,
-            Number(dto.sourceAccountId) || 0,
-            dto.hasInstallments || false,
-            dto.linkToInvoice || false,
-            Number(dto.idInvoice),
-            dto.id,
-        )
+    setSourceAccountId(id: number) {
+        this.sourceAccountId = id;
+    }
+
+    setInvoiceDueDate(date: string) {
+        this.invoiceDueDate = date;
+    }
+
+    setIdCreditCard(id: number) {
+        this.idCreditCard = id;
+    }
+
+    setTotalPaid(totalPaid: number) {
+        this.totalPaid = totalPaid;
     }
 }

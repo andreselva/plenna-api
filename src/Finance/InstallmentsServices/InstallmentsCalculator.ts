@@ -40,7 +40,7 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
                         this.entity.getName(),
                         this.entity.getDescription(),
                         this.entity.getValue(),
-                        newDate.toISODate() as string, 
+                        newDate.toISODate() as string,
                         this.entity.getIdCategory(),
                         0, // A parcela não pode ter parcelas
                         this.entity.getTypeOfInstallments(),
@@ -48,30 +48,20 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
                         this.entity.getHasInstallments(),
                         0 // Id é zero ao gerar a parcela
                     ) as T;
-                } else {
-                    installment = new Expense(
-                        this.entity.getName(),
-                        this.entity.getDescription(),
-                        this.entity.getValue(),
-                        newDate.toISODate() as string,
-                        this.entity.getIdCategory(),
-                        this.entity.getIdCreditCard(),
-                        0, // A parcela não pode ter parcelas
-                        this.entity.getTypeOfInstallments(),
-                        this.entity.getId(), // Salvamos o id da conta de origem
-                        this.entity.getHasInstallments(),
-                        this.entity.getLinkToInvoice(),
-                        this.entity.getIdInvoice(),
-                        0 // Id é zero ao gerar a parcela
-                    ) as T;
+                } else if (this.entity instanceof Expense) {
+                    installment = new Expense(this.entity) as T;
+                    installment.setInvoiceDueDate(newDate.toISODate() as string);
+                    installment.setId(0)
+                    this.otherInstallments.push(installment);
                 }
-
-                this.otherInstallments.push(installment);
             }
+
         }
     }
-
+    
     private setQuantityInstallments(installments: number) {
         this.quantityInstallments = installments;
     }
 }
+
+

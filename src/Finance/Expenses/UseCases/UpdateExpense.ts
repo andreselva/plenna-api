@@ -4,11 +4,11 @@ import { Expense } from "../Entity/Expense";
 import { ExpensesRepository } from "../ExpensesRepository";
 import { getChangedFields } from "src/Shared/Utils/CompareChanges";
 import DateCalculator from "src/Shared/Utils/DateCalculator";
-import { ExpenseResponseDTO } from "../DTOs/ExpenseResponseDTO";
 import { InstallmentUpdater } from "src/Finance/InstallmentsServices/InstallmentsUpdater";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
 import AssociateExpensesToInvoiceUseCase from "src/Finance/Invoices/UseCases/AssociateExpensesToInvoice";
+import { ExpenseStatus } from "../Types/expense.status.type";
 
 @Injectable()
 export class UpdateExpense {
@@ -20,7 +20,11 @@ export class UpdateExpense {
 
     async execute(id: string, expense: ExpenseDTO, periodo: PeriodoDTO) {
         expense.id = Number(id);
-        const entity = Expense.fromDTO(expense);
+        const entity = new Expense(expense);
+
+        if (entity.getIdInvoice() === 0 && !entity.linkToInvoice) {
+            entity.setIdCreditCard(0);
+        }
 
         if (expense.updateInstallments) {
             //Define id considerado para buscar as outras parcelas
@@ -46,7 +50,7 @@ export class UpdateExpense {
 
                 //Delega a atualização das parcelas para InstallmentUpdater. InstallmentUpdater é uma função higher order,
                 //então, ela recebe o método updateExpense por parâmetro.
-                const results: ExpenseResponseDTO[] = await InstallmentUpdater<Expense, ExpenseResponseDTO>({
+                const results: Expense[] = await InstallmentUpdater<Expense, Expense>({
                     items: installments,
                     changedFields,
                     dynamicFieldProcessors: {
@@ -110,8 +114,8 @@ export class UpdateExpense {
     }
 
     private async searchRelatedInstallments(expense: ExpenseDTO) {
-        if (expense.sourceAccountId && expense.sourceAccountId > 0) {
-            const consideredId = expense.sourceAccountId;
+        if (expense.sourceAccountId) {
+            const consideredId = Number(expense.sourceAccountId);
             return await this.repository.searchForRelatedInstallments(consideredId, expense.id);
         }
 
@@ -119,5 +123,30 @@ export class UpdateExpense {
             return await this.repository.searchForRelatedInstallments(expense.id);
         }
         throw new Error("Considered ID invalid!");
+    }
+
+    public async updateExpenseStatus(id: number, paymentDate: string|null) {
+        try {
+            const totalPayments = await this.repository.getPayments(id);
+            const expense = await this.repository.getExpenseById(id);
+            if (!expense) {
+                throw new Error("Expense not found");
+            }
+            const expenseValue = expense.getValue();
+            const status = this.defineStatus(totalPayments, expenseValue);
+            await this.repository.updateStatus(id, status, paymentDate);
+        } catch (error) {
+            throw new Error(`Failed to update expense status: ${error.message}`);
+        }
+    }
+
+    private defineStatus(totalPayments: number, expenseValue: number): ExpenseStatus {
+        if (totalPayments >= expenseValue) {
+            return ExpenseStatus.PAID;
+        } else if (totalPayments > 0) {
+            return ExpenseStatus.PARTIAL;
+        } else {
+            return ExpenseStatus.PENDING;
+        }
     }
 }

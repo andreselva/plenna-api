@@ -16,15 +16,16 @@ export class CreateExpense {
     ) { }
 
     async execute(expense: ExpenseDTO, periodo: PeriodoDTO) {
-        const entity = Expense.fromDTO(expense);
+        const entity = new Expense(expense);
+        if (entity.getIdInvoice() === 0 && !entity.linkToInvoice) {
+            entity.setIdCreditCard(0);
+        }
         const firstExpense = await this.repository.createExpense(entity);
 
         //Só entra nesse if se houver uma quantidade de parcelas informadas e se 
         // o tipo da parcela for P (parcelada), ou se o tipo for F (fixa).
-        if (
-            firstExpense &&
-            ((firstExpense.getTypeOfInstallments() === 'P' && firstExpense.getInstallments() > 0) || firstExpense.getTypeOfInstallments() === 'F')
-        ) {
+        if (firstExpense &&
+            ((firstExpense.getTypeOfInstallments() === 'P' && firstExpense.getInstallments() > 0) || firstExpense.getTypeOfInstallments() === 'F')) {
             const otherInstallments = (new InstallmentsCalculator(
                 firstExpense.getTypeOfInstallments() as 'P' | 'F',
                 firstExpense.getInstallments(),
@@ -34,6 +35,7 @@ export class CreateExpense {
             //Adicionar a primeira conta gerada para retornar pro front mapeado posteriormente.
             expensesCreated.push(firstExpense);
             for (let i = 0; i < otherInstallments.length; i++) {
+                otherInstallments[i].setSourceAccountId(firstExpense.getId()); //Salva o id da conta de origem para associar as parcelas.
                 //Cria as parcelas no banco de dados e as salva em um novo array para retornar pro front.
                 expensesCreated.push(await this.repository.createExpense(otherInstallments[i]));
             }

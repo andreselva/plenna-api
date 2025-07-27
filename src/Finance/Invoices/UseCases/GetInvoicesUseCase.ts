@@ -19,7 +19,6 @@ export default class GetInvoicesUseCase {
             if (invoices && invoices.length > 0) {
                 return await this.setExpensesAndPayments(invoices);
             }
-            this.logger.warn("Nenhuma fatura encontrada no período especificado.");
             return [];
         } catch (err) {
             this.logger.error("Erro capturado ao buscar as faturas! Erro: " + err);
@@ -54,7 +53,7 @@ export default class GetInvoicesUseCase {
         try {
             for (const invoice of invoices) {
                 const expenses = await this.repository.getRelatedExpenses(invoice.getId());
-                const payments = await this.repository.getPayments(invoice.getId());
+                const totalPaiments = await this.repository.getPayments(invoice.getId());
     
                 if (expenses && expenses.length > 0) {
                     const totalValue = expenses.reduce((acc, expense) => acc + expense.getValue(), 0);
@@ -65,9 +64,8 @@ export default class GetInvoicesUseCase {
                     invoice.setValue(0);
                 }
     
-                if (payments && payments.length > 0) {
-                    const totalPaid = payments.reduce((acc, payment) => acc + payment.getValue(), 0);
-                    invoice.setTotalPaid(totalPaid);
+                if (totalPaiments > 0) {
+                    invoice.setTotalPaid(totalPaiments);
                 } else {
                     invoice.setTotalPaid(0);
                 }

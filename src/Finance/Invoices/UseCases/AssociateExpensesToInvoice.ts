@@ -18,7 +18,6 @@ export default class AssociateExpensesToInvoiceUseCase {
 
     async associate(expenses: Expense[]) {
         if (!expenses || expenses.length === 0) {
-            this.logger.warn("Nenhuma despesa fornecida para associação.");
             return;
         }
 
@@ -54,12 +53,11 @@ export default class AssociateExpensesToInvoiceUseCase {
             if (!invoiceToExpense) {
                 this.logger.log(`Fatura não encontrada para data ${dueDate}. Criando uma nova...`);
 
-                const createResult = await this.createInvoiceUC.create(settingsInvoice);
+                const createdInvoice = await this.createInvoiceUC.create(settingsInvoice);
 
-                if (createResult && createResult.isSuccess) {
-                    const newInvoice = createResult.createdInvoice;
-                    availableInvoices.set(newInvoice.getDueDate(), newInvoice);
-                    invoiceToExpense = newInvoice;
+                if (createdInvoice) {
+                    availableInvoices.set(createdInvoice.getDueDate(), createdInvoice);
+                    invoiceToExpense = createdInvoice;
                 } else {
                     this.logger.error(`A criação da fatura para a data ${dueDate} falhou e não retornou um resultado válido.`);
                 }

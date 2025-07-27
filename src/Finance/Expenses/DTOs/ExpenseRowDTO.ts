@@ -1,3 +1,5 @@
+import { ExpenseStatus } from "../Types/expense.status.type";
+
 export class ExpenseRowDTO {
     name: string;
     description: string;
@@ -6,10 +8,11 @@ export class ExpenseRowDTO {
     idCategory: number;
     idCreditCard: number;
     installments: number;
-    typeOfInstallments: string;
+    typeOfInstallment: string;
     sourceAccountId: number;
     hasInstallments: boolean;
     linkToInvoice: boolean;
     idInvoice: number;
+    status: ExpenseStatus
     id: number;
 }

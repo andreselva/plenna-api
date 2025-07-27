@@ -4,10 +4,9 @@ import { Injectable } from "@nestjs/common";
 import InvoiceRowDTO from "./DTOs/invoice.row.dto";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import { Expense } from "../Expenses/Entity/Expense";
-import { ExpenseRowDTO } from "../Expenses/DTOs/ExpenseRowDTO";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
-import Payment from "./Payment/Entity/Payment";
-import PaymentRowDTO from "./Payment/DTOs/PaymentRowDTO";
+import { ExpenseDTO } from "../Expenses/DTOs/ExpenseDTO";
+import { PaymentType } from "../Payment/Types/payment.type";
 
 @Injectable()
 export default class InvoicesRepository {
@@ -107,24 +106,12 @@ export default class InvoicesRepository {
                 throw new Error("Erro ao buscar despesas relacionadas à fatura! ID zero recebido: " + idInvoice);
             }
             const query = "SELECT * FROM expense WHERE idInvoice = ?";
-            const result = await this.database.select(query, [idInvoice]) as ExpenseRowDTO[];
+            const result = await this.database.select(query, [idInvoice]) as ExpenseDTO[];
             if (result && result.length > 0) {
-                return result.map(expense => new Expense(
-                    expense.name,
-                    expense.description,
-                    Number(expense.value),
-                    DateHelper.toISODate(expense.invoiceDueDate) as string,
-                    expense.idCategory,
-                    expense.idCreditCard,
-                    expense.installments,
-                    expense.typeOfInstallments,
-                    expense.sourceAccountId,
-                    Boolean(expense.hasInstallments),
-                    Boolean(expense.linkToInvoice),
-                    expense.idInvoice,
-                    expense.id
-                ))
-            }
+                return result.map(expense =>
+                    new Expense(expense)
+                )
+            };
 
             return [];
         } catch (err) {
@@ -132,25 +119,17 @@ export default class InvoicesRepository {
         }
     }
 
-    async getPayments(idInvoice: number) {
+    async getPayments(idInvoice: number): Promise<number> {
         try {
-            const query = "SELECT * FROM payment WHERE id_invoice = ?";
-            const result = await this.database.select(query, [idInvoice]) as PaymentRowDTO[];
-            if (result && result.length > 0) {
-                return result.map(payment => new Payment(
-                    payment.value,
-                    DateHelper.toISODate(payment.paymentDate) as string,
-                    [],
-                    payment.idInvoice,
-                    payment.id
-                ));
-            }
+            const query = "SELECT SUM(value) as value FROM payment WHERE payable_id = ? AND payable_type = ?";
+            const result = await this.database.select(query, [idInvoice, PaymentType.INVOICE]);
+            return Number(result[0]?.value) || 0;
         } catch (err) {
             throw new Error("Erro ao buscar pagamentos relacionados à fatura! Erro: " + err);
         }
     }
 
-    async getById(id: number): Promise<Invoice > {
+    async getById(id: number): Promise<Invoice> {
         try {
             const query = "SELECT * FROM invoices WHERE id = ?";
             const result = await this.database.select(query, [id]) as InvoiceRowDTO[];
@@ -174,13 +153,14 @@ export default class InvoicesRepository {
 
     async update(invoice: Invoice): Promise<Invoice> {
         try {
-            const query = "UPDATE invoices SET idBankAccount = ?, name = ?, closingDate = ?, dueDate = ?, status = ? WHERE id = ?";
+            const query = "UPDATE invoices SET idBankAccount = ?, name = ?, closingDate = ?, dueDate = ?, status = ?, paymentDate = ? WHERE id = ?";
             const result = await this.database.execute(query, [
                 invoice.getIdBankAccount(),
                 invoice.getName(),
                 invoice.getClosingDate(),
                 invoice.getDueDate(),
                 invoice.getStatus(),
+                invoice.getPaymentDate(),
                 invoice.getId()
             ]);
             if (result.affectedRows > 0) {
@@ -190,6 +170,16 @@ export default class InvoicesRepository {
             }
         } catch (err) {
             throw new Error("Erro ao atualizar fatura! Erro: " + err);
+        }
+    }
+
+    async getTotalInvoiceValue(idInvoice: number): Promise<number> {
+        try {
+            const query = "SELECT SUM(value) as total FROM expense WHERE idInvoice = ?";
+            const result = await this.database.select(query, [idInvoice]);
+            return Number(result[0]?.total) || 0;
+        } catch (err) {
+            throw new Error("Erro ao buscar total da fatura! Erro: " + err);
         }
     }
 }

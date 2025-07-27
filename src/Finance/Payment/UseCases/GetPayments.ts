@@ -12,7 +12,7 @@ export default class GetPayments {
         if (entityType && entityId) {
             const payments = await this.repository.getPaymentsByEntity(entityType, entityId);
             if (!payments || payments.length === 0) {
-                return {"payments": []};
+                return { "payments": [] };
             }
 
             payments.map(payment => {
@@ -20,8 +20,8 @@ export default class GetPayments {
                 paymentDate = DateHelper.toISODate(paymentDate) ?? '';
                 payment.setPaymentDate(paymentDate);
             })
-            
-            return {"payments": payments };
+
+            return { "payments": payments };
         } else {
             throw new Error("Entity type and ID are required");
         }

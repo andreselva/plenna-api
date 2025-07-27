@@ -17,6 +17,9 @@ export class CreateExpense {
 
     async execute(expense: ExpenseDTO, periodo: PeriodoDTO) {
         const entity = new Expense(expense);
+        if (entity.getIdInvoice() === 0 && !entity.linkToInvoice) {
+            entity.setIdCreditCard(0);
+        }
         const firstExpense = await this.repository.createExpense(entity);
 
         //Só entra nesse if se houver uma quantidade de parcelas informadas e se 

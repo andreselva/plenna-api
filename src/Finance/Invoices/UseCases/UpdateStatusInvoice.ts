@@ -9,10 +9,9 @@ export default class UpdateStatusInvoice {
         private readonly repository: InvoicesRepository
     ) { }
 
-    async update(invoiceId: number, paymentDate: string) {
-        const totalPayments = await this.repository.getPayments(invoiceId);
-
-        if (totalPayments > 0) {
+    async update(invoiceId: number, paymentDate: string|null) {
+        try {
+            const totalPayments = await this.repository.getPayments(invoiceId);
             const invoice = await this.repository.getById(invoiceId);
             const invoiceValue = await this.repository.getTotalInvoiceValue(invoiceId);
 
@@ -24,6 +23,8 @@ export default class UpdateStatusInvoice {
             } else {
                 throw new Error("Invoice not found");
             }
+        } catch (error) {
+            throw new Error(`An error ocurred while update invoice: ${error.message}`);
         }
     }
 

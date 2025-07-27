@@ -18,7 +18,6 @@ export default class AssociateExpensesToInvoiceUseCase {
 
     async associate(expenses: Expense[]) {
         if (!expenses || expenses.length === 0) {
-            this.logger.warn("Nenhuma despesa fornecida para associação.");
             return;
         }
 

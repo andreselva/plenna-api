@@ -19,7 +19,6 @@ export default class GetInvoicesUseCase {
             if (invoices && invoices.length > 0) {
                 return await this.setExpensesAndPayments(invoices);
             }
-            this.logger.warn("Nenhuma fatura encontrada no período especificado.");
             return [];
         } catch (err) {
             this.logger.error("Erro capturado ao buscar as faturas! Erro: " + err);

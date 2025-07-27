@@ -125,7 +125,7 @@ export class UpdateExpense {
         throw new Error("Considered ID invalid!");
     }
 
-    public async updateExpenseStatus(id: number, paymentDate: string) {
+    public async updateExpenseStatus(id: number, paymentDate: string|null) {
         try {
             const totalPayments = await this.repository.getPayments(id);
             const expense = await this.repository.getExpenseById(id);

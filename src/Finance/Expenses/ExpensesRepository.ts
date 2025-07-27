@@ -96,9 +96,6 @@ export class ExpensesRepository {
 
     async updateStatus(id: number, status: ExpenseStatus, paymentDate: string | null) {
         try {
-            if (paymentDate === '') {
-                paymentDate = null;
-            }
             const query = "UPDATE expense SET status = ?, paymentDate = ? WHERE id = ?";
             const result = await this.database.execute(query, [status, paymentDate, id]);
 

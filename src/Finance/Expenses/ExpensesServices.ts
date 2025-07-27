@@ -41,7 +41,7 @@ export class ExpensesServices {
         return await this.updateExpenseUseCase.execute(id, expense, periodo);
     }
 
-    async updateStatusExpense(id: number, paymentDate: string) {
+    async updateStatusExpense(id: number, paymentDate: string|null) {
         try {
             await this.updateExpenseUseCase.updateExpenseStatus(id, paymentDate);
         } catch (error) {

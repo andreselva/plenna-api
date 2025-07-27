@@ -55,19 +55,23 @@ export default class PaymentService {
     }
 
     async deletePayment(dto: ReversePaymentDataDTO) {
-        const result = await this.deletePaymentUC.delete(dto);
+        try {
+            const result = await this.deletePaymentUC.delete(dto);
 
-        if (result) {
-            switch (dto.entityType) {
-                case PaymentType.INVOICE:
-                    await this.invoiceService.updateInvoiceStatus(dto.entityId, '');
-                    return { isSuccess: true, message: "Payment reversed successfully" };
-                case PaymentType.EXPENSE:
-                    await this.expenseService.updateStatusExpense(dto.entityId, '');
-                    return { isSuccess: true, message: "Payment reversed successfully" };
-                default:
-                    throw new Error("Invalid entity type for payment reversal");
+            if (result) {
+                switch (dto.entityType) {
+                    case PaymentType.INVOICE:
+                        await this.invoiceService.updateInvoiceStatus(dto.entityId, null);
+                        return { isSuccess: true, message: "Payment reversed successfully" };
+                    case PaymentType.EXPENSE:
+                        await this.expenseService.updateStatusExpense(dto.entityId, '');
+                        return { isSuccess: true, message: "Payment reversed successfully" };
+                    default:
+                        throw new Error("Invalid entity type for payment reversal");
+                }
             }
+        } catch (error) {
+            throw new Error(`An error ocurred while delete payment: ${error.message}`);
         }
     }
 }

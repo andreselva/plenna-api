@@ -18,7 +18,7 @@ export class BillsDueService {
         const periodo = new PeriodoDTO();
         periodo.start = args.startDate;
         periodo.end = args.endDate;
-        const invoices = await this.invoicesService.getInvoices(periodo);
+        const invoices = (await this.invoicesService.getInvoices(periodo)).invoices;
 
         const newBillsFromInvoices = invoices.map(invoice => new BillsDueDTO(
             invoice.getName(),

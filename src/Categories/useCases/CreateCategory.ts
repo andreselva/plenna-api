@@ -13,6 +13,7 @@ export default class CreateCategory {
     async execute(category: CategoryDTO) {
         Validator.validate(category);
         const entity = Category.fromDTO(category);
-        return await this.repository.createCategory(entity);
+        const categoryCreated = await this.repository.createCategory(entity);
+        return {category: categoryCreated};    
     }
-}
+}   

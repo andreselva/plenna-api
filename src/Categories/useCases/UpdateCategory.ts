@@ -14,6 +14,7 @@ export default class UpdateCategory {
         Validator.validate(category);
         Validator.validateId(id);
         const entidade = Category.fromDTO(category);
-        return await this.categoryRepository.updateCategory(Number(id), entidade);
+        const updatedCategory = await this.categoryRepository.updateCategory(Number(id), entidade);
+        return { category: updatedCategory };
     }
 }

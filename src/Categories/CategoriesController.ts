@@ -21,7 +21,7 @@ export default class CategoriesController {
     }
 
     @Delete(':id')
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(HttpStatus.OK)
     async deleteCategory(@Param('id') id: string) {
         return await this.categoriesService.deleteCategory(id);
     }

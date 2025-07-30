@@ -16,7 +16,7 @@ export default class CreditCardStatementsService {
         const periodo = new PeriodoDTO();
         periodo.start = args.startDate;
         periodo.end = args.endDate;
-        const invoices = await this.invoicesService.getInvoices(periodo);
+        const invoices = (await this.invoicesService.getInvoices(periodo)).invoices;
         const labels: string[] = [];
         const values: number[] = [];
 

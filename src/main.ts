@@ -2,6 +2,8 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import { GlobalAuthGuard } from './common/guards/global-auth.guard';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +15,8 @@ async function bootstrap() {
 
   //Habilitar o guards em todas as rotas. Rotas públicas devem usar @Public.
   app.useGlobalGuards(new GlobalAuthGuard(reflector));
+  app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   app.enableCors({
     origin: process.env.NODE_ENV === 'development' ? true : 'https://plenna.me',

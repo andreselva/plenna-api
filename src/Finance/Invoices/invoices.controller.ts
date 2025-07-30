@@ -12,11 +12,7 @@ export class InvoicesController {
     @Get()
     async getInvoices(@Headers('x-periodo') periodo: string) {
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
-        const invoices = await this.service.getInvoices(newPeriodo);
-
-        if (invoices) {
-            return { invoices: invoices };
-        }
+        return await this.service.getInvoices(newPeriodo);
     }
 
     @Get('/related/:idBankAccount')

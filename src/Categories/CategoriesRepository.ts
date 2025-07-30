@@ -8,11 +8,17 @@ export default class CategoriesRepository {
         private readonly database: MySQLDatabase,
     ) {}
 
+    /**
+     * Busca todas as categorias no banco de dados.
+     */
     async getCategories() {
         const query = 'SELECT * FROM category';
         return await this.database.select(query);
     }
 
+    /**
+     * Cria uma nova categoria.
+     */
     async createCategory(category: Category) {
         const query = 'INSERT INTO category (name, description, type, color) VALUES (?, ?, ?, ?)';
         const values = [category.getName(), category.getDescription(), category.getType(), category.getColor()];
@@ -27,21 +33,26 @@ export default class CategoriesRepository {
                 color: category.getColor(),
             };
         }
-        throw new Error('Failed to create category');
+        // Este erro é específico da lógica de negócio, então faz sentido lançá-lo aqui.
+        throw new Error('Falha ao criar a categoria.');
     }
 
+    /**
+     * Deleta uma categoria pelo ID.
+     */
     async deleteCategory(id: number) {
         const query = 'DELETE FROM category WHERE id = ?';
         const result = await this.database.execute(query, [id]);
 
         if (result.affectedRows > 0) {
-            return {
-                message: 'Category deleted successfully',
-            };
+            return { success: true, message: 'Categoria deletada com sucesso.' };
         }
-        throw new Error('Failed to delete category');
+        throw new Error('Falha ao deletar a categoria, possivelmente não foi encontrada.');
     }
 
+    /**
+     * Atualiza uma categoria pelo ID.
+     */
     async updateCategory(id: number, category: Category) {
         const query = "UPDATE category SET name = ?, type = ?, description = ?, color = ? WHERE id = ?";
         const params = [category.getName(), category.getType(), category.getDescription(), category.getColor(), id];
@@ -55,6 +66,6 @@ export default class CategoriesRepository {
                 color: category.getColor()
             };
         }
-        throw new Error('Failed to update category');
+        throw new Error('Falha ao atualizar a categoria, possivelmente não foi encontrada.');
     }
 }

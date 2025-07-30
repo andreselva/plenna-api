@@ -5,6 +5,10 @@ import InvoicesRepository from "../invoices.repository";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
+export interface InvoicesResponse {
+    invoices: Invoice[];
+}
+
 @Injectable()
 export default class GetInvoicesUseCase {
     private readonly logger = new Logger(GetInvoicesUseCase.name)
@@ -13,20 +17,20 @@ export default class GetInvoicesUseCase {
         private readonly repository: InvoicesRepository
     ) { }
 
-    async get(periodo: PeriodoDTO): Promise<Invoice[]> {
+    async get(periodo: PeriodoDTO): Promise<InvoicesResponse> {
         try {
             const invoices = await this.repository.getInvoices(periodo);
             if (invoices && invoices.length > 0) {
-                return await this.setExpensesAndPayments(invoices);
+                return {invoices: await this.setExpensesAndPayments(invoices)};
             }
-            return [];
+            return {invoices: []};
         } catch (err) {
             this.logger.error("Erro capturado ao buscar as faturas! Erro: " + err);
             throw new Error("Erro: " + err);
         }
     }
 
-    async getRelatedInvoiceBankAccount(idBankAccount: number) {
+    async getRelatedInvoiceBankAccount(idBankAccount: number): Promise<InvoicesResponse> {
         const invoicesRelated = await this.repository.getRelatedInvoiceBankAccount(idBankAccount) as InvoiceRowDTO[];
 
         const invoicesList = invoicesRelated ?? [];

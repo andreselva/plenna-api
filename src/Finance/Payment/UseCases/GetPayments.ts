@@ -21,7 +21,7 @@ export default class GetPayments {
                 payment.setPaymentDate(paymentDate);
             })
 
-            return { "payments": payments };
+            return { payments: payments };
         } else {
             throw new Error("Entity type and ID are required");
         }

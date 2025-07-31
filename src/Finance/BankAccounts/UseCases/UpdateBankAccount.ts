@@ -34,6 +34,7 @@ export default class UpdateBankAccount {
             bankAccount.closingDate,
             Number(id)
         );
-        return await this.repository.updateBankAccount(entity);
+        const updatedBankAccount = await this.repository.updateBankAccount(entity);
+        return { bankAccount: updatedBankAccount };
     }
 }

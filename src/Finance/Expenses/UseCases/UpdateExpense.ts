@@ -92,6 +92,7 @@ export class UpdateExpense {
         const expenseValue = expense.getValue();
         const status = this.defineStatus(totalPayments, expenseValue);
         await this.repository.updateStatus(id, status, paymentDate);
+        return { status: status };
     }
 
     private defineStatus(totalPayments: number, expenseValue: number): ExpenseStatus {

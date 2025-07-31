@@ -19,6 +19,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.message 
         : 'Ocorreu um erro interno no servidor.';
 
+    this.logger.error(`An error ocurred - HTTPCODE: ${status} - MESSAGE: ${message}`);
+
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),

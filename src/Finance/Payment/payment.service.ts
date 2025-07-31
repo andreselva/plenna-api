@@ -29,10 +29,10 @@ export default class PaymentService {
             switch (paymentData.payableType) {
                 case PaymentType.INVOICE:
                     await this.invoiceService.updateInvoiceStatus(savedPayment.getPayableId(), savedPayment.getPaymentDate());
-                    return { isSuccess: true, payment: savedPayment };
+                    return { payment: savedPayment };
                 case PaymentType.EXPENSE:
                     await this.expenseService.updateStatusExpense(savedPayment.getPayableId(), savedPayment.getPaymentDate());
-                    return { isSuccess: true, payment: savedPayment };
+                    return { payment: savedPayment };
             }
         } else {
             throw new Error("Invalid payment data");
@@ -64,8 +64,7 @@ export default class PaymentService {
                         await this.invoiceService.updateInvoiceStatus(dto.entityId, null);
                         return { isSuccess: true, message: "Payment reversed successfully" };
                     case PaymentType.EXPENSE:
-                        await this.expenseService.updateStatusExpense(dto.entityId, '');
-                        return { isSuccess: true, message: "Payment reversed successfully" };
+                        return this.expenseService.updateStatusExpense(dto.entityId, '');
                     default:
                         throw new Error("Invalid entity type for payment reversal");
                 }

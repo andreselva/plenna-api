@@ -30,6 +30,7 @@ export default class CreateBankAccount {
             bankAccount.closingDate
         );
         
-        return await this.repository.createBankAccount(entity);
+        const createdBankAccount = await this.repository.createBankAccount(entity);
+        return { bankAccount: createdBankAccount };
     }
 }

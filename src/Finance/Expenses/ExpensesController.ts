@@ -18,15 +18,8 @@ export class ExpensesController {
 
     @Post()
     async createExpense(@Body() expense: ExpenseDTO, @Headers('x-periodo') periodo: string) {
-        try {
-            const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
-            return await this.service.createExpense(expense, newPeriodo);
-        } catch (error) {
-            return {
-                message: "Error creating expense: " + error.message,
-                statusCode: HttpStatus.INTERNAL_SERVER_ERROR
-            };
-        }
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.service.createExpense(expense, newPeriodo);
     }
 
     @Delete(':id')
@@ -37,10 +30,7 @@ export class ExpensesController {
         @Headers('x-periodo') periodo: string
     ) {
         if (Number(id) <= 0) {
-            return {
-                message: "Invalid ID!",
-                statusCode: HttpStatus.BAD_REQUEST
-            }
+            throw new Error(`Invalid ID`);
         }
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         return await this.service.deleteExpense(id, deleteInstallments, sourceAccountId, newPeriodo);

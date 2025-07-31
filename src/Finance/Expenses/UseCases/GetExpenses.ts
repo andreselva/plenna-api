@@ -16,6 +16,6 @@ export class GetExpenses {
             return expense;
         })
         const formattedExpenses = await Promise.all(promiseArray);
-        return formattedExpenses;
+        return { expenses: formattedExpenses };
     }
 }

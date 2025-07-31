@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 import { Expense } from "../Entity/Expense";
 import { ExpensesRepository } from "../ExpensesRepository";
@@ -48,9 +48,8 @@ export class UpdateExpense {
                     dates = DateCalculator.calculate(changedFields.invoiceDueDate, installments.length);
                 }
 
-                //Delega a atualização das parcelas para InstallmentUpdater. InstallmentUpdater é uma função higher order,
-                //então, ela recebe o método updateExpense por parâmetro.
-                const results: Expense[] = await InstallmentUpdater<Expense, Expense>({
+                //Delega a atualização das parcelas para InstallmentUpdater.
+                await InstallmentUpdater<Expense, Expense>({
                     items: installments,
                     changedFields,
                     dynamicFieldProcessors: {
@@ -63,54 +62,13 @@ export class UpdateExpense {
                 if (expense.linkToInvoice) {
                     await this.associateExpensesToInvoices.associate(installments);
                 }
-
-                if (!results || (results.length > 0)) {
-                    const result = await this.repository.updateExpense(entity);
-                    if (!result) {
-                        return {
-                            message: "Failed to update installments",
-                            statusCode: HttpStatus.BAD_REQUEST,
-                            expenses: await this.getExpensesUseCase.execute(periodo),
-                            isSuccess: false,
-                        }
-                    }
-
-                    return {
-                        message: "Installment updated successfully, but the other installments were not updated.",
-                        statusCode: HttpStatus.MULTI_STATUS,
-                        results: [
-                            {
-                                revenue: 'mainEntity',
-                                isSuccess: true,
-                            },
-                            {
-                                revenue: 'installments',
-                                isSuccess: false,
-                            }
-                        ],
-                        expenses: await this.getExpensesUseCase.execute(periodo),
-                        isSuccess: false,
-                    }
-                }
+                
+                return { expenses: await this.getExpensesUseCase.execute(periodo) }
             }
         }
 
-        const result = await this.repository.updateExpense(entity);
-        if (!result) {
-            return {
-                message: "Failed to update installments",
-                statusCode: HttpStatus.BAD_REQUEST,
-                expenses: await this.getExpensesUseCase.execute(periodo),
-                isSuccess: false,
-            }
-        }
-
-        return {
-            message: "Installment updated successfully",
-            statusCode: HttpStatus.OK,
-            expenses: await this.getExpensesUseCase.execute(periodo),
-            isSuccess: true,
-        }
+        await this.repository.updateExpense(entity);
+        return { expenses: await this.getExpensesUseCase.execute(periodo) }
     }
 
     private async searchRelatedInstallments(expense: ExpenseDTO) {
@@ -126,18 +84,14 @@ export class UpdateExpense {
     }
 
     public async updateExpenseStatus(id: number, paymentDate: string|null) {
-        try {
-            const totalPayments = await this.repository.getPayments(id);
-            const expense = await this.repository.getExpenseById(id);
-            if (!expense) {
-                throw new Error("Expense not found");
-            }
-            const expenseValue = expense.getValue();
-            const status = this.defineStatus(totalPayments, expenseValue);
-            await this.repository.updateStatus(id, status, paymentDate);
-        } catch (error) {
-            throw new Error(`Failed to update expense status: ${error.message}`);
+        const totalPayments = await this.repository.getPayments(id);
+        const expense = await this.repository.getExpenseById(id);
+        if (!expense) {
+            throw new Error("Expense not found");
         }
+        const expenseValue = expense.getValue();
+        const status = this.defineStatus(totalPayments, expenseValue);
+        await this.repository.updateStatus(id, status, paymentDate);
     }
 
     private defineStatus(totalPayments: number, expenseValue: number): ExpenseStatus {

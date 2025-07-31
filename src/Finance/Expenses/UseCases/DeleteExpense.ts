@@ -21,40 +21,10 @@ export class DeleteExpense {
                 for (let i = 0; i < installments.length; i++) {
                     result[i] = (await this.repository.deleteExpense(installments[i].getId()));
                 }
-
-                const isSuccess = result.every(obj => obj.isSuccess === true);
-
-                if (isSuccess) {
-                    return {
-                        message: "All installments have been deleted successfully.",
-                        statusCode: HttpStatus.OK,
-                        expenses: await this.getExpensesUseCase.execute(periodo),
-                        isSuccess: true
-                    }
-                }
-                return {
-                    message: "An error occurred while deleting the installments!",
-                    statusCode: HttpStatus.BAD_REQUEST,
-                    expenses: await this.getExpensesUseCase.execute(periodo),
-                    isSuccess: false
-                }
+                return { expenses: await this.getExpensesUseCase.execute(periodo) };
             }
         }
-
-        if ((await this.repository.deleteExpense(Number(id))).isSuccess === true) {
-            return {
-                message: "Expense have been deleted successfully.",
-                statusCode: HttpStatus.OK,
-                expenses: await this.getExpensesUseCase.execute(periodo),
-                isSuccess: true
-            }
-        }
-
-        return {
-            message: "An error occurred while deleting the expense!",
-            statusCode: HttpStatus.BAD_REQUEST,
-            expenses: await this.getExpensesUseCase.execute(periodo),
-            isSuccess: false
-        }
+        await this.repository.deleteExpense(Number(id))
+        return { expenses: await this.getExpensesUseCase.execute(periodo) }
     }
 }

@@ -88,7 +88,7 @@ export default class InvoicesRepository {
 
     async updateExpense(expense: Expense) {
         try {
-            await this.database.execute("UPDATE expense SET idInvoice = ? WHERE id = ?", [expense.getIdInvoice(), expense.getId()]);
+            await this.database.execute("UPDATE expense SET idInvoice = ?, invoiceDueDate = ? WHERE id = ?", [expense.getIdInvoice(), expense.getInvoiceDueDate(), expense.getId()]);
         } catch (err) {
             throw new Error("Erro ao atualizar despesa na fatura! Erro: " + err);
         }

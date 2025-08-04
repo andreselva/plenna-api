@@ -46,6 +46,10 @@ export class CreateExpense {
             }
         }
 
+        if (expense.linkToInvoice) {
+            await this.associateExpensesToInvoiceUC.associate([firstExpense]);
+        }
+
         return { expenses: await this.getExpensesUseCase.execute(periodo) }
     }
 }

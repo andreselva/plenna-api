@@ -51,7 +51,6 @@ export default class AssociateExpensesToInvoiceUseCase {
 
             // Se a fatura não existir, cria e a adiciona ao mapa local
             if (!invoiceToExpense) {
-                this.logger.log(`Fatura não encontrada para data ${dueDate}. Criando uma nova...`);
 
                 const createdInvoice = await this.createInvoiceUC.create(settingsInvoice);
 
@@ -70,6 +69,7 @@ export default class AssociateExpensesToInvoiceUseCase {
                     continue;
                 }
                 expense.setIdInvoice(invoiceId);
+                expense.setInvoiceDueDate(invoiceToExpense.getDueDate());
                 await this.repository.updateExpense(expense);
             } else {
                 this.logger.error(`Não foi possível encontrar ou criar uma fatura para a despesa ${expense.getId()}`);

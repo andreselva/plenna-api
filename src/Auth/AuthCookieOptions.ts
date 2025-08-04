@@ -5,7 +5,8 @@ export class AuthCookieOptions {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'lax',
+            sameSite: 'none',
+            domain: '.plenna.me',
             maxAge: 60 * 60 * 1000,//1h
         };
     }
@@ -14,7 +15,8 @@ export class AuthCookieOptions {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'lax',
+            sameSite: 'none',
+            domain: '.plenna.me',
             maxAge: 7 * 24 * 60 * 60 * 1000
         }
     }
@@ -23,7 +25,8 @@ export class AuthCookieOptions {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'lax',
+            sameSite: 'none',
+            domain: '.plenna.me'
         }
     }
 }

@@ -59,32 +59,22 @@ export default class CreateInvoiceUseCase {
      * @returns {{ closingDate: string, dueDate: string }} As datas calculadas em formato ISO (YYYY-MM-DD).
      */
     private calculateNextInvoiceDates(settings: InvoiceSettingsDTO, lastInvoice: Invoice | null): { closingDate: string, dueDate: string } {
-        // Se já existe uma fatura anterior, calcula o próximo mês.
-        if (lastInvoice) {
-            const nextClosingDate = DateTime.fromISO(lastInvoice.getClosingDate()).plus({ months: 1 });
-            const nextDueDate = DateTime.fromISO(lastInvoice.getDueDate()).plus({ months: 1 });
+        const baseDate = lastInvoice 
+            ? DateTime.fromISO(lastInvoice.getClosingDate())
+            : DateTime.now();
 
-            return {
-                closingDate: nextClosingDate.toISODate() as string,
-                dueDate: nextDueDate.toISODate() as string,
-            };
-        }
+        // Começamos com a data de fechamento do mês da nossa data base.
+        let closingDateDt = baseDate.set({ day: settings.closingDate });
 
-        // Se for a primeira fatura, calcula com base nas configurações e na data atual.
-        const now = DateTime.now();
-        let closingDateDt = now.set({ day: settings.closingDate });
-
-        // Se a data de fechamento já passou neste mês, avança para o próximo.
-        if (closingDateDt <= now) {
+        if (closingDateDt <= DateTime.now() || lastInvoice) {
             closingDateDt = closingDateDt.plus({ months: 1 });
         }
 
-        let dueDateDt = now.set({ day: settings.dueDate });
+        // A data de vencimento é calculada a partir do MÊS da data de fechamento.
+        // Isso garante que elas estejam no mesmo ciclo de faturamento.
+        let dueDateDt = closingDateDt.set({ day: settings.dueDate });
 
-        // A data de vencimento deve ser sempre após a data de fechamento.
-        if (dueDateDt < closingDateDt) {
-            dueDateDt = dueDateDt.plus({ months: 2 });
-        } else if (dueDateDt === closingDateDt) {
+        if (dueDateDt <= closingDateDt) {
             dueDateDt = dueDateDt.plus({ months: 1 });
         }
 

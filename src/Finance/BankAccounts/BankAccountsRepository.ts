@@ -33,7 +33,7 @@ export default class BankAccountsRepository {
             bankAccount.getClosingDate()
         ];
         const placeholders = QueryBuilder.getPlaceholders(params);
-        const query = `INSERT INTO bank_account (name, icon, gerenateInvoice) VALUES (${placeholders})`;
+        const query = `INSERT INTO bank_account (name, icon, generateInvoice, dueDate, closingDate) VALUES (${placeholders})`;
         const result = await this.database.execute(query, params);
 
         if (result.affectedRows > 0) {

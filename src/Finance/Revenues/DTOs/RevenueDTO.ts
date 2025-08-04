@@ -3,11 +3,11 @@ export class RevenueDTO {
     description: string;
     value: number;
     invoiceDueDate: string;
-    idCategory: string;
+    idCategory: number;
+    installments: number;
+    typeOfInstallments: string;
+    sourceAccountId: number;
+    hasInstallments: boolean;
+    updateInstallments: boolean;
     id?: number;
-    installments?: number;
-    typeOfInstallment?: string;
-    sourceAccountId?: number;
-    hasInstallments?: boolean;
-    updateInstallments?: boolean;
 }

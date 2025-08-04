@@ -1,4 +1,4 @@
-import { Controller, Get, Headers } from "@nestjs/common";
+import { Controller, Get, Headers, HttpCode, HttpStatus } from "@nestjs/common";
 import { DashboardServices } from "./DashboardServices";
 import DashboardArgs from "./Args/DashboardArgs";
 import PeriodoDTO from "../DTOs/PeriodoDTO";
@@ -10,6 +10,7 @@ export class DashboardController {
     ) { }
 
     @Get()
+    @HttpCode(HttpStatus.OK)
     async getDashboardData(
         @Headers('periodo') periodo: string
         // @Req() req -> pra usar dps

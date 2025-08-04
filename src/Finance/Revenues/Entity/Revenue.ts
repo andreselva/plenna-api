@@ -1,3 +1,4 @@
+import DateHelper from "src/Shared/Utils/DateHelper";
 import { RevenueDTO } from "../DTOs/RevenueDTO";
 
 export default class Revenue {
@@ -6,23 +7,27 @@ export default class Revenue {
     public value: number;
     public invoiceDueDate: string;
     public idCategory: number
-    public installments: number = 0;
+    public installments: number;
     public typeOfInstallments: string = 'U';
     public sourceAccountId: number = 0;
     public hasInstallments: boolean = false;
     public id?: number;
 
-    constructor(name: string, description: string, value: number, invoiceDueDate: string, idCategory: number, installments: number = 0, typeOfInstallments: string = 'U', sourceAccountId: number = 0, hasInstallments: boolean = false, id?: number) {
-        this.name = name;
-        this.description = description;
-        this.value = value;
-        this.invoiceDueDate = invoiceDueDate;
-        this.idCategory = idCategory;
-        this.installments = installments;
-        this.typeOfInstallments = typeOfInstallments;
-        this.sourceAccountId = sourceAccountId;
-        this.hasInstallments = hasInstallments;
-        this.id = id;
+    constructor(dto: RevenueDTO | Revenue) {
+        if (dto instanceof Revenue) {
+            Object.assign(this, dto);
+        } else {
+            this.name = dto.name;
+            this.description = dto.description;
+            this.value = dto.value;
+            this.invoiceDueDate = DateHelper.toISODate(dto.invoiceDueDate) ?? '';
+            this.idCategory = dto.idCategory;
+            this.installments = dto.installments;
+            this.typeOfInstallments = dto.typeOfInstallments;
+            this.sourceAccountId = dto.sourceAccountId ?? 0;
+            this.hasInstallments = Boolean(dto.hasInstallments);
+            this.id = dto.id ?? 0;
+        }
     }
 
     getName(): string {
@@ -75,18 +80,7 @@ export default class Revenue {
         this.invoiceDueDate = date;
     }
 
-    static fromDTO(dto: RevenueDTO): Revenue {
-        return new Revenue(
-            dto.name,
-            dto.description,
-            Number(dto.value),
-            dto.invoiceDueDate,
-            Number(dto.idCategory),
-            Number(dto.installments),
-            dto.typeOfInstallment,
-            dto.sourceAccountId,
-            dto.hasInstallments || false,
-            dto.id,
-        );
+    setSourceAccountId(id: number) {
+        this.sourceAccountId = id;
     }
 }

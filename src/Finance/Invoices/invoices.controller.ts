@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import PeriodoDTO from 'src/DTOs/PeriodoDTO';
 import { InvoicesService } from './invoices.service';
 import InvoiceSettingsDTO from './DTOs/invoice.settings.dto';
@@ -10,16 +10,14 @@ export class InvoicesController {
     ) { }
 
     @Get()
+    @HttpCode(HttpStatus.OK)
     async getInvoices(@Headers('x-periodo') periodo: string) {
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
-        const invoices = await this.service.getInvoices(newPeriodo);
-
-        if (invoices) {
-            return { invoices: invoices };
-        }
+        return await this.service.getInvoices(newPeriodo);
     }
 
     @Get('/related/:idBankAccount')
+    @HttpCode(HttpStatus.OK)
     async searchForRelatedOpenInvoices(@Param('idBankAccount') idBankAccount: string) {
         if (idBankAccount && idBankAccount.length > 0) {
             return await this.service.getRelatedInvoicesIdBankAccount(idBankAccount);
@@ -27,6 +25,7 @@ export class InvoicesController {
     }
 
     @Post('/create')
+    @HttpCode(HttpStatus.CREATED)
     createInvoices(@Body() invoiceSettings: InvoiceSettingsDTO) {
         try {
             if (invoiceSettings) {

@@ -33,7 +33,7 @@ export default class BankAccountsRepository {
             bankAccount.getClosingDate()
         ];
         const placeholders = QueryBuilder.getPlaceholders(params);
-        const query = `INSERT INTO bank_account (name, icon, gerenateInvoice) VALUES (${placeholders})`;
+        const query = `INSERT INTO bank_account (name, icon, generateInvoice, dueDate, closingDate) VALUES (${placeholders})`;
         const result = await this.database.execute(query, params);
 
         if (result.affectedRows > 0) {
@@ -49,12 +49,12 @@ export default class BankAccountsRepository {
         throw new Error("Failed to create bank account");
     }
 
-    async deleteBankAccount(id: number): Promise<{ message: string }> {
+    async deleteBankAccount(id: number) {
         const query = "DELETE FROM bank_account WHERE id = ?";
         const result = await this.database.execute(query, [id]);
 
         if (result.affectedRows > 0) {
-            return { message: "Bank account deleted successfully" };
+            return { success: true, message: 'Conta deletada com sucesso.' };
         }
         throw new Error("Failed to delete bank account");
     }

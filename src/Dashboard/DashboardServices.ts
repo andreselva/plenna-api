@@ -23,12 +23,14 @@ export class DashboardServices {
         const monthlyProgress = await this.monthlyProgress.getMonthlyProgressData(args);
         const creditCardStatements = await this.creditCardStatements.getData(args);
         return {
-            currentBalance: currentBalance,
-            expensesByCategory: expensesByCategory,
-            billsDue: billsDue,
-            monthlyProgress: monthlyProgress,
-            remainingBalance: currentBalance.remainingBalance,
-            creditCardStatements: creditCardStatements
+            dashboardData: {
+                currentBalance: currentBalance,
+                expensesByCategory: expensesByCategory,
+                billsDue: billsDue,
+                monthlyProgress: monthlyProgress,
+                remainingBalance: currentBalance.remainingBalance,
+                creditCardStatements: creditCardStatements 
+            }
         };
     }
 }

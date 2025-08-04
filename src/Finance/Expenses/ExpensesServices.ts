@@ -21,15 +21,11 @@ export class ExpensesServices {
     }
 
     async createExpense(dto: ExpenseDTO, periodo: PeriodoDTO) {
-        try {
-            if ((dto.typeOfInstallment === 'P' && dto.installments && dto.installments > 0) || dto.typeOfInstallment === 'F') {
-                dto.hasInstallments = true;
-            }
-
-            return await this.createExpenseUseCase.execute(dto, periodo);
-        } catch (error) {
-            throw new Error("Error creating expense: " + error.message);
+        if ((dto.typeOfInstallment === 'P' && dto.installments && dto.installments > 0) || dto.typeOfInstallment === 'F') {
+            dto.hasInstallments = true;
         }
+
+        return await this.createExpenseUseCase.execute(dto, periodo);
     }
 
     async deleteExpense(id: string, deleteInstallments: string, sourceAccountId: string, periodo: PeriodoDTO) {
@@ -42,10 +38,9 @@ export class ExpensesServices {
     }
 
     async updateStatusExpense(id: number, paymentDate: string|null) {
-        try {
-            await this.updateExpenseUseCase.updateExpenseStatus(id, paymentDate);
-        } catch (error) {
-            throw new Error(`Failed to update expense status: ${error.message}`);
+        if (paymentDate === '') {
+            paymentDate = null;
         }
+        return await this.updateExpenseUseCase.updateExpenseStatus(id, paymentDate);
     }
 }

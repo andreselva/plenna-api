@@ -9,6 +9,6 @@ export default class GetCategories {
 
     async execute() {
         const result = await this.categoriesRepository.getCategories();
-        return result;
+        return {categories: result};
     }
 }

@@ -5,6 +5,7 @@ import { RevenueRowDTO } from "./DTOs/RevenueRowDTO";
 import { RevenueResponseDTO } from "./DTOs/RevenueResponseDTO";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import DateHelper from "src/Shared/Utils/DateHelper";
+import { RevenueDTO } from "./DTOs/RevenueDTO";
 
 @Injectable()
 export default class RevenuesRepository {
@@ -12,22 +13,10 @@ export default class RevenuesRepository {
         private readonly database: MySQLDatabase,
     ) { }
 
-    async getRevenues(periodo: PeriodoDTO): Promise<RevenueResponseDTO[]> {
+    async getRevenues(periodo: PeriodoDTO): Promise<Revenue[]> {
         const query = "SELECT * FROM revenue WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
-        const rows = await this.database.select(query, [periodo.start, periodo.end]) as RevenueRowDTO[];
-
-        return rows.map(row => new RevenueResponseDTO(
-            row.id,
-            row.name,
-            row.description,
-            row.value,
-            row.invoiceDueDate,
-            row.idCategory,
-            row.installments,
-            row.typeOfInstallments,
-            row.sourceAccountId,
-            Boolean(row.hasInstallments),
-        ));
+        const rows = await this.database.select(query, [periodo.start, periodo.end]) as RevenueDTO[];
+        return rows.map(row => new Revenue(row));
     }
 
     async createRevenue(revenue: Revenue): Promise<Revenue> {
@@ -58,15 +47,12 @@ export default class RevenuesRepository {
         const result = await this.database.execute(query, [id]);
 
         if (result.affectedRows > 0) {
-            return {
-                isSuccess: true,
-                message: 'Revenue deleted successfully',
-            }
+            return { isSuccess: true, message: 'Revenue deleted successfully' };
         }
         throw new Error('Failed to delete revenue');
     }
 
-    async updateRevenue(revenue: Revenue): Promise<RevenueResponseDTO> {
+    async updateRevenue(revenue: Revenue): Promise<Revenue> {
         const query = "UPDATE revenue SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ? WHERE id = ?";
         const result = await this.database.execute(
             query,
@@ -81,18 +67,7 @@ export default class RevenuesRepository {
         )
 
         if (result.affectedRows > 0) {
-            return new RevenueResponseDTO(
-                revenue.getId(),
-                revenue.getName(),
-                revenue.getDescription(),
-                revenue.getValue(),
-                revenue.getInvoiceDueDate(),
-                revenue.getIdCategory(),
-                revenue.getInstallments(),
-                revenue.getTypeOfInstallments(),
-                revenue.getSourceAccountId(),
-                revenue.getHasInstallments()
-            )
+            return new Revenue(revenue);
         }
         throw new Error('Failed to update revenue');
     }
@@ -108,18 +83,7 @@ export default class RevenuesRepository {
 
         query += " ORDER BY id ASC";
     
-        const rows = await this.database.select(query, params) as RevenueRowDTO[];
-        return rows.map(row => new Revenue(
-            String(row.name),
-            String(row.description),
-            Number(row.value),
-            DateHelper.toISODate(row.invoiceDueDate) as string,
-            Number(row.idCategory),
-            Number(row.installments),
-            String(row.typeOfInstallments),
-            Number(row.sourceAccountId),
-            Boolean(row.hasInstallments),
-            Number(row.id),
-        ))
+        const rows = await this.database.select(query, params) as RevenueDTO[];
+        return rows.map(row => new Revenue(row));
     }
 }

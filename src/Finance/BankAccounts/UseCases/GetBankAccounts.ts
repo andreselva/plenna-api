@@ -8,6 +8,7 @@ export default class GetBankAccounts {
     ) { }
 
     async execute() {
-        return await this.repository.getBankAccounts();
+        const bankAccounts = await this.repository.getBankAccounts();
+        return { bankAccounts: bankAccounts };
     }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Dependencies, Get, Headers, HttpStatus, Param, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Dependencies, Get, Headers, HttpCode, HttpStatus, Param, Post, Put, Query } from "@nestjs/common";
 import { ExpensesServices } from "./ExpensesServices";
 import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
@@ -11,25 +11,21 @@ export class ExpensesController {
     ) { }
 
     @Get()
+    @HttpCode(HttpStatus.OK)
     async getExpenses(@Headers('x-periodo') periodo: string) {
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         return await this.service.getExpenses(newPeriodo);
     }
 
     @Post()
+    @HttpCode(HttpStatus.CREATED)
     async createExpense(@Body() expense: ExpenseDTO, @Headers('x-periodo') periodo: string) {
-        try {
-            const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
-            return await this.service.createExpense(expense, newPeriodo);
-        } catch (error) {
-            return {
-                message: "Error creating expense: " + error.message,
-                statusCode: HttpStatus.INTERNAL_SERVER_ERROR
-            };
-        }
+        const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
+        return await this.service.createExpense(expense, newPeriodo);
     }
 
     @Delete(':id')
+    @HttpCode(HttpStatus.OK)
     async deleteExpense(
         @Param('id') id: string,
         @Query('deleteInstallments') deleteInstallments: string = 'false',
@@ -37,16 +33,14 @@ export class ExpensesController {
         @Headers('x-periodo') periodo: string
     ) {
         if (Number(id) <= 0) {
-            return {
-                message: "Invalid ID!",
-                statusCode: HttpStatus.BAD_REQUEST
-            }
+            throw new Error(`Invalid ID`);
         }
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         return await this.service.deleteExpense(id, deleteInstallments, sourceAccountId, newPeriodo);
     }
 
     @Put(':id')
+    @HttpCode(HttpStatus.OK)
     async updateExpense(
         @Param('id') id: string,
         @Body() expense: ExpenseDTO,

@@ -44,38 +44,8 @@ export class CreateExpense {
             if (expense.linkToInvoice) {
                 await this.associateExpensesToInvoiceUC.associate(expensesCreated);
             }
-
-            if (!firstExpense && !(expensesCreated.length > 0)) {
-                return {
-                    message: "Failed to create expense",
-                    statusCode: 400,
-                    expenses: await this.getExpensesUseCase.execute(periodo),
-                    isSucess: false,
-                }
-            }
-
-            return {
-                message: "Expense created successfully",
-                statusCode: 201,
-                expenses: await this.getExpensesUseCase.execute(periodo),
-                isSucess: true,
-            }
         }
 
-        if (!firstExpense) {
-            return {
-                message: "Failed to create expense",
-                statusCode: 400,
-                expenses: await this.getExpensesUseCase.execute(periodo),
-                isSucess: false,
-            }
-        }
-
-        return {
-            message: "Expense created successfully",
-            statusCode: 201,
-            expenses: await this.getExpensesUseCase.execute(periodo),
-            isSucess: true,
-        }
+        return { expenses: await this.getExpensesUseCase.execute(periodo) }
     }
 }

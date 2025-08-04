@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Logger, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post } from "@nestjs/common";
 import PaymentService from "./payment.service";
 import PaymentInicialDataDTO from "./DTOs/PaymentInicialDataDTO";
 import { PaymentType } from "./Types/payment.type";
@@ -13,6 +13,7 @@ export default class PaymentController {
     ) { }
 
     @Post()
+    @HttpCode(HttpStatus.CREATED)
     async registerPayment(@Body() paymentData: PaymentInicialDataDTO) {
         if (paymentData && Object.keys(paymentData).length > 0) {
             return this.paymentService.registerPayment(paymentData);
@@ -20,6 +21,7 @@ export default class PaymentController {
     }
 
     @Get('/:entityType/:entityId')
+    @HttpCode(HttpStatus.OK)
     async getPaymentsData(@Param('entityType') entityType: string, @Param('entityId') entityId: string) {
         if (entityType && entityId) {
             if (!Object.values(PaymentType).includes(entityType as PaymentType)) {
@@ -30,6 +32,7 @@ export default class PaymentController {
     }
 
     @Delete('/reverse')
+    @HttpCode(HttpStatus.OK)
     async deletePayment(@Body() dto: ReversePaymentDataDTO) {
         return await this.paymentService.deletePayment(dto);
     }

@@ -5,7 +5,7 @@ export class AuthCookieOptions {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
+            sameSite: 'lax',
             maxAge: 60 * 60 * 1000,//1h
         };
     }
@@ -14,7 +14,7 @@ export class AuthCookieOptions {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
+            sameSite: 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000
         }
     }
@@ -23,7 +23,7 @@ export class AuthCookieOptions {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
+            sameSite: 'lax',
         }
     }
 }

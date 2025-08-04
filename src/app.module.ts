@@ -29,6 +29,7 @@ import { ConfigModule } from '@nestjs/config';
 import { InvoicesModule } from './Finance/Invoices/invoices.module';
 import { FinanceModule } from './Finance/finance.module';
 import { DatabaseModule } from './Config/Database/database.module';
+import { HealthCheckModule } from './Check/health-check.module';
 
 const services = [
   CategoriesService,
@@ -54,7 +55,8 @@ const repositories = [
     UsersModule,
     InvoicesModule,
     FinanceModule,
-    DatabaseModule
+    DatabaseModule,
+    HealthCheckModule
   ],
   controllers: [
     AppController,

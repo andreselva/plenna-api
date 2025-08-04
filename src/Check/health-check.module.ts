@@ -7,4 +7,4 @@ import { HealthCheckController } from "./health-check.controller";
     exports: []
 
 })
-export class BankAccountModule { }
+export class HealthCheckModule { }

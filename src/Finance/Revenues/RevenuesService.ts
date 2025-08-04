@@ -26,14 +26,7 @@ export default class RevenuesService {
     }
 
     async createRevenue(revenue: RevenueDTO, periodo: PeriodoDTO) {
-        if (
-            (
-                revenue.typeOfInstallment === 'P' 
-                && revenue.installments 
-                && revenue.installments > 0
-            )
-            || revenue.typeOfInstallment === 'F'
-        ) {
+        if ((revenue.typeOfInstallments === 'P' && revenue.installments && revenue.installments > 0) || revenue.typeOfInstallments === 'F') {
             revenue.hasInstallments = true;
         }
         

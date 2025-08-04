@@ -36,18 +36,10 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
                 let installment: T;
 
                 if (this.entity instanceof Revenue) {
-                    installment = new Revenue(
-                        this.entity.getName(),
-                        this.entity.getDescription(),
-                        this.entity.getValue(),
-                        newDate.toISODate() as string,
-                        this.entity.getIdCategory(),
-                        0, // A parcela não pode ter parcelas
-                        this.entity.getTypeOfInstallments(),
-                        this.entity.getId(),// Salvamos o id da conta de origem
-                        this.entity.getHasInstallments(),
-                        0 // Id é zero ao gerar a parcela
-                    ) as T;
+                    installment = new Revenue(this.entity) as T;
+                    installment.setInvoiceDueDate(newDate.toISODate());
+                    installment.setId(0);
+                    this.otherInstallments.push(installment);
                 } else if (this.entity instanceof Expense) {
                     installment = new Expense(this.entity) as T;
                     installment.setInvoiceDueDate(newDate.toISODate() as string);

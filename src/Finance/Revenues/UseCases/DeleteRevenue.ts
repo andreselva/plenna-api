@@ -22,40 +22,10 @@ export class DeleteRevenue {
                     result.push(await this.repository.deleteRevenue(installments[i].getId()));
                 }
 
-                const isSuccess = result.every(obj => obj.isSuccess === true);
-
-                if (isSuccess) {
-                    return {
-                        message: 'All installments have been deleted successfully.',
-                        statusCode: HttpStatus.OK,
-                        revenues: await this.getRevenuesUseCase.execute(periodo),
-                        isSuccess: true
-                    }
-                }
-
-                return {
-                    message: 'An error occurred while deleting the installments.',
-                    statusCode: HttpStatus.BAD_REQUEST,
-                    revenues: await this.getRevenuesUseCase.execute(periodo),
-                    isSuccess: false
-                }
+                return { revenues: await this.getRevenuesUseCase.execute(periodo) };
             }
         }
-
-        if ((await this.repository.deleteRevenue(Number(id))).isSuccess === true) {
-            return {
-                message: 'Revenue have been deleted successfully.',
-                statusCode: HttpStatus.OK,
-                revenues: await this.getRevenuesUseCase.execute(periodo),
-                isSuccess: true
-            }
-        }
-
-        return {
-            message: 'An error occurred while deleting the revenue.',
-            statusCode: HttpStatus.BAD_REQUEST,
-            revenues: await this.getRevenuesUseCase.execute(periodo),
-            isSuccess: false
-        }
+        await this.repository.deleteRevenue(Number(id));
+        return { revenues: await this.getRevenuesUseCase.execute(periodo) };
     }
 }

@@ -1,10 +1,9 @@
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { RevenueDTO } from "../DTOs/RevenueDTO";
 import Revenue from "../Entity/Revenue";
 import RevenuesRepository from "../RevenuesRepository";
 import DateCalculator from "src/Shared/Utils/DateCalculator";
 import { getChangedFields } from "src/Shared/Utils/CompareChanges";
-import { RevenueResponseDTO } from "../DTOs/RevenueResponseDTO";
 import { InstallmentUpdater } from "src/Finance/InstallmentsServices/InstallmentsUpdater";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import GetRevenues from "./GetRevenues";
@@ -18,7 +17,7 @@ export class UpdateRevenue {
 
     async execute(id: string, revenue: RevenueDTO, periodo: PeriodoDTO) {
         revenue.id = Number(id);
-        const entity = Revenue.fromDTO(revenue);
+        const entity = new Revenue(revenue);
 
         if (revenue.updateInstallments) {
             const installments = await this.searchRelatedInstallments(revenue);
@@ -38,9 +37,8 @@ export class UpdateRevenue {
                     //Recalculamos as datas conforme a parcela alterada
                     dates = DateCalculator.calculate(changedFields.invoiceDueDate, installments.length);
                 }
-                //Delega a atualização das parcelas para InstallmentUpdater. InstallmentUpdater é uma função higher order,
-                //então, ela recebe o método updateRevenue por parâmetro.
-                const results: RevenueResponseDTO[] = await InstallmentUpdater<Revenue, RevenueResponseDTO>({
+                //Delega a atualização das parcelas para InstallmentUpdater.
+                await InstallmentUpdater<Revenue, Revenue>({
                     items: installments,
                     changedFields,
                     dynamicFieldProcessors: {
@@ -49,64 +47,12 @@ export class UpdateRevenue {
                     updateFn: (item) => this.repository.updateRevenue(item),
                 });
 
-                //Se a atualização acima falhar, atualizamos somente a entity
-                if (!results || !(results.length > 0)) {
-                    const result = await this.repository.updateRevenue(entity);
-                    if (!result) {
-                        //Se a atualização da entity falhar, retornamos erro.
-                        return {
-                            message: 'Failed to update installments',
-                            statusCode: HttpStatus.BAD_REQUEST,
-                            revenues: await this.getRevenuesUseCase.execute(periodo),
-                            isSuccess: false,
-                        };
-                    }
-                    //Se a atualização entity for bem sucedida, retornamos sucesso, 
-                    //e sinalizamos que as demais parcelas não foram atualizadas.
-                    return {
-                        message: 'Installment updated successfully, but the update of the installments failed.',
-                        statusCode: HttpStatus.MULTI_STATUS,
-                        results: [
-                            {
-                                revenue: 'mainEntity',
-                                isSuccess: true,
-                            },
-                            {
-                                revenue: 'installments',
-                                isSuccess: false,
-                            }
-                        ],
-                        revenues: await this.getRevenuesUseCase.execute(periodo),
-                        isSucess: false,
-                    }
-                }
-                //Se a atualização das parcelas for bem sucedida, retornamos sucesso.
-                return {
-                    message: 'Installment updated successfully',
-                    statusCode: HttpStatus.OK,
-                    revenues: await this.getRevenuesUseCase.execute(periodo),
-                    isSuccess: true,
-                }
+                return await this.getRevenuesUseCase.execute(periodo);
             }
         }
 
-        const result = await this.repository.updateRevenue(entity);
-
-        if (!result) {
-            return {
-                message: 'Failed to update revenue',
-                statusCode: HttpStatus.BAD_REQUEST,
-                revenues: await this.getRevenuesUseCase.execute(periodo),
-                isSuccess: false,
-            };
-        }
-        //Se a atualização da parcela principal for bem sucedida, retornamos sucesso.
-        return {
-            message: 'Revenue updated successfully',
-            statusCode: HttpStatus.OK,
-            revenues: await this.getRevenuesUseCase.execute(periodo),
-            isSuccess: true,
-        };
+        await this.repository.updateRevenue(entity);
+        return await this.getRevenuesUseCase.execute(periodo);
     }
 
     private async searchRelatedInstallments(revenue: RevenueDTO) {

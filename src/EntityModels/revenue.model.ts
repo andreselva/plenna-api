@@ -1,6 +1,6 @@
-import EntityModelInterface from "./entity.model.interface";
+import EntityModel from "./entity.model";
 
-export default class RevenueModel implements EntityModelInterface {
+export default class RevenueModel extends EntityModel {
     id: number;
     name: string;
     description: string;
@@ -13,6 +13,7 @@ export default class RevenueModel implements EntityModelInterface {
     hasInstallments: boolean;
 
     constructor() {
+        super();
         this.id = 0;
         this.name = '';
         this.description = '';

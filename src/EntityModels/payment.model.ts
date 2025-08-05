@@ -1,6 +1,6 @@
-import EntityModelInterface from "./entity.model.interface";
+import EntityModel from "./entity.model";
 
-export default class PaymentModel implements EntityModelInterface {
+export default class PaymentModel extends EntityModel {
     id: number;
     value: number;
     payment_date: string;
@@ -8,6 +8,7 @@ export default class PaymentModel implements EntityModelInterface {
     payable_id: number;
 
     constructor() {
+        super();
         this.id = 0;
         this.value = 0;
         this.payment_date = '';

@@ -1,6 +1,6 @@
-import EntityModelInterface from "./entity.model.interface";
+import EntityModel from "./entity.model";
 
-export default class CategoryModel implements EntityModelInterface {
+export default class CategoryModel extends EntityModel {
     id?: number;
     name?: string;
     type?: string;
@@ -8,6 +8,7 @@ export default class CategoryModel implements EntityModelInterface {
     color?: string;
 
     constructor() {
+        super();
         this.id = 0;
         this.name = '';
         this.type = '';

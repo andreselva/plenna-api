@@ -1,6 +1,6 @@
-import EntityModelInterface from "./entity.model.interface";
+import EntityModel from "./entity.model";
 
-export default class UserModel implements EntityModelInterface {
+export default class UserModel extends EntityModel {
     id: number;
     username: string;
     password: string;
@@ -8,6 +8,7 @@ export default class UserModel implements EntityModelInterface {
     name: string;
 
     constructor() {
+        super();
         this.id = 0;
         this.username = '';
         this.password = '';

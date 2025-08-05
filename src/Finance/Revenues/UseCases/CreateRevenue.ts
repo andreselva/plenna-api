@@ -41,7 +41,7 @@ export default class CreateRevenue {
 
         }
         
-        return { revenues: await this.getRevenuesUseCase.execute(periodo) };
+        return await this.getRevenuesUseCase.execute(periodo);
     }
 
 }

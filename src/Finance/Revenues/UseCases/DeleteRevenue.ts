@@ -22,10 +22,10 @@ export class DeleteRevenue {
                     result.push(await this.repository.deleteRevenue(installments[i].getId()));
                 }
 
-                return { revenues: await this.getRevenuesUseCase.execute(periodo) };
+                return await this.getRevenuesUseCase.execute(periodo);
             }
         }
         await this.repository.deleteRevenue(Number(id));
-        return { revenues: await this.getRevenuesUseCase.execute(periodo) };
+        return await this.getRevenuesUseCase.execute(periodo);
     }
 }

@@ -1,7 +1,7 @@
 import { ExpenseStatus } from "src/Finance/Expenses/Types/expense.status.type";
-import EntityModelInterface from "./entity.model.interface";
+import EntityModel from "./entity.model";
 
-export default class ExpenseModel implements EntityModelInterface {
+export default class ExpenseModel extends EntityModel {
     id: number;
     name: string;
     description: string;
@@ -19,6 +19,7 @@ export default class ExpenseModel implements EntityModelInterface {
     linkToInvoice: boolean;
 
     constructor() {
+        super();
         this.id = 0;
         this.name = '';
         this.description = '';

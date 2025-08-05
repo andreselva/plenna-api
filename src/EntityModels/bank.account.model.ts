@@ -1,6 +1,6 @@
-import EntityModelInterface from "./entity.model.interface";
+import EntityModel from "./entity.model";
 
-export default class BankAccountModel implements EntityModelInterface {
+export default class BankAccountModel extends EntityModel {
     id: number;
     name: string;
     icon: string;
@@ -9,6 +9,7 @@ export default class BankAccountModel implements EntityModelInterface {
     generateInvoice: boolean;
 
     constructor() {
+        super();
         this.id = 0;
         this.name = '';
         this.icon = '';

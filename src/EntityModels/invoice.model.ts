@@ -1,7 +1,7 @@
 import { InvoiceStatus } from "src/Finance/Invoices/Types/invoice.status.type";
-import EntityModelInterface from "./entity.model.interface";
+import EntityModel from "./entity.model";
 
-export default class InvoiceModel implements EntityModelInterface {
+export default class InvoiceModel extends EntityModel {
     id: number;
     idBankAccount: number;
     name: string;
@@ -11,6 +11,7 @@ export default class InvoiceModel implements EntityModelInterface {
     status: InvoiceStatus
 
     constructor() {
+        super();
         this.id = 0;
         this.idBankAccount = 0;
         this.name = '';

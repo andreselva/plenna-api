@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { DateTime } from "luxon";
 import InvoiceSettingsDTO from "../DTOs/invoice.settings.dto";
 import InvoicesRepository from "../invoices.repository";
@@ -20,7 +20,6 @@ export default class CreateInvoiceUseCase {
      * Se for a primeira fatura, as datas são calculadas com base no dia atual.
      * @param {InvoiceSettingsDTO} invoiceSettings - As configurações da conta para a criação da fatura.
      * @returns {Promise<Invoice>} A entidade da fatura criada.
-     * @throws {InternalServerErrorException} Se ocorrer um erro durante o processo.
      */
     async create(invoiceSettings: InvoiceSettingsDTO): Promise<Invoice> {
         const lastInvoice = await this.repository.searchInvoice(invoiceSettings.idAccount);

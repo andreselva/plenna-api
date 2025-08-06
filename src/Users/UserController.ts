@@ -9,10 +9,8 @@ export class UsersController {
         private readonly service: UsersService
     ) { }
 
-    @Public()
     @Post('register')
     async createUser(@Body() user: UserDTO) {
         throw new UnauthorizedException("Você não pode usar esse serviço!");
-        // return await this.service.createUser(user);
     }
 }

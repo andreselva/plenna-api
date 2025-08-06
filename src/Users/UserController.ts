@@ -12,9 +12,7 @@ export class UsersController {
     @Public()
     @Post('register')
     async createUser(@Body() user: UserDTO) {
-        if (user.email !== "selvaandre99@gmail.com" && user.email !== "samanta.goin@gmail.com") {
-            throw new UnauthorizedException("Você não pode usar esse serviço!");
-        }
-        return await this.service.createUser(user);
+        throw new UnauthorizedException("Você não pode usar esse serviço!");
+        // return await this.service.createUser(user);
     }
 }

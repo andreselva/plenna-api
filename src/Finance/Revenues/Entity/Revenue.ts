@@ -41,6 +41,12 @@ export default class Revenue extends EntityModel implements IEntity {
         return revenue;
     }
 
+     /**
+     * Método "fábrica" estático que cria uma instância de BankAccount
+     * a partir de uma linha de dados crua vinda do banco de dados.
+     * @param row O objeto de dados vindo da query.
+     * @returns Uma nova instância de BankAccount.
+     */
     static fromRow(row: IRevenueRow) {
         const revenue = new Revenue();
         revenue.id = row.id;

@@ -53,6 +53,12 @@ export class Expense extends EntityModel implements IEntity {
         return expense;
     }
 
+     /**
+     * Método "fábrica" estático que cria uma instância de BankAccount
+     * a partir de uma linha de dados crua vinda do banco de dados.
+     * @param row O objeto de dados vindo da query.
+     * @returns Uma nova instância de BankAccount.
+     */
     static fromRow(row: IExpenseRow) {
         const expense = new Expense();
         expense.id = row.id;

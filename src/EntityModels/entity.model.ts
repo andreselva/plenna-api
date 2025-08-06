@@ -1,1 +1,3 @@
-export default abstract class EntityModel {}
+export default abstract class EntityModel {
+    
+}

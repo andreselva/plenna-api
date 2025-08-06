@@ -1,8 +1,8 @@
 export default class BankAccountsRowDTO {
-    id?: number;
+    id: number;
     name: string;
-    icon?: string;
+    icon: string;
     generateInvoice: boolean;
-    dueDate?: string;
-    closingDate?: string;
+    dueDate: string;
+    closingDate: string;
 }

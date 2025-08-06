@@ -12,9 +12,10 @@ export default class CategoriesRepository extends BaseRepository<Category>{
     /**
      * Busca todas as categorias no banco de dados.
      */
-    async getCategories() {
+    async getCategories(): Promise<Category[]> {
         const query = 'SELECT * FROM category';
-        return await this.database.select(query);
+        const rows = await this.database.select(query);
+        return this.extractToEntity(rows, Category)
     }
 
     /**

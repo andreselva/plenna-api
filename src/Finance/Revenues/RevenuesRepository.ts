@@ -1,45 +1,29 @@
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import Revenue from "./Entity/Revenue";
 import { Injectable } from "@nestjs/common";
-import { RevenueRowDTO } from "./DTOs/RevenueRowDTO";
-import { RevenueResponseDTO } from "./DTOs/RevenueResponseDTO";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
-import DateHelper from "src/Shared/Utils/DateHelper";
-import { RevenueDTO } from "./DTOs/RevenueDTO";
+import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
-export default class RevenuesRepository {
-    constructor(
-        private readonly database: MySQLDatabase,
-    ) { }
+export default class RevenuesRepository extends BaseRepository<Revenue> {
+    constructor(database: MySQLDatabase) {
+        super(database);
+    }
 
     async getRevenues(periodo: PeriodoDTO): Promise<Revenue[]> {
         const query = "SELECT * FROM revenue WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
-        const rows = await this.database.select(query, [periodo.start, periodo.end]) as RevenueDTO[];
-        return rows.map(row => new Revenue(row));
+        const rows = await this.database.select(query, [periodo.start, periodo.end]);
+        return this.extractToEntity(rows, Revenue);
     }
 
-    async createRevenue(revenue: Revenue): Promise<Revenue> {
-        const query = "INSERT INTO revenue (name, description, value, invoiceDueDate, idCategory, installments, typeOfInstallments, sourceAccountId, hasInstallments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        const params = [
-            revenue.getName(),
-            revenue.getDescription(),
-            revenue.getValue(),
-            revenue.getInvoiceDueDate(),
-            revenue.getIdCategory(),
-            revenue.getInstallments(),
-            revenue.getTypeOfInstallments(),
-            revenue.getSourceAccountId(),
-            revenue.getHasInstallments()
-        ];
-        const result = await this.database.execute(query, params);
-
-        if (result.affectedRows > 0) {
-            revenue.setId(result.insertId);
+    async saveRevenue(revenue: Revenue): Promise<Revenue> {
+        const result = await this.save(revenue);
+        if (result.affectedRows > 0 && revenue.id === 0) {
+            revenue.id = result.insertId;
             return revenue;
         }
+        return revenue;
 
-        throw new Error("Failed to create revenue");
     }
 
     async deleteRevenue(id: number) {
@@ -50,26 +34,6 @@ export default class RevenuesRepository {
             return { isSuccess: true, message: 'Revenue deleted successfully' };
         }
         throw new Error('Failed to delete revenue');
-    }
-
-    async updateRevenue(revenue: Revenue): Promise<Revenue> {
-        const query = "UPDATE revenue SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ? WHERE id = ?";
-        const result = await this.database.execute(
-            query,
-            [
-                revenue.getName(),
-                revenue.getDescription(),
-                revenue.getValue(),
-                revenue.getInvoiceDueDate(),
-                revenue.getIdCategory(),
-                revenue.getId()
-            ]
-        )
-
-        if (result.affectedRows > 0) {
-            return new Revenue(revenue);
-        }
-        throw new Error('Failed to update revenue');
     }
 
     async searchForRelatedInstallments(consideredId: number, revenueId: number = 0): Promise<Revenue[]> {
@@ -83,7 +47,7 @@ export default class RevenuesRepository {
 
         query += " ORDER BY id ASC";
     
-        const rows = await this.database.select(query, params) as RevenueDTO[];
-        return rows.map(row => new Revenue(row));
+        const rows = await this.database.select(query, params);
+        return this.extractToEntity(rows, Revenue);
     }
 }

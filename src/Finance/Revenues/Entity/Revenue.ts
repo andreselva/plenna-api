@@ -1,7 +1,10 @@
 import DateHelper from "src/Shared/Utils/DateHelper";
 import { RevenueDTO } from "../DTOs/RevenueDTO";
+import EntityModel from "src/EntityModels/entity.model";
+import IEntity from "src/Shared/interfaces/IEntity";
+import IRevenueRow from "src/Shared/interfaces/IRevenueRow";
 
-export default class Revenue {
+export default class Revenue extends EntityModel implements IEntity {
     public name: string;
     public description: string;
     public value: number;
@@ -9,78 +12,59 @@ export default class Revenue {
     public idCategory: number
     public installments: number;
     public typeOfInstallments: string = 'U';
-    public sourceAccountId: number = 0;
+    public sourceAccountId: number;
     public hasInstallments: boolean = false;
-    public id?: number;
+    public id: number;
 
-    constructor(dto: RevenueDTO | Revenue) {
-        if (dto instanceof Revenue) {
-            Object.assign(this, dto);
-        } else {
-            this.name = dto.name;
-            this.description = dto.description;
-            this.value = dto.value;
-            this.invoiceDueDate = DateHelper.toISODate(dto.invoiceDueDate) ?? '';
-            this.idCategory = dto.idCategory;
-            this.installments = dto.installments;
-            this.typeOfInstallments = dto.typeOfInstallments;
-            this.sourceAccountId = dto.sourceAccountId ?? 0;
-            this.hasInstallments = Boolean(dto.hasInstallments);
-            this.id = dto.id ?? 0;
-        }
+    constructor() {
+        super();
     }
 
-    getName(): string {
-        return this.name;
+    static fromEntity(entity: Revenue) {
+        const newRevenue = new Revenue();
+        Object.assign(newRevenue, entity);
+        return newRevenue;
     }
 
-    getDescription(): string {
-        return this.description;
+    static fromDTO(dto: RevenueDTO) {
+        const revenue = new Revenue();
+        revenue.name = dto.name;
+        revenue.description = dto.description;
+        revenue.invoiceDueDate = dto.invoiceDueDate;
+        revenue.idCategory = dto.idCategory ?? 0;
+        revenue.installments = dto.installments ?? 0;
+        revenue.typeOfInstallments = dto.typeOfInstallments;
+        revenue.sourceAccountId = dto.sourceAccountId ?? 0;
+        revenue.hasInstallments = dto.hasInstallments;
+        revenue.value = dto.value;
+        revenue.id = dto.id ?? 0;
+        return revenue;
     }
 
-    getValue(): number {
-        return this.value;
+    static fromRow(row: IRevenueRow) {
+        const revenue = new Revenue();
+        revenue.id = row.id;
+        revenue.name = row.name;
+        revenue.description = row.description;
+        revenue.value = row.value;
+        revenue.invoiceDueDate = DateHelper.toISODate(row.invoiceDueDate) as string;
+        revenue.idCategory = row.idCategory;
+        revenue.installments = row.installments;
+        revenue.typeOfInstallments = row.typeOfInstallments;
+        revenue. sourceAccountId = row.sourceAccountId;
+        revenue.hasInstallments = Boolean(row.hasInstallments);
+        return revenue;
     }
 
-    getInvoiceDueDate(): string {
-        return this.invoiceDueDate;
+    getTableName(): string {
+        return 'revenue';
     }
 
-    getIdCategory(): number {
-        return this.idCategory;
+    getPrimaryKey(): string {
+        return 'id';
     }
 
-    getId() {
-        return this.id ?? 0;
-    }
-
-    getInstallments() {
-        return this.installments ?? 0;
-    }
-
-    getTypeOfInstallments() {
-        return this.typeOfInstallments ?? 'U';
-    }
-
-    getSourceAccountId() {
-        return this.sourceAccountId ?? 0;
-    }
-
-    getHasInstallments() {
-        return this.hasInstallments;
-    }
-
-    setId(id: number) {
-        if (this.id === undefined || !this.id) {
-            this.id = id;
-        }
-    }
-
-    setInvoiceDueDate(date: string) {
-        this.invoiceDueDate = date;
-    }
-
-    setSourceAccountId(id: number) {
-        this.sourceAccountId = id;
+    getIgnoredProperties(): string[] {
+        return [];
     }
 }

@@ -15,9 +15,9 @@ export class UpdateRevenue {
         private readonly getRevenuesUseCase: GetRevenues
     ) { }
 
-    async execute(id: string, revenue: RevenueDTO, periodo: PeriodoDTO) {
-        revenue.id = Number(id);
-        const entity = new Revenue(revenue);
+    async execute(id: number, revenue: RevenueDTO, periodo: PeriodoDTO) {
+        revenue.id = id;
+        const entity = Revenue.fromDTO(revenue);
 
         if (revenue.updateInstallments) {
             const installments = await this.searchRelatedInstallments(revenue);

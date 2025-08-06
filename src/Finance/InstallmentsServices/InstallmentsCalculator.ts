@@ -36,7 +36,7 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
                 let installment: T;
 
                 if (this.entity instanceof Revenue) {
-                    installment = new Revenue(this.entity) as T;
+                    installment = Revenue.fromEntity(this.entity) as T;
                     installment.invoiceDueDate = newDate.toISODate();
                     installment.id = 0;
                     this.otherInstallments.push(installment);

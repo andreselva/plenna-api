@@ -7,7 +7,7 @@ import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import { Expense } from "src/EntityModels/Expense";
 
 @Injectable()
-export class ExpensesRepository extends BaseRepository<Expense>{
+export class ExpensesRepository extends BaseRepository<Expense> {
     constructor(database: MySQLDatabase) {
         super(database);
     }

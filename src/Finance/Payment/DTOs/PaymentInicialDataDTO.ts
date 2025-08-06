@@ -1,9 +1,24 @@
+import { IsDateString, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { PaymentType } from "../Types/payment.type";
 
 export default class PaymentInicialDataDTO {
-    public value: number;
-    public paymentDate: string;
+    @IsNumber({}, { message: 'Invalid value!' })
+    @IsNotEmpty({ message: 'Invalid value.'})
+    value: number;
+
+    @IsDateString({}, { message: 'Invalid payment date!' })
+    @IsNotEmpty({ message: 'Invalid payment date.' })
+    paymentDate: string;
+
+    @IsInt({ message: 'Invalid id payment type!' })
+    @IsNotEmpty({ message: 'Invalid id payment type.'})
     public payableId: number;
+
+    @IsString({ message: 'Invalid payment type!' })
+    @IsNotEmpty({ message: 'Invalid payment type.' })
     public payableType: PaymentType;
-    public id?: number;
+
+    @IsOptional()
+    @IsInt({ message: 'Invalid ID!' })
+    public id: number;
 }

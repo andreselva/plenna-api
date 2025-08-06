@@ -16,9 +16,9 @@ export default class GetPayments {
             }
 
             payments.map(payment => {
-                let paymentDate = payment.getPaymentDate();
+                let paymentDate = payment.payment_date;
                 paymentDate = DateHelper.toISODate(paymentDate) ?? '';
-                payment.setPaymentDate(paymentDate);
+                payment.payment_date = paymentDate;
             })
 
             return { payments: payments };

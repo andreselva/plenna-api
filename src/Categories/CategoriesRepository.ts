@@ -1,12 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import Category from "./Entity/Category";
+import CategoryModel from "src/EntityModels/category.model";
+import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
-export default class CategoriesRepository {
-    constructor(
-        private readonly database: MySQLDatabase,
-    ) {}
+export default class CategoriesRepository extends BaseRepository<CategoryModel>{
+    constructor(database: MySQLDatabase) {
+        super(database, 'category', 'id');
+    }
 
     /**
      * Busca todas as categorias no banco de dados.
@@ -20,9 +22,13 @@ export default class CategoriesRepository {
      * Cria uma nova categoria.
      */
     async createCategory(category: Category) {
-        const query = 'INSERT INTO category (name, description, type, color) VALUES (?, ?, ?, ?)';
-        const values = [category.getName(), category.getDescription(), category.getType(), category.getColor()];
-        const result = await this.database.execute(query, values);
+        const categoryModel = new CategoryModel();
+        categoryModel.id = category.getId();
+        categoryModel.description = category.getDescription();
+        categoryModel.name = category.getName();
+        categoryModel.type = category.getType();
+        categoryModel.color = category.getColor();
+        const result = await this.save(categoryModel);
 
         if (result.affectedRows > 0) {
             return {
@@ -33,7 +39,6 @@ export default class CategoriesRepository {
                 color: category.getColor(),
             };
         }
-        // Este erro é específico da lógica de negócio, então faz sentido lançá-lo aqui.
         throw new Error('Falha ao criar a categoria.');
     }
 

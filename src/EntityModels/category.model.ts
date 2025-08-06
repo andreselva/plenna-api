@@ -14,12 +14,4 @@ export default class CategoryModel extends EntityModel {
         this.type = '';
         this.description = ''
     }
-
-    setTableName(): string {
-        return 'category';
-    }
-
-    setPrimaryKey(): string {
-        return 'id';
-    }
 }

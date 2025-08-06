@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import Revenue from "../Entity/Revenue";
 import { RevenueDTO } from "../DTOs/RevenueDTO";
 import RevenuesRepository from "../RevenuesRepository";
 import InstallmentsCalculator from "src/Finance/InstallmentsServices/InstallmentsCalculator";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import GetRevenues from "./GetRevenues";
+import Revenue from "src/EntityModels/Revenue";
 
 @Injectable()
 export default class CreateRevenue {

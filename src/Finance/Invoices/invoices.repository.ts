@@ -3,11 +3,11 @@ import Invoice from "./Entity/invoice";
 import { Injectable } from "@nestjs/common";
 import InvoiceRowDTO from "./DTOs/invoice.row.dto";
 import DateHelper from "src/Shared/Utils/DateHelper";
-import { Expense } from "../Expenses/Entity/Expense";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { ExpenseDTO } from "../Expenses/DTOs/ExpenseDTO";
 import { PaymentType } from "../Payment/Types/payment.type";
 import QueryBuilder from "src/Shared/QueryBuilder/QueryBuilder";
+import { Expense } from "src/EntityModels/Expense";
 
 @Injectable()
 export default class InvoicesRepository {
@@ -89,7 +89,7 @@ export default class InvoicesRepository {
 
     async updateExpense(expense: Expense) {
         try {
-            const { sql, values } = QueryBuilder.buildQuery(expense, Expense.getTableName(), Expense.getPrimaryKey(), Expense.getIgnoredProperties())
+            const { sql, values } = QueryBuilder.buildQuery(expense, expense.getTableName(), expense.getPrimaryKey(), expense.getIgnoredProperties())
             await this.database.execute(sql, values);
         } catch (err) {
             throw new Error("Erro ao atualizar despesa na fatura! Erro: " + err);

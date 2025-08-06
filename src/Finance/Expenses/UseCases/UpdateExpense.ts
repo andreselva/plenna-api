@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { ExpenseDTO } from "../DTOs/ExpenseDTO";
-import { Expense } from "../Entity/Expense";
 import { ExpensesRepository } from "../ExpensesRepository";
 import { getChangedFields } from "src/Shared/Utils/CompareChanges";
 import DateCalculator from "src/Shared/Utils/DateCalculator";
@@ -9,6 +8,7 @@ import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
 import AssociateExpensesToInvoiceUseCase from "src/Finance/Invoices/UseCases/AssociateExpensesToInvoice";
 import { ExpenseStatus } from "../Types/expense.status.type";
+import { Expense } from "src/EntityModels/Expense";
 
 @Injectable()
 export class UpdateExpense {

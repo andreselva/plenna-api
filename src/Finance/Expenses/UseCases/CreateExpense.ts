@@ -1,11 +1,11 @@
 import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 import { ExpensesRepository } from "../ExpensesRepository";
-import { Expense } from "../Entity/Expense";
 import { Injectable } from "@nestjs/common";
 import InstallmentsCalculator from "src/Finance/InstallmentsServices/InstallmentsCalculator";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
 import AssociateExpensesToInvoiceUseCase from "src/Finance/Invoices/UseCases/AssociateExpensesToInvoice";
+import { Expense } from "src/EntityModels/Expense";
 
 @Injectable()
 export class CreateExpense {

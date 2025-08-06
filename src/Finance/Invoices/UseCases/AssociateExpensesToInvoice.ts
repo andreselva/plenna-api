@@ -1,10 +1,10 @@
 import { Injectable, Logger } from "@nestjs/common";
 import InvoicesRepository from "../invoices.repository";
-import { Expense } from "src/Finance/Expenses/Entity/Expense";
 import GetInvoicesUseCase from "./GetInvoicesUseCase";
 import Invoice from "../Entity/invoice";
 import CreateInvoiceUseCase from "./CreateInvoiceUseCase";
 import InvoiceSettingsDTO from "../DTOs/invoice.settings.dto";
+import { Expense } from "src/EntityModels/Expense";
 
 @Injectable()
 export default class AssociateExpensesToInvoiceUseCase {

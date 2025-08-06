@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ExpensesRepository } from "../ExpensesRepository";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
-import { Expense } from "../Entity/Expense";
+import { Expense } from "src/EntityModels/Expense";
 
 @Injectable()
 export class GetExpenses {

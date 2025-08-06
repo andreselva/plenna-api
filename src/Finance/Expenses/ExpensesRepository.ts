@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { Expense } from "./Entity/Expense";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 import { ExpenseStatus } from "./Types/expense.status.type";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
+import { Expense } from "src/EntityModels/Expense";
 
 @Injectable()
 export class ExpensesRepository extends BaseRepository<Expense>{

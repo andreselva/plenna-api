@@ -1,8 +1,8 @@
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
-import Revenue from "./Entity/Revenue";
 import { Injectable } from "@nestjs/common";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
+import Revenue from "src/EntityModels/Revenue";
 
 @Injectable()
 export default class RevenuesRepository extends BaseRepository<Revenue> {

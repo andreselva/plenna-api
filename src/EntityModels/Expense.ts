@@ -1,9 +1,9 @@
 import EntityModel from "src/EntityModels/entity.model";
-import { ExpenseDTO } from "../DTOs/ExpenseDTO";
-import { ExpenseStatus } from "../Types/expense.status.type";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import IExpenseRow from "src/Shared/interfaces/IExpenseRow";
 import IEntity from "src/Shared/interfaces/IEntity";
+import { ExpenseStatus } from "src/Finance/Expenses/Types/expense.status.type";
+import { ExpenseDTO } from "src/Finance/Expenses/DTOs/ExpenseDTO";
 
 export class Expense extends EntityModel implements IEntity {
     public id: number;

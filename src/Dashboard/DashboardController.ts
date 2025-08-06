@@ -11,9 +11,8 @@ export class DashboardController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    async getDashboardData(
-        @Headers('periodo') periodo: string
-        // @Req() req -> pra usar dps
+    async getDashboardData(@
+        Headers('periodo') periodo: string,// @Req() req -> pra usar dps
     ) {
         // const user = req.user; -> pra usar depois
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;

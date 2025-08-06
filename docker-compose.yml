@@ -14,7 +14,7 @@ services:
       - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=password
-      - DB_NAME=system
+      - DB_NAME=railway
       - JWT_SECRET=samantinha
       - JWT_REFRESH_SECRET=samantinha
     depends_on:
@@ -30,7 +30,7 @@ services:
     container_name: mysql-db
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: system
+      MYSQL_DATABASE: railway
     volumes:
       - mysql-data:/var/lib/mysql
     ports:

@@ -33,6 +33,6 @@ export default class CategoriesService {
     }
 
     async updateCategory(id: string, category: CategoryDTO) {
-        return await this.updateCategoryUseCase.execute(id, category);
+        return await this.updateCategoryUseCase.execute(Number(id), category);
     }
 }

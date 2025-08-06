@@ -1,11 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
-import Category from "./Entity/Category";
-import CategoryModel from "src/EntityModels/category.model";
+import Category from "src/EntityModels/Category";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
-export default class CategoriesRepository extends BaseRepository<CategoryModel>{
+export default class CategoriesRepository extends BaseRepository<Category>{
     constructor(database: MySQLDatabase) {
         super(database, 'category', 'id');
     }
@@ -21,23 +20,12 @@ export default class CategoriesRepository extends BaseRepository<CategoryModel>{
     /**
      * Cria uma nova categoria.
      */
-    async createCategory(category: Category) {
-        const categoryModel = new CategoryModel();
-        categoryModel.id = category.getId();
-        categoryModel.description = category.getDescription();
-        categoryModel.name = category.getName();
-        categoryModel.type = category.getType();
-        categoryModel.color = category.getColor();
-        const result = await this.save(categoryModel);
+    async createCategory(category: Category): Promise<Category> {
+        const result = await this.save(category);
 
         if (result.affectedRows > 0) {
-            return {
-                id: result.insertId,
-                name: category.getName(),
-                description: category.getDescription(),
-                type: category.getType(),
-                color: category.getColor(),
-            };
+            category.id = result.insertId;
+            return category;
         }
         throw new Error('Falha ao criar a categoria.');
     }
@@ -55,22 +43,10 @@ export default class CategoriesRepository extends BaseRepository<CategoryModel>{
         throw new Error('Falha ao deletar a categoria, possivelmente não foi encontrada.');
     }
 
-    /**
-     * Atualiza uma categoria pelo ID.
-     */
-    async updateCategory(id: number, category: Category) {
-        const query = "UPDATE category SET name = ?, type = ?, description = ?, color = ? WHERE id = ?";
-        const params = [category.getName(), category.getType(), category.getDescription(), category.getColor(), id];
-        const result = await this.database.execute(query, params);
-        
+    async updateCategory(category: Category): Promise<Category> {
+        const result = await this.save(category);
         if (result.affectedRows > 0) {
-            return {
-                id: id,
-                name: category.getName(),
-                description: category.getDescription(),
-                type: category.getType(),
-                color: category.getColor()
-            };
+            return category;
         }
         throw new Error('Falha ao atualizar a categoria, possivelmente não foi encontrada.');
     }

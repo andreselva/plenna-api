@@ -3,16 +3,15 @@ import EntityModel from "src/EntityModels/entity.model";
 import QueryBuilder from "../QueryBuilder/QueryBuilder";
 import DataMapper from "../mapper/DataMapper";
 import { IEntityFactory } from "../interfaces/IEntityFactory";
+import IEntity from "../interfaces/IEntity";
 
 export default abstract class BaseRepository<T extends EntityModel> {
     constructor(
         protected readonly database: MySQLDatabase,
-        private readonly tableName: string,
-        private readonly primaryKey: string
     ) {}
 
-    async save(entity: T) {
-        const { sql, values } = QueryBuilder.buildQuery(entity, this.tableName, this.primaryKey);
+    async save(entity: IEntity) {
+        const { sql, values } = QueryBuilder.buildQuery(entity, entity.getTableName(), entity.getPrimaryKey(), entity.getIgnoredProperties());
         return await this.database.execute(sql, values);
     }
 

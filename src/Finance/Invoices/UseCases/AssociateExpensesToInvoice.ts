@@ -46,7 +46,7 @@ export default class AssociateExpensesToInvoiceUseCase {
         invoices.forEach(inv => availableInvoices.set(inv.getDueDate(), inv));
 
         for (const expense of expenses) {
-            const dueDate = expense.getInvoiceDueDate();
+            const dueDate = expense.invoiceDueDate;
             let invoiceToExpense = availableInvoices.get(dueDate);
 
             // Se a fatura não existir, cria e a adiciona ao mapa local
@@ -68,11 +68,11 @@ export default class AssociateExpensesToInvoiceUseCase {
                     this.logger.error(`A fatura para a data ${dueDate} foi encontrada/criada mas não possui um ID.`);
                     continue;
                 }
-                expense.setIdInvoice(invoiceId);
-                expense.setInvoiceDueDate(invoiceToExpense.getDueDate());
+                expense.idInvoice = invoiceId;
+                expense.invoiceDueDate = invoiceToExpense.getDueDate();
                 await this.repository.updateExpense(expense);
             } else {
-                this.logger.error(`Não foi possível encontrar ou criar uma fatura para a despesa ${expense.getId()}`);
+                this.logger.error(`Não foi possível encontrar ou criar uma fatura para a despesa ${expense.id}`);
             }
         }
     }
@@ -86,7 +86,7 @@ export default class AssociateExpensesToInvoiceUseCase {
         const grouped = new Map<number, Expense[]>();
 
         for (const expense of expenses) {
-            const idCreditCard = expense.getIdCreditCard();
+            const idCreditCard = expense.idCreditCard;
             if (!grouped.has(idCreditCard)) {
                 grouped.set(idCreditCard, []);
             }

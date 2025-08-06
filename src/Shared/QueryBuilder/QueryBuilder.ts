@@ -14,12 +14,16 @@ export default class QueryBuilder {
      * @param entity O objeto com os dados.
      * @param tableName O nome da tabela.
      * @param primaryKey O nome da coluna da chave primária.
+     * @param ignoreProperties As propriedades do objeto que devem ser ignoradas.
+
      */
-    static buildQuery(entity: object, tableName: string, primaryKey: string): { sql: string, values: any[] } {
+    static buildQuery(entity: object, tableName: string, primaryKey: string, ignoreProperties: string[] = []): { sql: string, values: any[] } {
         const allProperties = Object.keys(entity);
 
         const columns = allProperties.filter(prop =>
-            typeof entity[prop as keyof object] !== 'function' && prop !== primaryKey
+            typeof entity[prop as keyof object] !== 'function' && 
+            prop !== primaryKey &&
+            !ignoreProperties.includes(prop)
         );
 
         const primaryKeyValue = entity[primaryKey as keyof object];

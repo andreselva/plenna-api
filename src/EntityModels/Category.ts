@@ -1,5 +1,6 @@
 import { CategoryType } from "src/enum/category-type.enum";
 import EntityModel from "./entity.model";
+import IEntity from "src/Shared/interfaces/IEntity";
 
 interface CategoryRow {
     id: number;
@@ -9,7 +10,7 @@ interface CategoryRow {
     color: string;
 }
 
-export default class Category extends EntityModel {
+export default class Category extends EntityModel implements IEntity {
     public name: string;
     public description: string;
     public type: CategoryType;
@@ -35,5 +36,17 @@ export default class Category extends EntityModel {
         category.description = row.description;
 
         return category;
+    }
+
+    getTableName(): string {
+        return 'category';
+    }
+
+    getPrimaryKey(): string {
+        return 'id';
+    }
+
+    getIgnoredProperties(): string[] {
+        return [];
     }
 }

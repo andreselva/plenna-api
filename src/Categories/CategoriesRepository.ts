@@ -6,7 +6,7 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 @Injectable()
 export default class CategoriesRepository extends BaseRepository<Category>{
     constructor(database: MySQLDatabase) {
-        super(database, 'category', 'id');
+        super(database);
     }
 
     /**

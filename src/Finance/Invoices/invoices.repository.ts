@@ -7,6 +7,7 @@ import { Expense } from "../Expenses/Entity/Expense";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { ExpenseDTO } from "../Expenses/DTOs/ExpenseDTO";
 import { PaymentType } from "../Payment/Types/payment.type";
+import QueryBuilder from "src/Shared/QueryBuilder/QueryBuilder";
 
 @Injectable()
 export default class InvoicesRepository {
@@ -88,7 +89,8 @@ export default class InvoicesRepository {
 
     async updateExpense(expense: Expense) {
         try {
-            await this.database.execute("UPDATE expense SET idInvoice = ?, invoiceDueDate = ? WHERE id = ?", [expense.getIdInvoice(), expense.getInvoiceDueDate(), expense.getId()]);
+            const { sql, values } = QueryBuilder.buildQuery(expense, Expense.getTableName(), Expense.getPrimaryKey(), Expense.getIgnoredProperties())
+            await this.database.execute(sql, values);
         } catch (err) {
             throw new Error("Erro ao atualizar despesa na fatura! Erro: " + err);
         }

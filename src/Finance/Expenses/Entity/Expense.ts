@@ -1,9 +1,12 @@
-import DateHelper from "src/Shared/Utils/DateHelper";
+import EntityModel from "src/EntityModels/entity.model";
 import { ExpenseDTO } from "../DTOs/ExpenseDTO";
 import { ExpenseStatus } from "../Types/expense.status.type";
+import DateHelper from "src/Shared/Utils/DateHelper";
+import IExpenseRow from "src/Shared/interfaces/IExpenseRow";
+import IEntity from "src/Shared/interfaces/IEntity";
 
-export class Expense {
-    public id?: number;
+export class Expense extends EntityModel implements IEntity {
+    public id: number;
     public name: string;
     public description: string;
     public value: number;
@@ -11,118 +14,73 @@ export class Expense {
     public idCategory: number;
     public idCreditCard: number = 0;
     public installments: number = 0;
-    public typeOfInstallment: string = 'U';
+    public typeOfInstallment: string;
     public sourceAccountId: number;
     public hasInstallments: boolean;
     public linkToInvoice: boolean;
     public idInvoice: number;
-    public status: ExpenseStatus = ExpenseStatus.PENDING;
+    public status: ExpenseStatus;
     public totalPaid?: number;
+    public updateInstallments?: boolean;
 
-    constructor(dto: ExpenseDTO | Expense) {
-        if (dto instanceof Expense) {
-            // Se for uma instância de Expense, copia os valores diretamente
-            Object.assign(this, dto);
-        } else {
-            this.name = dto.name;
-            this.description = dto.description;
-            this.value = Number(dto.value);
-            this.invoiceDueDate = DateHelper.toISODate(dto.invoiceDueDate) ?? '';
-            this.idCategory = Number(dto.idCategory);
-            this.idCreditCard = Number(dto.idCreditCard);
-            this.installments = Number(dto.installments);
-            this.typeOfInstallment = dto.typeOfInstallment;
-            this.sourceAccountId = dto.sourceAccountId ? Number(dto.sourceAccountId) : 0;
-            this.hasInstallments = Boolean(dto.hasInstallments);
-            this.linkToInvoice = Boolean(dto.linkToInvoice);
-            this.idInvoice = dto.idInvoice !== "" ? Number(dto.idInvoice) : 0;
-            this.status = Object.values(ExpenseStatus).includes(dto.status) ? dto.status : ExpenseStatus.PENDING;
-            this.id = dto.id;
-            this.totalPaid = dto.totalPaid;
-        }
+    constructor() {
+        super();
     }
 
-    getName() {
-        return this.name;
+    static fromEntity(entity: Expense) {
+        const newExpense = new Expense(); 
+        Object.assign(newExpense, entity);
+        return newExpense;
     }
 
-    getDescription() {
-        return this.description;
+    static fromDTO(dto: ExpenseDTO) {
+        const expense = new Expense();
+        expense.id = dto.id ?? 0;
+        expense.name = dto.name;
+        expense.description = dto.description;
+        expense.value = dto.value;
+        expense.invoiceDueDate = dto.invoiceDueDate;
+        expense.idCategory = dto.idCategory;
+        expense.idCreditCard = dto.idCreditCard ?? 0;
+        expense.installments = dto.installments ?? 0;
+        expense.typeOfInstallment = dto.typeOfInstallment;
+        expense.sourceAccountId = dto.sourceAccountId ?? 0;
+        expense.hasInstallments = dto.hasInstallments;
+        expense.linkToInvoice = dto.linkToInvoice;
+        expense.idInvoice = dto.idInvoice ?? 0;
+        expense.status = dto.status ?? ExpenseStatus.PENDING;
+        expense.totalPaid = dto.totalPaid ?? 0;
+        return expense;
     }
 
-    getValue() {
-        return this.value;
+    static fromRow(row: IExpenseRow) {
+        const expense = new Expense();
+        expense.id = row.id;
+        expense.name = row.name;
+        expense.description = row.description;
+        expense.value = row.value;
+        expense.invoiceDueDate = DateHelper.toISODate(row.invoiceDueDate) as string;
+        expense.idCategory = row.idCategory;
+        expense.idCreditCard = row.idCreditCard;
+        expense.installments = row.installments;
+        expense.typeOfInstallment = row.typeOfInstallment;
+        expense.sourceAccountId = row.sourceAccountId;
+        expense.hasInstallments = Boolean(row.hasInstallments);
+        expense.linkToInvoice = Boolean(row.linkToInvoice);
+        expense.idInvoice = row.idInvoice;
+        expense.status = row.status;
+        return expense;
     }
 
-    getInvoiceDueDate() {
-        return this.invoiceDueDate;
+    getTableName() {
+        return 'expense'; 
     }
 
-    getIdCategory() {
-        return this.idCategory;
+    getPrimaryKey() {
+        return 'id';
     }
 
-    getId(): number {
-        return this.id ?? 0;
-    }
-
-    getIdCreditCard(): number {
-        return this.idCreditCard ?? 0;
-    }
-
-    getInstallments() {
-        return this.installments ?? 0;
-    }
-
-    getTypeOfInstallments() {
-        return this.typeOfInstallment ?? 'U';
-    }
-
-    getSourceAccountId() {
-        return this.sourceAccountId ?? 0;
-    }
-
-    getHasInstallments() {
-        return this.hasInstallments;
-    }
-
-    getLinkToInvoice() {
-        return this.linkToInvoice;
-    }
-
-    getIdInvoice() {
-        return this.idInvoice;
-    }
-
-    getStatus(): ExpenseStatus {
-        return this.status;
-    }
-
-    setStatus(status: ExpenseStatus) {
-        this.status = status;
-    }
-
-    setId(id: number) {
-        this.id = id;
-    }
-
-    setIdInvoice(id: number) {
-        this.idInvoice = id;
-    }
-
-    setSourceAccountId(id: number) {
-        this.sourceAccountId = id;
-    }
-
-    setInvoiceDueDate(date: string) {
-        this.invoiceDueDate = date;
-    }
-
-    setIdCreditCard(id: number) {
-        this.idCreditCard = id;
-    }
-
-    setTotalPaid(totalPaid: number) {
-        this.totalPaid = totalPaid;
+    getIgnoredProperties() {
+        return ['totalPaid', 'updateInstallments'];
     }
 }

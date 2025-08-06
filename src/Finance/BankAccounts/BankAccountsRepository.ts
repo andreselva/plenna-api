@@ -5,11 +5,8 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
 export default class BankAccountsRepository extends BaseRepository<BankAccount>{
-    private static readonly TABLE_NAME = 'bank_account';
-    private static readonly PRIMARY_KEY = 'id';
-
     constructor(database: MySQLDatabase) { 
-        super(database, BankAccountsRepository.TABLE_NAME, BankAccountsRepository.PRIMARY_KEY)
+        super(database)
     }
 
     async getBankAccounts(): Promise<BankAccount[]> {

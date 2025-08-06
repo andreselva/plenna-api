@@ -1,3 +1,4 @@
+import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
 
 interface BankAccountRow {
@@ -9,7 +10,7 @@ interface BankAccountRow {
     closingDate: string;
 }
 
-export default class BankAccount extends EntityModel {
+export default class BankAccount extends EntityModel implements IEntity {
     id: number;
     name: string;
     generateInvoice: boolean;
@@ -44,5 +45,17 @@ export default class BankAccount extends EntityModel {
         account.closingDate = row.closingDate;
 
         return account;
+    }
+
+    public getTableName(): string {
+        return 'bank_account';
+    }
+
+    public getPrimaryKey(): string {
+        return 'id';
+    }
+
+    public getIgnoredProperties(): string[] {
+        return [];
     }
 }

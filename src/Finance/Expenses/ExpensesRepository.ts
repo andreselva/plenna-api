@@ -1,53 +1,30 @@
 import { Injectable } from "@nestjs/common";
-import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import { Expense } from "./Entity/Expense";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 import { ExpenseStatus } from "./Types/expense.status.type";
+import BaseRepository from "src/Shared/Repositories/BaseRepository";
+import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 
 @Injectable()
-export class ExpensesRepository {
-    constructor(
-        private readonly database: MySQLDatabase,
-    ) { }
-
-    async getExpenses(periodo: PeriodoDTO): Promise<Expense[]> {
-        try {
-            const query = "SELECT * FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
-            const rows = await this.database.select(query, [periodo.start, periodo.end]) as ExpenseDTO[];
-            return rows.map(row => new Expense(row));
-        } catch (error) {
-            throw new Error(`Failed to get expenses. Error: ${error.message}`)
-        }
+export class ExpensesRepository extends BaseRepository<Expense>{
+    constructor(database: MySQLDatabase) {
+        super(database);
     }
 
-    async createExpense(expense: Expense): Promise<Expense> {
-        const query = "INSERT INTO expense (name, description, value, invoiceDueDate, idCategory, idCreditCard, installments, typeOfInstallment, sourceAccountId, hasInstallments, linkToInvoice, idInvoice, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        const result = await this.database.execute(
-            query,
-            [
-                expense.getName(),
-                expense.getDescription(),
-                expense.getValue(),
-                expense.getInvoiceDueDate(),
-                expense.getIdCategory(),
-                expense.getIdCreditCard(),
-                expense.getInstallments(),
-                expense.getTypeOfInstallments(),
-                expense.getSourceAccountId(),
-                expense.getHasInstallments(),
-                expense.getLinkToInvoice(),
-                expense.getIdInvoice(),
-                expense.getStatus()
-            ]
-        );
+    async getExpenses(periodo: PeriodoDTO): Promise<Expense[]> {
+        const query = "SELECT * FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
+        const rows = await this.database.select(query, [periodo.start, periodo.end]);
+        return this.extractToEntity(rows, Expense);
+    }
 
-        if (result.affectedRows > 0) {
-            expense.setId(result.insertId);
+    async saveExpense(expense: Expense): Promise<Expense> {
+        const result = await this.save(expense)
+        if (result.affectedRows > 0 && expense.id === 0) {
+            expense.id = result.insertId;
             return expense;
         }
-
-        throw new Error("Failed to create expense");
+        return expense;
     }
 
     async deleteExpense(id: number) {
@@ -63,25 +40,6 @@ export class ExpensesRepository {
         throw new Error('Failed to delete expense');
     }
 
-    async updateExpense(expense: Expense): Promise<Expense> {
-        try {
-            if (!expense.getId()) {
-                throw new Error('Expense ID is required for update');
-            }
-
-            const query = "UPDATE expense SET name = ?, description = ?, value = ?, invoiceDueDate = ?, idCategory = ?, idCreditCard = ?, linkToInvoice = ?, idInvoice = ?, status = ? WHERE id = ?";
-            const result = await this.database.execute(query, [expense.getName(), expense.getDescription(), expense.getValue(), expense.getInvoiceDueDate(), expense.getIdCategory(), expense.getIdCreditCard(), expense.getLinkToInvoice(), expense.getIdInvoice(), expense.getStatus(), expense.getId()]
-            );
-
-            if (result.affectedRows > 0) {
-                return new Expense(expense);
-            }
-            throw new Error('Failed to update expense');
-        } catch (error) {
-            throw new Error(`Failed to update expense. Error: ${error.message}`);
-        }
-    }
-
     async searchForRelatedInstallments(consideredId: number, expenseId: number = 0): Promise<Expense[]> {
         let query = "SELECT * FROM expense WHERE (sourceAccountId = ? OR id = ?)";
         const params = [consideredId, consideredId];
@@ -90,8 +48,8 @@ export class ExpensesRepository {
             params.push(expenseId);
         }
         query += " ORDER BY id ASC";
-        const rows = await this.database.select(query, params) as ExpenseDTO[];
-        return rows.map(row => new Expense(row))
+        const rows = await this.database.select(query, params);
+        return this.extractToEntity(rows, Expense);
     }
 
     async updateStatus(id: number, status: ExpenseStatus, paymentDate: string | null) {
@@ -122,7 +80,7 @@ export class ExpensesRepository {
             const query = "SELECT * FROM expense WHERE id = ?";
             const result = await this.database.select(query, [id]) as ExpenseDTO[];
             if (result && result.length > 0) {
-                return new Expense(result[0]);
+                return Expense.fromDTO(result[0]);
             }
             throw new Error("Expense not found");
         } catch (error) {

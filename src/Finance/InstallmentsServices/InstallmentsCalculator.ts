@@ -27,7 +27,7 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
         }
 
         if (this.quantityInstallments > 0) {
-            const initialDate = DateTime.fromISO(this.entity.getInvoiceDueDate());
+            const initialDate = DateTime.fromISO(this.entity.invoiceDueDate);
 
             // Começar do 1, pois a primeira parcela já foi criada
             for (let i = 1; i < this.quantityInstallments; i++) {
@@ -37,13 +37,13 @@ export default class InstallmentsCalculator<T extends Revenue | Expense> {
 
                 if (this.entity instanceof Revenue) {
                     installment = new Revenue(this.entity) as T;
-                    installment.setInvoiceDueDate(newDate.toISODate());
-                    installment.setId(0);
+                    installment.invoiceDueDate = newDate.toISODate();
+                    installment.id = 0;
                     this.otherInstallments.push(installment);
                 } else if (this.entity instanceof Expense) {
-                    installment = new Expense(this.entity) as T;
-                    installment.setInvoiceDueDate(newDate.toISODate() as string);
-                    installment.setId(0)
+                    installment = Expense.fromEntity(this.entity) as T;
+                    installment.invoiceDueDate = newDate.toISODate();
+                    installment.id = 0;
                     this.otherInstallments.push(installment);
                 }
             }

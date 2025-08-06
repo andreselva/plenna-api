@@ -19,7 +19,7 @@ export class DeleteRevenue {
                 const result: { isSuccess: boolean, message: string }[] = [];
 
                 for (let i = 0; i < installments.length; i++) {
-                    result.push(await this.repository.deleteRevenue(installments[i].getId()));
+                    result.push(await this.repository.deleteRevenue(installments[i].id));
                 }
 
                 return await this.getRevenuesUseCase.execute(periodo);

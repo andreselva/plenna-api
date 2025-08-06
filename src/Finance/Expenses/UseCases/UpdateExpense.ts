@@ -18,7 +18,7 @@ export class UpdateExpense {
         private readonly associateExpensesToInvoices: AssociateExpensesToInvoiceUseCase
     ) { }
 
-    async execute(id: number, expense: ExpenseDTO, periodo: PeriodoDTO, earlyReturn = false) {
+    async execute(id: number, expense: ExpenseDTO, periodo: PeriodoDTO) {
         expense.id = id;
         const entity = Expense.fromDTO(expense);
 
@@ -93,10 +93,6 @@ export class UpdateExpense {
         const status = this.defineStatus(totalPayments, expenseValue);
         await this.repository.updateStatus(id, status, paymentDate);
         return { status: status };
-    }
-
-    public async updateExpense(expense: Expense) {
-        return await this.repository.save(expense);
     }
 
     private defineStatus(totalPayments: number, expenseValue: number): ExpenseStatus {

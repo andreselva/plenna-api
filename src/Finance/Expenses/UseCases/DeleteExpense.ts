@@ -19,7 +19,7 @@ export class DeleteExpense {
 
             if (installments) {
                 for (let i = 0; i < installments.length; i++) {
-                    result[i] = (await this.repository.deleteExpense(installments[i].getId()));
+                    result[i] = (await this.repository.deleteExpense(installments[i].id));
                 }
                 return { expenses: await this.getExpensesUseCase.execute(periodo) };
             }

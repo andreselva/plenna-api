@@ -12,14 +12,9 @@ export default class UpdateBankAccount {
     async execute(id: number, bankAccount: BankAccountDTO) {
         if (id <= 0) {
             throw new Error('Invalid ID!');
-        } 
-        const entity = new BankAccount();
-        entity.name = bankAccount.name;
-        entity.icon = bankAccount.icon !== undefined ? bankAccount.icon : '';
-        entity.dueDate = bankAccount.dueDate;
-        entity.closingDate = bankAccount.closingDate;
-        entity.generateInvoice = Boolean(bankAccount.generateInvoice);
-        entity.id = id;
+        }
+        bankAccount.id = id;
+        const entity = BankAccount.fromDTO(bankAccount);
         const updatedBankAccount = await this.repository.saveBankAccount(entity);
         return { bankAccount: updatedBankAccount };
     }

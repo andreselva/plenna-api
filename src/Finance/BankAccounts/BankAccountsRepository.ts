@@ -16,16 +16,12 @@ export default class BankAccountsRepository extends BaseRepository<BankAccount>{
     }
 
     async saveBankAccount(bankAccount: BankAccount): Promise<BankAccount> {
-        try {
-            const result = await this.save(bankAccount);
-            if (result.affectedRows > 0 && bankAccount.id === 0) {
-                bankAccount.id = result.insertId;
-                return bankAccount;
-            }
+        const result = await this.save(bankAccount);
+        if (result.affectedRows > 0 && bankAccount.id === 0) {
+            bankAccount.id = result.insertId;
             return bankAccount;
-        } catch {
-            throw new Error("Failed to create bank account");
         }
+        return bankAccount;
     }
 
     async deleteBankAccount(id: number) {

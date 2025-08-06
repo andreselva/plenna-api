@@ -10,17 +10,7 @@ export default class CreateBankAccount {
     ) { }
 
     async execute(bankAccount: BankAccountDTO): Promise<{ bankAccount: BankAccount }> {
-        const entity = new BankAccount();
-        entity.name = bankAccount.name;
-        entity.generateInvoice = Boolean(bankAccount.generateInvoice);
-        entity.dueDate = bankAccount.dueDate;
-        entity.closingDate = bankAccount.closingDate;
-        entity.icon = bankAccount.icon !== undefined ? bankAccount.icon : '';
-
-        if (bankAccount.id !== undefined && bankAccount.id > 0) {
-            entity.id = bankAccount.id;
-        }
-
+        const entity = BankAccount.fromDTO(bankAccount);
         const createdBankAccount = await this.repository.saveBankAccount(entity);
         return { bankAccount: createdBankAccount };
     }

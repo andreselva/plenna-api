@@ -1,0 +1,1 @@
+ALTER TABLE invoices MODIFY paymentDate DATE NULL;

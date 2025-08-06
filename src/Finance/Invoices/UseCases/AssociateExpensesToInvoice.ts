@@ -1,10 +1,10 @@
 import { Injectable, Logger } from "@nestjs/common";
 import InvoicesRepository from "../invoices.repository";
 import GetInvoicesUseCase from "./GetInvoicesUseCase";
-import Invoice from "../Entity/invoice";
 import CreateInvoiceUseCase from "./CreateInvoiceUseCase";
 import InvoiceSettingsDTO from "../DTOs/invoice.settings.dto";
 import { Expense } from "src/EntityModels/Expense";
+import Invoice from "src/EntityModels/invoice";
 
 @Injectable()
 export default class AssociateExpensesToInvoiceUseCase {
@@ -43,7 +43,7 @@ export default class AssociateExpensesToInvoiceUseCase {
         // Busca as faturas existentes
         const { invoices } = await this.getInvoicesUC.getRelatedInvoiceBankAccount(idCreditCard);
         const availableInvoices = new Map<string, Invoice>();
-        invoices.forEach(inv => availableInvoices.set(inv.getDueDate(), inv));
+        invoices.forEach(inv => availableInvoices.set(inv.dueDate, inv));
 
         for (const expense of expenses) {
             const dueDate = expense.invoiceDueDate;
@@ -55,7 +55,7 @@ export default class AssociateExpensesToInvoiceUseCase {
                 const createdInvoice = await this.createInvoiceUC.create(settingsInvoice);
 
                 if (createdInvoice) {
-                    availableInvoices.set(createdInvoice.getDueDate(), createdInvoice);
+                    availableInvoices.set(createdInvoice.dueDate, createdInvoice);
                     invoiceToExpense = createdInvoice;
                 } else {
                     this.logger.error(`A criação da fatura para a data ${dueDate} falhou e não retornou um resultado válido.`);
@@ -63,13 +63,13 @@ export default class AssociateExpensesToInvoiceUseCase {
             }
 
             if (invoiceToExpense) {
-                const invoiceId = invoiceToExpense.getId();
+                const invoiceId = invoiceToExpense.id;
                 if (invoiceId === null || invoiceId === undefined) {
                     this.logger.error(`A fatura para a data ${dueDate} foi encontrada/criada mas não possui um ID.`);
                     continue;
                 }
                 expense.idInvoice = invoiceId;
-                expense.invoiceDueDate = invoiceToExpense.getDueDate();
+                expense.invoiceDueDate = invoiceToExpense.dueDate;
                 await this.repository.updateExpense(expense);
             } else {
                 this.logger.error(`Não foi possível encontrar ou criar uma fatura para a despesa ${expense.id}`);

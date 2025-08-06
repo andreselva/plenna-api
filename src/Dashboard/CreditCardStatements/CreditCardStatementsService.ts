@@ -21,8 +21,8 @@ export default class CreditCardStatementsService {
         const values: number[] = [];
 
         invoices.forEach((invoice) => {
-            labels.push(invoice.getName());
-            values.push(invoice.getValue());
+            labels.push(invoice.name);
+            values.push(invoice.value);
         });
 
         const data = new DashboardCreditCardStatementsDTO(

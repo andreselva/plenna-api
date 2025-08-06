@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import Invoice from "../Entity/invoice";
 import InvoicesRepository from "../invoices.repository";
 import { InvoiceStatus } from "../Types/invoice.status.type";
+import Invoice from "src/EntityModels/invoice";
 
 @Injectable()
 export default class UpdateStatusInvoice {
@@ -17,9 +17,9 @@ export default class UpdateStatusInvoice {
 
             if (invoice) {
                 const status = this.defineStatus(totalPayments, invoiceValue);
-                invoice.setStatus(status);
-                invoice.setPaymentDate(paymentDate);
-                return await this.repository.update(invoice);
+                invoice.status = status;
+                invoice.paymentDate = paymentDate;
+                return await this.repository.save(invoice);
             } else {
                 throw new Error("Invoice not found");
             }

@@ -17,15 +17,15 @@ export class AuthController {
         try {
             const user = await this.authService.validateUser(loginDto.username, loginDto.password);
             if (!user) throw new UnauthorizedException('Credenciais inválidas');
-            const { accessToken, refreshToken } = await this.authService.generateTokens(user);
+            const { accessToken, refreshTokenGenerated } = await this.authService.generateTokens(user);
             res.cookie('access_token', accessToken, AuthCookieOptions.accessToken());
-            res.cookie('refresh_token', refreshToken, AuthCookieOptions.refreshToken());
+            res.cookie('refresh_token', refreshTokenGenerated, AuthCookieOptions.refreshToken());
             return { user };
         } catch (err) {
             if (err instanceof UnauthorizedException) {
                 throw err;
             }
-            throw new InternalServerErrorException('Erro interno ao processar a autenticação');
+            throw new InternalServerErrorException();
         }
 
     }
@@ -35,17 +35,17 @@ export class AuthController {
     async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         try {
             const refreshToken = req.cookies['refresh_token'] as string;
-            if (!refreshToken) throw new UnauthorizedException('Refresh token não fornecido');
+            if (!refreshToken) throw new UnauthorizedException();
             const { accessToken, newRefreshToken } = await this.authService.refreshAccessToken(refreshToken);
             res.cookie('access_token', accessToken, AuthCookieOptions.accessToken());
             res.cookie('refresh_token', newRefreshToken, AuthCookieOptions.refreshToken());
-            return { message: 'ok', statusCode: HttpStatus.CREATED }
+            return { message: 'ok', statusCode: HttpStatus.OK }
         } catch (err) {
             console.error(`Erro: ${err}`);
             if (err instanceof UnauthorizedException) {
                 throw err;
             }
-            throw new InternalServerErrorException("Erro ao realizar o refresh");
+            throw new InternalServerErrorException();
         }
     }
 
@@ -77,10 +77,10 @@ export class AuthController {
     async getAuthenticatedUser(@Req() req: Request) {
         try {
             const token = req.cookies['access_token'] as string;
-            if (!token) throw new UnauthorizedException('Sem token');
+            if (!token) throw new UnauthorizedException();
 
             const user = await this.authService.getUserFromToken(token);
-            if (!user) throw new UnauthorizedException('Usuário não autenticado');
+            if (!user) throw new UnauthorizedException();
 
             return { user };
         } catch (err) {
@@ -88,7 +88,7 @@ export class AuthController {
             if (err instanceof UnauthorizedException) {
                 throw err;
             }
-            throw new InternalServerErrorException("Erro ao buscar usuário autenticado");
+            throw new InternalServerErrorException();
         }
     }
 }

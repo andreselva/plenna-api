@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import UsersRepository from './UserRepository';
 import UserDTO from './DTOs/UserDTO';
 import User from './Entity/User';
-import * as bcrypt from 'bcryptjs';
 import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
 
 @Injectable()

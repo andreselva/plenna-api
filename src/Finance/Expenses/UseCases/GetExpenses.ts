@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ExpensesRepository } from "../ExpensesRepository";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import { Expense } from "src/EntityModels/Expense";
 
 @Injectable()
 export class GetExpenses {
@@ -8,11 +9,11 @@ export class GetExpenses {
         private readonly repository: ExpensesRepository
     ) { }
 
-    async execute(periodo: PeriodoDTO) {
+    async execute(periodo: PeriodoDTO): Promise<{ expenses: Expense[] }> {
         const expenses = await this.repository.getExpenses(periodo);
         const promiseArray = expenses.map(async (expense) => {
-            const totalPayments = await this.repository.getPayments(expense.getId());
-            expense.setTotalPaid(totalPayments);
+            const totalPayments = await this.repository.getPayments(expense.id);
+            expense.totalPaid = totalPayments;
             return expense;
         })
         const formattedExpenses = await Promise.all(promiseArray);

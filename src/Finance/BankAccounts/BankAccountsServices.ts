@@ -27,6 +27,6 @@ export default class BankAccountsService {
     }
 
     async updateBankAccount(id: string, bankAccount: BankAccountDTO) {
-        return await this.updateAccount.execute(id, bankAccount);
+        return await this.updateAccount.execute(Number(id), bankAccount);
     }
 }

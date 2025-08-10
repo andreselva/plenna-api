@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { RevenueDTO } from "../DTOs/RevenueDTO";
-import Revenue from "../Entity/Revenue";
 import RevenuesRepository from "../RevenuesRepository";
 import DateCalculator from "src/Shared/Utils/DateCalculator";
 import { getChangedFields } from "src/Shared/Utils/CompareChanges";
 import { InstallmentUpdater } from "src/Finance/InstallmentsServices/InstallmentsUpdater";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import GetRevenues from "./GetRevenues";
+import Revenue from "src/EntityModels/Revenue";
 
 @Injectable()
 export class UpdateRevenue {
@@ -15,15 +15,15 @@ export class UpdateRevenue {
         private readonly getRevenuesUseCase: GetRevenues
     ) { }
 
-    async execute(id: string, revenue: RevenueDTO, periodo: PeriodoDTO) {
-        revenue.id = Number(id);
-        const entity = new Revenue(revenue);
+    async execute(id: number, revenue: RevenueDTO, periodo: PeriodoDTO) {
+        revenue.id = id;
+        const entity = Revenue.fromDTO(revenue);
 
         if (revenue.updateInstallments) {
             const installments = await this.searchRelatedInstallments(revenue);
 
             if (!installments) {
-                return await this.repository.updateRevenue(entity);
+                return await this.repository.saveRevenue(entity);
             }
 
             //Busca os campos alterados.
@@ -44,14 +44,14 @@ export class UpdateRevenue {
                     dynamicFieldProcessors: {
                         invoiceDueDate: (i) => dates[i],
                     },
-                    updateFn: (item) => this.repository.updateRevenue(item),
+                    updateFn: (item) => this.repository.saveRevenue(item),
                 });
 
                 return await this.getRevenuesUseCase.execute(periodo);
             }
         }
 
-        await this.repository.updateRevenue(entity);
+        await this.repository.saveRevenue(entity);
         return await this.getRevenuesUseCase.execute(periodo);
     }
 

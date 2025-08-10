@@ -28,10 +28,10 @@ export default class PaymentService {
 
             switch (paymentData.payableType) {
                 case PaymentType.INVOICE:
-                    await this.invoiceService.updateInvoiceStatus(savedPayment.getPayableId(), savedPayment.getPaymentDate());
+                    await this.invoiceService.updateInvoiceStatus(savedPayment.payable_id, savedPayment.payment_date);
                     return { payment: savedPayment };
                 case PaymentType.EXPENSE:
-                    await this.expenseService.updateStatusExpense(savedPayment.getPayableId(), savedPayment.getPaymentDate());
+                    await this.expenseService.updateStatusExpense(savedPayment.payable_id, savedPayment.payment_date);
                     return { payment: savedPayment };
             }
         } else {

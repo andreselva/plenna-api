@@ -1,9 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../Users/UserService';
-import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import AuthRepository from './AuthRepository';
+import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
+import RefreshToken from 'src/EntityModels/RefreshToken';
 
 @Injectable()
 export class AuthService {
@@ -20,17 +21,19 @@ export class AuthService {
         }
     }
 
-    async generateTokens(user: any): Promise<{ accessToken: string; refreshToken: string }> {
+    async generateTokens(user: any): Promise<{ accessToken: string; refreshTokenGenerated: string }> {
         const accessToken = this.generateToken(user);
-        const refreshToken = this.generateRefreshToken(user);
-
-        const result = await this.repository.saveRefreshToken(Number(user.id), refreshToken);
+        const refreshTokenGenerated = this.generateRefreshToken(user);
+        const refreshToken = new RefreshToken();
+        refreshToken.idUser = Number(user.id);
+        refreshToken.refresh_token = refreshTokenGenerated;
+        const result = await this.repository.saveRefreshToken(refreshToken);
 
         if (!result.isSuccess) {
             throw new Error('Falha ao salvar o refresh token.');
         }
 
-        return { accessToken, refreshToken };
+        return { accessToken, refreshTokenGenerated };
     }
 
     generateToken(user: any): string {
@@ -48,54 +51,56 @@ export class AuthService {
             const decoded = await this.jwtService.verifyAsync<jwt.JwtPayload>(refreshToken, {
                 secret: this.refreshSecret,
             });
-            if (!decoded || !decoded.sub) throw new UnauthorizedException('Token inválido');
+            if (!decoded || !decoded.sub) throw new UnauthorizedException();
 
             const isRefreshTokenValid = await this.repository.isRefreshTokenValid(refreshToken, Number(decoded.sub));
-            if (!isRefreshTokenValid) throw new UnauthorizedException('Refresh token inválido ou revogado!');
+            if (!isRefreshTokenValid) throw new UnauthorizedException();
 
             const user = await this.userService.findUserById(decoded.sub);
-            if (!user) throw new UnauthorizedException('Usuário não encontrado');
+            if (!user) throw new UnauthorizedException();
             
             const newAccessToken = this.generateToken(user);
             const newRefreshToken = this.generateRefreshToken(user);
-            await this.repository.updateRefreshToken(newRefreshToken, Number(user.getId()));
+
+            const refreshTokenModel = new RefreshToken();
+            refreshTokenModel.idUser = Number(user.id);
+            refreshTokenModel.refresh_token = newRefreshToken;
+            await this.repository.saveRefreshToken(refreshTokenModel);
+
             return { accessToken: newAccessToken, newRefreshToken };
 
         } catch (err) {
             console.error('Falha no refresh do token:', err);
-            throw new UnauthorizedException('Refresh token inválido ou expirado.');
+            throw new UnauthorizedException();
         }
     }
 
     async validateUser(username: string, password: string) {
         const userEntity = await this.userService.findByUsername(username);
-        if (
-            userEntity &&
-            (await bcrypt.compare(password, userEntity.getPassword()))
-        ) {
-            return { id: userEntity.getId(), username: userEntity.getUserName() };
+        if (userEntity && (await PasswordHasher.compare(password, userEntity.password))) {
+            return { id: userEntity.id, username: userEntity.username };
         }
         return null;
     }
 
     async getUserFromToken(token: string | undefined): Promise<any> {
         if (!token) {
-            throw new UnauthorizedException('Token não fornecido');
+            throw new UnauthorizedException();
         }
 
         try {
-            if (!this.jwtSecret) throw new Error('JWT_SECRET não definido.');
+            if (!this.jwtSecret) throw new UnauthorizedException();
             const decoded = jwt.verify(token, this.jwtSecret) as jwt.JwtPayload;
 
-            if (!decoded || !decoded.sub) throw new UnauthorizedException('Token inválido');
+            if (!decoded || !decoded.sub) throw new UnauthorizedException();
             const user = await this.userService.findUserById(decoded.sub);
             if (!user) {
-                throw new UnauthorizedException('Usuário não encontrado');
+                throw new UnauthorizedException();
             }
-            return { id: user.getId(), username: user.getUserName(), name: user.getName() };
+            return { id: user.id, username: user.username, name: user.name };
         } catch (error) {
             console.error('Erro ao verificar o token:', error);
-            throw new UnauthorizedException('Token inválido ou expirado');
+            throw new UnauthorizedException();
         }
     }
 

@@ -1,8 +1,8 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { DateTime } from "luxon";
 import InvoiceSettingsDTO from "../DTOs/invoice.settings.dto";
-import Invoice from "../Entity/invoice";
 import InvoicesRepository from "../invoices.repository";
+import Invoice from "src/EntityModels/invoice";
 
 /**
  * @class CreateInvoiceUseCase
@@ -20,35 +20,19 @@ export default class CreateInvoiceUseCase {
      * Se for a primeira fatura, as datas são calculadas com base no dia atual.
      * @param {InvoiceSettingsDTO} invoiceSettings - As configurações da conta para a criação da fatura.
      * @returns {Promise<Invoice>} A entidade da fatura criada.
-     * @throws {InternalServerErrorException} Se ocorrer um erro durante o processo.
      */
     async create(invoiceSettings: InvoiceSettingsDTO): Promise<Invoice> {
-        try {
-            const lastInvoice = await this.repository.searchInvoice(invoiceSettings.idAccount);
-
-            const { closingDate, dueDate } = this.calculateNextInvoiceDates(invoiceSettings, lastInvoice);
-
-            const newInvoice = new Invoice(
-                closingDate,
-                dueDate,
-                invoiceSettings.idAccount,
-                invoiceSettings.nameAccount,
-                undefined,
-                'pending'
-            );
-
-            const result = await this.repository.createInvoice(newInvoice);
-
-            if (result?.isSuccess) {
-                return result.createdInvoice;
-            } else {
-                throw new Error("O repositório não conseguiu criar a fatura.");
-            }
-
-        } catch (error) {
-            console.error("Erro detalhado ao criar a fatura:", error);
-            throw new InternalServerErrorException("Ocorreu um erro ao tentar criar a fatura.");
-        }
+        const lastInvoice = await this.repository.searchInvoice(invoiceSettings.idAccount);
+        const { closingDate, dueDate } = this.calculateNextInvoiceDates(invoiceSettings, lastInvoice);
+        const newInvoice = new Invoice()
+        newInvoice.closingDate = closingDate;
+        newInvoice.dueDate = dueDate;
+        newInvoice.idBankAccount = invoiceSettings.idAccount;
+        newInvoice.name = invoiceSettings.nameAccount;
+        newInvoice.id = 0,
+        newInvoice.status = Invoice.STATUS_PENDING
+        newInvoice.paymentDate = null;
+        return await this.repository.createInvoice(newInvoice);
     }
 
     /**
@@ -60,7 +44,7 @@ export default class CreateInvoiceUseCase {
      */
     private calculateNextInvoiceDates(settings: InvoiceSettingsDTO, lastInvoice: Invoice | null): { closingDate: string, dueDate: string } {
         const baseDate = lastInvoice 
-            ? DateTime.fromISO(lastInvoice.getClosingDate())
+            ? DateTime.fromISO(lastInvoice.closingDate)
             : DateTime.now();
 
         // Começamos com a data de fechamento do mês da nossa data base.

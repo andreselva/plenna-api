@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PaymentRepository } from "../payment.repository";
-import Payment from "../Entity/Payment";
 import PaymentInicialDataDTO from "../DTOs/PaymentInicialDataDTO";
+import Payment from "src/EntityModels/Payment";
 
 @Injectable()
 export default class PaymentRegister {
@@ -10,7 +10,7 @@ export default class PaymentRegister {
     ) { }
 
     async register(payment: PaymentInicialDataDTO) {
-        const entity = new Payment(payment);
-        return await this.paymentRepository.save(entity);
+        const entity = Payment.fromDTO(payment);
+        return await this.paymentRepository.savePayment(entity);
     }
 }

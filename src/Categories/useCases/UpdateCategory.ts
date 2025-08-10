@@ -1,8 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import CategoriesRepository from "../CategoriesRepository";
 import CategoryDTO from "../CategoryDTO";
-import Validator from "./Validator";
-import Category from "../Entity/Category";
+import Category from "src/EntityModels/Category";
 
 @Injectable()
 export default class UpdateCategory {
@@ -10,11 +9,11 @@ export default class UpdateCategory {
         private readonly categoryRepository: CategoriesRepository
     ) {}
 
-    async execute(id: string, category: CategoryDTO) {
-        Validator.validate(category);
-        Validator.validateId(id);
-        const entidade = Category.fromDTO(category);
-        const updatedCategory = await this.categoryRepository.updateCategory(Number(id), entidade);
+    async execute(id: number, category: CategoryDTO): Promise<{ category: Category }> {
+        category.id = id;
+        const entity = Category.fromDTO(category);
+        
+        const updatedCategory = await this.categoryRepository.saveCategory(entity);
         return { category: updatedCategory };
     }
 }

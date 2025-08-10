@@ -1,9 +1,9 @@
 import { Injectable, Logger } from "@nestjs/common";
 import InvoiceRowDTO from "../DTOs/invoice.row.dto";
-import Invoice from "../Entity/invoice";
 import InvoicesRepository from "../invoices.repository";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import Invoice from "src/EntityModels/invoice";
 
 export interface InvoicesResponse {
     invoices: Invoice[];
@@ -18,16 +18,11 @@ export default class GetInvoicesUseCase {
     ) { }
 
     async get(periodo: PeriodoDTO): Promise<InvoicesResponse> {
-        try {
-            const invoices = await this.repository.getInvoices(periodo);
-            if (invoices && invoices.length > 0) {
-                return {invoices: await this.setExpensesAndPayments(invoices)};
-            }
-            return {invoices: []};
-        } catch (err) {
-            this.logger.error("Erro capturado ao buscar as faturas! Erro: " + err);
-            throw new Error("Erro: " + err);
+        const invoices = await this.repository.getInvoices(periodo);
+        if (invoices && invoices.length > 0) {
+            return {invoices: await this.setExpensesAndPayments(invoices)};
         }
+        return {invoices: []};
     }
 
     async getRelatedInvoiceBankAccount(idBankAccount: number): Promise<InvoicesResponse> {
@@ -38,16 +33,16 @@ export default class GetInvoicesUseCase {
             const closingDate = DateHelper.toISODate(invoice.closingDate) as string;
             const dueDate = DateHelper.toISODate(invoice.dueDate) as string;
             const name = `${invoice.name} - ${DateHelper.toMonthYear(closingDate)} - Vencimento: ${DateHelper.toBrazilianDate(dueDate)}`;
-
-            return new Invoice(
-                closingDate,
-                dueDate,
-                invoice.idBankAccount,
-                name,
-                invoice.id,
-                invoice.status,
-                invoice.paymentDate
-            );
+            
+            const newInvoice = new Invoice();
+            newInvoice.closingDate = closingDate
+            newInvoice.dueDate = dueDate;
+            newInvoice.idBankAccount = invoice.idBankAccount;
+            newInvoice.name = name;
+            newInvoice.id = invoice.id;
+            newInvoice.status = invoice.status
+            newInvoice.paymentDate = invoice.paymentDate
+            return newInvoice;
         });
 
         return { invoices: mappedInvoices };
@@ -56,22 +51,22 @@ export default class GetInvoicesUseCase {
     private async setExpensesAndPayments(invoices: Invoice[]): Promise<Invoice[]> {
         try {
             for (const invoice of invoices) {
-                const expenses = await this.repository.getRelatedExpenses(invoice.getId());
-                const totalPaiments = await this.repository.getPayments(invoice.getId());
+                const expenses = await this.repository.getRelatedExpenses(invoice.id);
+                const totalPaiments = await this.repository.getPayments(invoice.id);
     
                 if (expenses && expenses.length > 0) {
-                    const totalValue = expenses.reduce((acc, expense) => acc + expense.getValue(), 0);
-                    invoice.setExpenses(expenses);
-                    invoice.setValue(totalValue);
+                    const totalValue = expenses.reduce((acc, expense) => Number(acc) + Number(expense.value), 0);
+                    invoice.expenses = expenses;
+                    invoice.value = totalValue;
                 } else {
-                    invoice.setExpenses([]);
-                    invoice.setValue(0);
+                    invoice.expenses = [];
+                    invoice.value = 0;
                 }
     
                 if (totalPaiments > 0) {
-                    invoice.setTotalPaid(totalPaiments);
+                    invoice.totalPaid = totalPaiments;
                 } else {
-                    invoice.setTotalPaid(0);
+                    invoice.totalPaid = 0;
                 }
             }
             return invoices;

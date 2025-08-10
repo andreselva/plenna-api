@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { PaymentRepository } from "../payment.repository";
-import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export default class GetPayments {
@@ -14,12 +13,6 @@ export default class GetPayments {
             if (!payments || payments.length === 0) {
                 return { "payments": [] };
             }
-
-            payments.map(payment => {
-                let paymentDate = payment.getPaymentDate();
-                paymentDate = DateHelper.toISODate(paymentDate) ?? '';
-                payment.setPaymentDate(paymentDate);
-            })
 
             return { payments: payments };
         } else {

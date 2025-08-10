@@ -1,40 +1,33 @@
 import { Injectable } from "@nestjs/common";
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
-import Category from "./Entity/Category";
+import Category from "src/EntityModels/Category";
+import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
-export default class CategoriesRepository {
-    constructor(
-        private readonly database: MySQLDatabase,
-    ) {}
+export default class CategoriesRepository extends BaseRepository<Category>{
+    constructor(database: MySQLDatabase) {
+        super(database);
+    }
 
     /**
      * Busca todas as categorias no banco de dados.
      */
-    async getCategories() {
+    async getCategories(): Promise<Category[]> {
         const query = 'SELECT * FROM category';
-        return await this.database.select(query);
+        const rows = await this.database.select(query);
+        return this.extractToEntity(rows, Category)
     }
 
     /**
      * Cria uma nova categoria.
      */
-    async createCategory(category: Category) {
-        const query = 'INSERT INTO category (name, description, type, color) VALUES (?, ?, ?, ?)';
-        const values = [category.getName(), category.getDescription(), category.getType(), category.getColor()];
-        const result = await this.database.execute(query, values);
+    async saveCategory(category: Category): Promise<Category> {
+        const result = await this.save(category);
 
-        if (result.affectedRows > 0) {
-            return {
-                id: result.insertId,
-                name: category.getName(),
-                description: category.getDescription(),
-                type: category.getType(),
-                color: category.getColor(),
-            };
+        if (result.affectedRows > 0 && category.id === 0) {
+            category.id = result.insertId;
         }
-        // Este erro é específico da lógica de negócio, então faz sentido lançá-lo aqui.
-        throw new Error('Falha ao criar a categoria.');
+        return category;
     }
 
     /**
@@ -48,25 +41,5 @@ export default class CategoriesRepository {
             return { success: true, message: 'Categoria deletada com sucesso.' };
         }
         throw new Error('Falha ao deletar a categoria, possivelmente não foi encontrada.');
-    }
-
-    /**
-     * Atualiza uma categoria pelo ID.
-     */
-    async updateCategory(id: number, category: Category) {
-        const query = "UPDATE category SET name = ?, type = ?, description = ?, color = ? WHERE id = ?";
-        const params = [category.getName(), category.getType(), category.getDescription(), category.getColor(), id];
-        const result = await this.database.execute(query, params);
-        
-        if (result.affectedRows > 0) {
-            return {
-                id: id,
-                name: category.getName(),
-                description: category.getDescription(),
-                type: category.getType(),
-                color: category.getColor()
-            };
-        }
-        throw new Error('Falha ao atualizar a categoria, possivelmente não foi encontrada.');
     }
 }

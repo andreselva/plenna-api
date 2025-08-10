@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { ExpenseDTO } from "../DTOs/ExpenseDTO";
-import { Expense } from "../Entity/Expense";
 import { ExpensesRepository } from "../ExpensesRepository";
 import { getChangedFields } from "src/Shared/Utils/CompareChanges";
 import DateCalculator from "src/Shared/Utils/DateCalculator";
@@ -9,6 +8,7 @@ import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
 import AssociateExpensesToInvoiceUseCase from "src/Finance/Invoices/UseCases/AssociateExpensesToInvoice";
 import { ExpenseStatus } from "../Types/expense.status.type";
+import { Expense } from "src/EntityModels/Expense";
 
 @Injectable()
 export class UpdateExpense {
@@ -18,12 +18,12 @@ export class UpdateExpense {
         private readonly associateExpensesToInvoices: AssociateExpensesToInvoiceUseCase
     ) { }
 
-    async execute(id: string, expense: ExpenseDTO, periodo: PeriodoDTO) {
-        expense.id = Number(id);
-        const entity = new Expense(expense);
+    async execute(id: number, expense: ExpenseDTO, periodo: PeriodoDTO) {
+        expense.id = id;
+        const entity = Expense.fromDTO(expense);
 
-        if (entity.getIdInvoice() === 0 && !entity.linkToInvoice) {
-            entity.setIdCreditCard(0);
+        if (entity.idInvoice === 0 && !entity.linkToInvoice) {
+            entity.idCreditCard = 0;
         }
 
         if (expense.updateInstallments) {
@@ -32,7 +32,7 @@ export class UpdateExpense {
 
             //Se não retornar nada, atualizamos somente a entity.
             if (!installments) {
-                return await this.repository.updateExpense(entity);
+                return await this.repository.saveExpense(entity);
             }
 
             //Compara os campos que estão diferentes.
@@ -55,7 +55,7 @@ export class UpdateExpense {
                     dynamicFieldProcessors: {
                         invoiceDueDate: (i) => dates[i],
                     },
-                    updateFn: (item) => this.repository.updateExpense(item)
+                    updateFn: (item) => this.repository.saveExpense(item)
                 });
 
                 //Associa à fatura
@@ -67,7 +67,7 @@ export class UpdateExpense {
             }
         }
 
-        await this.repository.updateExpense(entity);
+        await this.repository.saveExpense(entity);
         return { expenses: await this.getExpensesUseCase.execute(periodo) }
     }
 
@@ -89,7 +89,7 @@ export class UpdateExpense {
         if (!expense) {
             throw new Error("Expense not found");
         }
-        const expenseValue = expense.getValue();
+        const expenseValue = expense.value;
         const status = this.defineStatus(totalPayments, expenseValue);
         await this.repository.updateStatus(id, status, paymentDate);
         return { status: status };

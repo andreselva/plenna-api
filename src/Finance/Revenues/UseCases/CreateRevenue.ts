@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import Revenue from "../Entity/Revenue";
 import { RevenueDTO } from "../DTOs/RevenueDTO";
 import RevenuesRepository from "../RevenuesRepository";
 import InstallmentsCalculator from "src/Finance/InstallmentsServices/InstallmentsCalculator";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import GetRevenues from "./GetRevenues";
+import Revenue from "src/EntityModels/Revenue";
 
 @Injectable()
 export default class CreateRevenue {
@@ -14,19 +14,19 @@ export default class CreateRevenue {
     ) { }
 
     async execute(dto: RevenueDTO, periodo: PeriodoDTO) {
-        const entity = new Revenue(dto);
-        const revenueCreated = await this.revenueRepository.createRevenue(entity);
+        const entity = Revenue.fromDTO(dto);
+        const revenueCreated = await this.revenueRepository.saveRevenue(entity);
 
         //Só entra nesse if se houver uma quantidade de parcelas informadas e se o tipo da parcela for P (parcelada) ou F (fixa).
         if (revenueCreated
             && (
-                (revenueCreated.getTypeOfInstallments() === 'P' && revenueCreated.getInstallments() > 0)
-                || revenueCreated.getTypeOfInstallments() === 'F'
+                (revenueCreated.typeOfInstallments === 'P' && revenueCreated.installments > 0)
+                || revenueCreated.typeOfInstallments === 'F'
             )
         ) {
             const otherInstallments = (new InstallmentsCalculator(
-                    revenueCreated.getTypeOfInstallments() as 'P' | 'F',
-                    revenueCreated.getInstallments(),
+                    revenueCreated.typeOfInstallments as 'P' | 'F',
+                    revenueCreated.installments,
                     revenueCreated)
             ).getInstallments();
 
@@ -34,9 +34,9 @@ export default class CreateRevenue {
             //Adicionar a primeira conta gerada para retornar pro front mapeado posteriormente.
             revenuesCreated.push(revenueCreated);
             for (let i = 0; i < otherInstallments.length; i++) {
-                otherInstallments[i].setSourceAccountId(revenueCreated.getId());
+                otherInstallments[i].sourceAccountId = revenueCreated.id;
                 //Cria as parcelas no banco de dados e as salva em um novo array para retornar pro front.
-                revenuesCreated.push(await this.revenueRepository.createRevenue(otherInstallments[i]));
+                revenuesCreated.push(await this.revenueRepository.saveRevenue(otherInstallments[i]));
             }
 
         }

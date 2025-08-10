@@ -1,26 +1,21 @@
 import { Injectable } from "@nestjs/common";
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
+import RefreshToken from "src/EntityModels/RefreshToken";
+import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
-export default class AuthRepository {
-    constructor(
-        private readonly database: MySQLDatabase
-    ) { }
+export default class AuthRepository extends BaseRepository<RefreshToken>{
+    constructor(database: MySQLDatabase) { 
+        super(database);
+    }
 
-    async saveRefreshToken(idUser: number, refreshToken: string) {
+    async saveRefreshToken(entity: RefreshToken) {
         //Apagar o antigo antes de salvar um novo.
-        await this.deleteRefreshToken(idUser);
-        const query = "INSERT refresh_token (refresh_token, idUser) VALUES (?, ?)";
-        const result = await this.database.execute(query, [refreshToken, idUser]);
-
-        if (result.affectedRows > 0) {
-            return {
-                isSuccess: true
-            };
-        }
+        await this.deleteRefreshToken(entity.idUser);
+        await this.save(entity);
 
         return {
-            isSuccess: false
+            isSuccess: true
         };
     }
 
@@ -31,11 +26,6 @@ export default class AuthRepository {
             return true;
         }
         return false;
-    }
-
-    async updateRefreshToken(refreshToken: string, idUser: number) {
-        const query = "UPDATE refresh_token SET refresh_token = ? WHERE idUser = ?";
-        await this.database.execute(query, [refreshToken, idUser]);
     }
 
     async deleteRefreshToken(idUser: number) {

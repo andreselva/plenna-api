@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import BankAccountsRepository from "../BankAccountsRepository";
-import BankAccount from "../Entity/BankAccount";
+import BankAccount from "../../../EntityModels/BankAccount";
 import BankAccountDTO from "../DTOs/BankAccountDTO";
 
 @Injectable()
@@ -9,28 +9,9 @@ export default class CreateBankAccount {
         private readonly repository: BankAccountsRepository
     ) { }
 
-    async execute(bankAccount: BankAccountDTO) {
-        if (!bankAccount.icon) {
-            bankAccount.icon = "";
-        }
-
-        if (!bankAccount.dueDate) {
-            bankAccount.dueDate = "";
-        }
-
-        if (bankAccount.closingDate) {
-            bankAccount.closingDate = "";
-        }
-
-        const entity = new BankAccount(
-            bankAccount.name,
-            bankAccount.generateInvoice,
-            bankAccount.icon,
-            bankAccount.dueDate,
-            bankAccount.closingDate
-        );
-        
-        const createdBankAccount = await this.repository.createBankAccount(entity);
+    async execute(bankAccount: BankAccountDTO): Promise<{ bankAccount: BankAccount }> {
+        const entity = BankAccount.fromDTO(bankAccount);
+        const createdBankAccount = await this.repository.saveBankAccount(entity);
         return { bankAccount: createdBankAccount };
     }
 }

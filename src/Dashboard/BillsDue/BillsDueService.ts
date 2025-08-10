@@ -21,9 +21,9 @@ export class BillsDueService {
         const invoices = (await this.invoicesService.getInvoices(periodo)).invoices;
 
         const newBillsFromInvoices = invoices.map(invoice => new BillsDueDTO(
-            invoice.getName(),
-            invoice.getDueDate(),
-            invoice.getValue()
+            invoice.name,
+            invoice.dueDate,
+            invoice.value
         ));
 
         bills.push(...newBillsFromInvoices);

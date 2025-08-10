@@ -39,6 +39,6 @@ export default class RevenuesService {
     }
 
     async updateRevenue(id: string, revenue: RevenueDTO, periodo: PeriodoDTO) {
-        return await this.updateRevenueUseCase.execute(id, revenue, periodo);
+        return await this.updateRevenueUseCase.execute(Number(id), revenue, periodo);
     }
 }

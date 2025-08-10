@@ -1,29 +1,28 @@
 import { CategoryType } from "src/enum/category-type.enum";
 import EntityModel from "./entity.model";
 import IEntity from "src/Shared/interfaces/IEntity";
-
-interface CategoryRow {
-    id: number;
-    name: string;
-    description: string;
-    type: CategoryType;
-    color: string;
-}
+import CategoryDTO from "src/Categories/CategoryDTO";
+import ICategoryRow from "src/Shared/interfaces/ICategoryRow";
 
 export default class Category extends EntityModel implements IEntity {
-    public name: string;
-    public description: string;
-    public type: CategoryType;
-    public color: string;
-    public id?: number;
+    public name: string = '';
+    public description: string = '';
+    public type: CategoryType = CategoryType.REVENUE;
+    public color: string = '';
+    public id: number = 0;
 
     constructor() {
         super();
-        this.name = '';
-        this.description = '';
-        this.color = ''
-        this.type = CategoryType.REVENUE;
-        this.id = 0;
+    }
+
+    static fromDTO(dto: CategoryDTO) {
+        const category = new Category();
+        category.name = dto.name;
+        category.description = dto.description;
+        category.type = dto.type ?? CategoryType.REVENUE;
+        category.color = dto.color;
+        category.id = dto.id ?? 0;
+        return category;
     }
 
      /**
@@ -32,7 +31,7 @@ export default class Category extends EntityModel implements IEntity {
      * @param row O objeto de dados vindo da query.
      * @returns Uma nova instância de BankAccount.
      */
-    static fromRow(row: CategoryRow) {
+    static fromRow(row: ICategoryRow) {
         const category = new Category();
 
         category.id = row.id;

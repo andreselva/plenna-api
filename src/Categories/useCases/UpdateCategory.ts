@@ -10,18 +10,10 @@ export default class UpdateCategory {
     ) {}
 
     async execute(id: number, category: CategoryDTO): Promise<{ category: Category }> {
-        if (id <= 0) {
-            throw new Error('Invalid ID!');
-        }
-
-        const entity = new Category();
-        entity.name = category.name;
-        entity.type = category.type;
-        entity.description = category.description;
-        entity.color = category.color;
-        entity.id = id;
+        category.id = id;
+        const entity = Category.fromDTO(category);
         
-        const updatedCategory = await this.categoryRepository.updateCategory(entity);
+        const updatedCategory = await this.categoryRepository.saveCategory(entity);
         return { category: updatedCategory };
     }
 }

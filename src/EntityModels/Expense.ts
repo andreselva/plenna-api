@@ -6,22 +6,22 @@ import { ExpenseStatus } from "src/Finance/Expenses/Types/expense.status.type";
 import { ExpenseDTO } from "src/Finance/Expenses/DTOs/ExpenseDTO";
 
 export class Expense extends EntityModel implements IEntity {
-    public id: number;
-    public name: string;
-    public description: string;
-    public value: number;
-    public invoiceDueDate: string;
-    public idCategory: number;
+    public id: number = 0;
+    public name: string = '';
+    public description: string = '';
+    public value: number = 0;
+    public invoiceDueDate: string = '';
+    public idCategory: number = 0;
     public idCreditCard: number = 0;
     public installments: number = 0;
-    public typeOfInstallment: string;
-    public sourceAccountId: number;
-    public hasInstallments: boolean;
-    public linkToInvoice: boolean;
-    public idInvoice: number;
-    public status: ExpenseStatus;
-    public totalPaid?: number;
-    public updateInstallments?: boolean;
+    public typeOfInstallment: string = 'U';
+    public sourceAccountId: number = 0;
+    public hasInstallments: boolean = false;
+    public linkToInvoice: boolean = false;
+    public idInvoice: number = 0;
+    public status: ExpenseStatus = ExpenseStatus.PENDING;
+    public totalPaid: number = 0;
+    public updateInstallments: boolean = false;
 
     constructor() {
         super();

@@ -32,7 +32,7 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
     async searchInvoice(idBankAccount: number) {
         const query = "SELECT * FROM invoices WHERE idBankAccount = ? ORDER BY id DESC LIMIT 1";
         const result = await this.database.select(query, [idBankAccount]);
-        return this.extractToEntity(result, Invoice)[0] ?? [];
+        return this.extractToEntity(result, Invoice)[0] ?? null;
     }
 
     async getRelatedInvoiceBankAccount(idBankAccount: number) {
@@ -68,7 +68,7 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
     async getPayments(idInvoice: number): Promise<number> {
         const query = "SELECT SUM(value) as value FROM payment WHERE payable_id = ? AND payable_type = ?";
         const result = await this.database.select(query, [idInvoice, PaymentType.INVOICE]);
-        return Number(result[0]?.value) || 0;
+        return Number(result[0].value) ?? 0;
     }
 
     async getById(id: number): Promise<Invoice> {
@@ -80,6 +80,6 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
     async getTotalInvoiceValue(idInvoice: number): Promise<number> {
         const query = "SELECT SUM(value) as total FROM expense WHERE idInvoice = ?";
         const result = await this.database.select(query, [idInvoice]);
-        return Number(result[0]?.total) || 0;
+        return Number(result[0].total) ?? 0;
     }
 }

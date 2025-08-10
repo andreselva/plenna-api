@@ -6,6 +6,7 @@ export default class BankAccountDTO {
     name: string;
 
     @IsBoolean({ message: 'GenerateInvoice precisa ser um boolean.' })
+    @IsNotEmpty({ message: 'Invalid argument.' })
     generateInvoice: boolean;
 
     @IsOptional()
@@ -17,9 +18,10 @@ export default class BankAccountDTO {
     closingDate: string;
 
     @IsOptional()
+    @IsString({ message: 'Invalid icon!' })
     icon: string;
 
     @IsOptional()
-    @IsInt({ message: 'ID precisa ser um inteiro.' })
+    @IsInt({ message: 'Invalid ID!' })
     id: number;
 }

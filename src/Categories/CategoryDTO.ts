@@ -20,5 +20,5 @@ export default class CategoryDTO {
 
     @IsOptional()
     @IsInt({ message: 'O ID da categoria deve ser um número inteiro.' })
-    id?: number;
+    id: number;
 }

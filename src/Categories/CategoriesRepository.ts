@@ -21,14 +21,13 @@ export default class CategoriesRepository extends BaseRepository<Category>{
     /**
      * Cria uma nova categoria.
      */
-    async createCategory(category: Category): Promise<Category> {
+    async saveCategory(category: Category): Promise<Category> {
         const result = await this.save(category);
 
-        if (result.affectedRows > 0) {
+        if (result.affectedRows > 0 && category.id === 0) {
             category.id = result.insertId;
-            return category;
         }
-        throw new Error('Falha ao criar a categoria.');
+        return category;
     }
 
     /**
@@ -42,13 +41,5 @@ export default class CategoriesRepository extends BaseRepository<Category>{
             return { success: true, message: 'Categoria deletada com sucesso.' };
         }
         throw new Error('Falha ao deletar a categoria, possivelmente não foi encontrada.');
-    }
-
-    async updateCategory(category: Category): Promise<Category> {
-        const result = await this.save(category);
-        if (result.affectedRows > 0) {
-            return category;
-        }
-        throw new Error('Falha ao atualizar a categoria, possivelmente não foi encontrada.');
     }
 }

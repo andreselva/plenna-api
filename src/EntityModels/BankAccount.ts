@@ -1,23 +1,15 @@
 import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
 import BankAccountDTO from "src/Finance/BankAccounts/DTOs/BankAccountDTO";
-
-interface BankAccountRow {
-    id: number;
-    name: string;
-    generateInvoice: number;
-    icon: string;
-    dueDate: string;
-    closingDate: string;
-}
+import IBankAccountRow from "src/Shared/interfaces/IBankAccountRow";
 
 export default class BankAccount extends EntityModel implements IEntity {
-    id: number;
-    name: string;
-    generateInvoice: boolean;
-    icon: string;
-    dueDate: string;
-    closingDate: string;
+    id: number = 0;
+    name: string = '';
+    generateInvoice: boolean = false;
+    icon: string = '';
+    dueDate: string = '';
+    closingDate: string = '';
 
     constructor() {
         super();
@@ -46,7 +38,7 @@ export default class BankAccount extends EntityModel implements IEntity {
      * @param row O objeto de dados vindo da query.
      * @returns Uma nova instância de BankAccount.
      */
-    public static fromRow(row: BankAccountRow): BankAccount {
+    public static fromRow(row: IBankAccountRow): BankAccount {
         const account = new BankAccount();
         account.id = row.id;
         account.name = row.name;

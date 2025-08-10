@@ -19,7 +19,6 @@ export default class BankAccountsRepository extends BaseRepository<BankAccount>{
         const result = await this.save(bankAccount);
         if (result.affectedRows > 0 && bankAccount.id === 0) {
             bankAccount.id = result.insertId;
-            return bankAccount;
         }
         return bankAccount;
     }

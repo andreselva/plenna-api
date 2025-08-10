@@ -42,6 +42,7 @@ export class ExpenseDTO {
   installments: number;
 
   @IsString({ message: 'O tipo de parcelamento deve ser uma string.' })
+  @IsNotEmpty({ message: 'Invalid argumento type of installment.' })
   typeOfInstallment: string;
 
   @IsOptional()
@@ -49,6 +50,7 @@ export class ExpenseDTO {
   sourceAccountId: number;
 
   @IsBoolean({ message: 'O valor de "hasInstallments" deve ser um booleano.' })
+  @IsNotEmpty({ message: 'Invalid argumento has installments.' })
   hasInstallments: boolean;
 
   @IsOptional()
@@ -64,6 +66,7 @@ export class ExpenseDTO {
   idInvoice: number;
 
   @IsEnum(ExpenseStatus, { message: 'O status da despesa é inválido.' })
+  @IsNotEmpty({ message: 'Invalid argument status.' })
   status: ExpenseStatus;
 
   @IsOptional()

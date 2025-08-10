@@ -22,7 +22,6 @@ export class ExpensesRepository extends BaseRepository<Expense> {
         const result = await this.save(expense)
         if (result.affectedRows > 0 && expense.id === 0) {
             expense.id = result.insertId;
-            return expense;
         }
         return expense;
     }
@@ -76,15 +75,8 @@ export class ExpensesRepository extends BaseRepository<Expense> {
     }
 
     async getExpenseById(id: number) {
-        try {
-            const query = "SELECT * FROM expense WHERE id = ?";
-            const result = await this.database.select(query, [id]) as ExpenseDTO[];
-            if (result && result.length > 0) {
-                return Expense.fromDTO(result[0]);
-            }
-            throw new Error("Expense not found");
-        } catch (error) {
-            throw new Error(`Failed to get expense by ID ${id}: ${error.message}`);
-        }
+        const query = "SELECT * FROM expense WHERE id = ?";
+        const result = await this.database.select(query, [id]);
+        return this.extractToEntity(result, Expense)[0] ?? null;
     }
 }

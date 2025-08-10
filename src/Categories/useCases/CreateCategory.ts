@@ -10,17 +10,8 @@ export default class CreateCategory {
     ) {}
 
     async execute(category: CategoryDTO): Promise<{category: Category}> {
-        const entity = new Category();
-        entity.name = category.name;
-        entity.description = category.description;
-        entity.type = category.type;
-        entity.color = category.color;
-
-        if (category.id !== undefined && category.id > 0) {
-            entity.id = category.id;
-        }
-
-        const categoryCreated = await this.repository.createCategory(entity);
+        const entity = Category.fromDTO(category); 
+        const categoryCreated = await this.repository.saveCategory(entity);
         return { category: categoryCreated };    
     }
 }   

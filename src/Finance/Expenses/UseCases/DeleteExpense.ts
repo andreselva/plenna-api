@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ExpensesRepository } from "../ExpensesRepository";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
@@ -15,11 +15,9 @@ export class DeleteExpense {
             const queryId = sourceAccountId > 0 ? sourceAccountId : id;
             const installments = await this.repository.searchForRelatedInstallments(queryId);
 
-            const result: { isSuccess: boolean; message: string }[] = [];
-
             if (installments) {
                 for (let i = 0; i < installments.length; i++) {
-                    result[i] = (await this.repository.deleteExpense(installments[i].id));
+                    await this.repository.deleteExpense(installments[i].id);
                 }
                 return { expenses: await this.getExpensesUseCase.execute(periodo) };
             }

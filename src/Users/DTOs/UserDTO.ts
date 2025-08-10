@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export default class UserDTO {
     @IsString({ message: 'Invalid username!' })
@@ -16,4 +16,8 @@ export default class UserDTO {
     @IsString({ message: 'Invalid name!' })
     @IsNotEmpty({ message: 'Invalid name.' })
     name: string;
+
+    @IsOptional()
+    @IsInt({ message: 'Invalid ID!' })
+    id: number;
 }

@@ -64,7 +64,7 @@ export class Expense extends EntityModel implements IEntity {
         expense.id = row.id;
         expense.name = row.name;
         expense.description = row.description;
-        expense.value = row.value;
+        expense.value = Number(row.value);
         expense.invoiceDueDate = DateHelper.toISODate(row.invoiceDueDate) as string;
         expense.idCategory = row.idCategory;
         expense.idCreditCard = row.idCreditCard;

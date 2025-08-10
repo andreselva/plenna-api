@@ -3,6 +3,7 @@ import PaymentInicialDataDTO from "../Finance/Payment/DTOs/PaymentInicialDataDTO
 import { PaymentType } from "../Finance/Payment/Types/payment.type";
 import IEntity from "src/Shared/interfaces/IEntity";
 import IPaymentRow from "src/Shared/interfaces/IPaymentInterface";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 export default class Payment extends EntityModel implements IEntity {
     public value: number = 0;
@@ -29,7 +30,7 @@ export default class Payment extends EntityModel implements IEntity {
         const payment = new Payment();
         payment.id = row.id;
         payment.value = row.value;
-        payment.payment_date = row.payment_date;
+        payment.payment_date = DateHelper.toISODate(row.payment_date) as string;
         payment.payable_id = row.payable_id;
         payment.payable_type = row.payable_type
         return payment;

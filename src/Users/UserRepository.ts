@@ -1,61 +1,32 @@
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
-import UserRowDTO from "./DTOs/UserRowDTO";
 import User from "./Entity/User";
 import { Injectable } from "@nestjs/common";
+import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
-export default class UsersRepository {
+export default class UsersRepository extends BaseRepository<User> {
 
-    constructor(
-        private readonly database: MySQLDatabase
-    ) { }
+    constructor(database: MySQLDatabase) { 
+        super(database);
+    }
 
     async findUserByUsername(username: string) {
         const query = "SELECT * FROM user WHERE username = ?";
-        const row = await this.database.select(query, [username]) as UserRowDTO[];
-
-        if (row && row.length > 0 && row.length === 1) {
-            const user = row[0];
-            return new User(
-                user.username,
-                user.password,
-                user.email,
-                user.name,
-                user.id
-            )
-        }
-        return null;
+        const result = await this.database.select(query, [username]);
+        return this.extractToEntity(result, User)[0] ?? null;
     }
 
     async createUser(user: User) {
-        const query = "INSERT INTO user (username, password, email, name) VALUES (?, ?, ?, ?)";
-        const params = [
-            user.getUserName(),
-            user.getPassword(),
-            user.getEmail(),
-            user.getName()
-        ];
-        
-        const result = await this.database.execute(query, params);
-
-        if (result.affectedRows > 0) {
-            return user;
+        const result = await this.save(user);
+        if (result.insertId > 0 && user.id === 0) {
+            user.id = result.insertId;
         }
+        return user;
     }
 
     async findUserById(id: number) {
         const query = "SELECT id, username, email, name FROM user WHERE id = ?";
-        const result = await this.database.select(query, [id]) as UserRowDTO[];
-
-        if (result) {
-            const user = result[0];
-            return new User(
-                user.username,
-                user.password,
-                user.email,
-                user.name,
-                user.id
-            )
-        }
+        const result = await this.database.select(query, [id]);
+        return this.extractToEntity(result, User)[0] ?? null;
     }
 }

@@ -1,46 +1,48 @@
+import EntityModel from "src/EntityModels/entity.model";
 import UserDTO from "../DTOs/UserDTO";
+import IEntity from "src/Shared/interfaces/IEntity";
+import IUserRow from "src/Shared/interfaces/IUserRow";
 
-export default class User {
-    private readonly username: string;
-    private readonly password: string;
-    private readonly email: string;
-    private readonly name: string;
-    private readonly id?: number;
+export default class User extends EntityModel implements IEntity {
+    public username: string;
+    public password: string;
+    public email: string;
+    public name: string;
+    public id: number;
 
-    constructor(username: string, password: string, email: string, name: string, id?: number) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.name = name;
-        this.id = id;
-    }
-
-    getUserName() {
-        return this.username;
-    }
-
-    getPassword() {
-        return this.password;
-    }
-
-    getEmail() {
-        return this.email;
-    }
-
-    getName() {
-        return this.name;
-    }
-
-    getId() {
-        return this.id;
+    constructor() {
+        super();
     }
 
     static fromDTO(dto: UserDTO) {
-        return new User(
-            dto.username,
-            dto.password,
-            dto.email,
-            dto.name
-        )
+        const user = new User();
+        user.username = dto.username;
+        user.password = dto.password;
+        user.email = dto.email;
+        user.name = dto.name;
+        user.id = dto.id ?? 0
+        return user;
+    }
+
+    static fromRow(row: IUserRow) {
+        const user = new User();
+        user.username = row.username;
+        user.password = row.password;
+        user.email = row.email;
+        user.name = row.name;
+        user.id = row.id;
+        return user;
+    }
+
+    getTableName(): string {
+        return 'user';
+    }
+
+    getPrimaryKey(): string {
+        return 'id';
+    }
+
+    getIgnoredProperties(): string[] {
+        return [];
     }
 }

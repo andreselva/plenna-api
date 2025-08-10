@@ -3,6 +3,7 @@ import UsersRepository from './UserRepository';
 import UserDTO from './DTOs/UserDTO';
 import User from './Entity/User';
 import * as bcrypt from 'bcryptjs';
+import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +15,7 @@ export class UsersService {
     }
 
     async createUser(user: UserDTO) {
-        const senhaHash = await bcrypt.hash(user.password, 10);
+        const senhaHash = await PasswordHasher.hash(user.password);
         user.password = senhaHash;
         const entity = User.fromDTO(user);
         return await this.repository.createUser(entity);

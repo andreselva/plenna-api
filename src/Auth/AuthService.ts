@@ -4,6 +4,7 @@ import { UsersService } from '../Users/UserService';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import AuthRepository from './AuthRepository';
+import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
 
 @Injectable()
 export class AuthService {
@@ -58,7 +59,7 @@ export class AuthService {
             
             const newAccessToken = this.generateToken(user);
             const newRefreshToken = this.generateRefreshToken(user);
-            await this.repository.updateRefreshToken(newRefreshToken, Number(user.getId()));
+            await this.repository.updateRefreshToken(newRefreshToken, Number(user.id));
             return { accessToken: newAccessToken, newRefreshToken };
 
         } catch (err) {
@@ -69,11 +70,8 @@ export class AuthService {
 
     async validateUser(username: string, password: string) {
         const userEntity = await this.userService.findByUsername(username);
-        if (
-            userEntity &&
-            (await bcrypt.compare(password, userEntity.getPassword()))
-        ) {
-            return { id: userEntity.getId(), username: userEntity.getUserName() };
+        if (userEntity && (await PasswordHasher.compare(password, userEntity.password))) {
+            return { id: userEntity.id, username: userEntity.username };
         }
         return null;
     }
@@ -92,7 +90,7 @@ export class AuthService {
             if (!user) {
                 throw new UnauthorizedException('Usuário não encontrado');
             }
-            return { id: user.getId(), username: user.getUserName(), name: user.getName() };
+            return { id: user.id, username: user.username, name: user.name };
         } catch (error) {
             console.error('Erro ao verificar o token:', error);
             throw new UnauthorizedException('Token inválido ou expirado');

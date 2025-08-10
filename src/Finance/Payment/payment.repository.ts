@@ -21,9 +21,9 @@ export class PaymentRepository extends BaseRepository<Payment> {
     async getPaymentsByEntity(entityType: string, entityId: string) {
         const query = `SELECT 
                             value as value,
-                            payment_date as paymentDate,
-                            payable_id as payableId,
-                            payable_type as payableType,
+                            payment_date,
+                            payable_id,
+                            payable_type,
                             id as id
                         FROM payment WHERE payable_type = ? AND payable_id = ?`;
         const values = [entityType, entityId];

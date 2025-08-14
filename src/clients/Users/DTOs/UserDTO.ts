@@ -20,4 +20,8 @@ export default class UserDTO {
     @IsOptional()
     @IsInt({ message: 'Invalid ID!' })
     id: number;
+
+    @IsOptional()
+    @IsInt({ message: 'Invalid clientId'})
+    clientId: number;
 }

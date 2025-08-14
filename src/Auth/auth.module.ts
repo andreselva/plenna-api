@@ -4,7 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './AuthService';
 import { AuthController } from './AuthController';
 import { JwtStrategy } from './JwtStrategy';
-import { UsersModule } from '../Users/users.module';
+import { UsersModule } from '../clients/Users/users.module';
 import AuthRepository from './AuthRepository';
 import MySQLDatabase from 'src/Config/Database/MySQLDatabase';
 import { ConfigModule, ConfigService } from '@nestjs/config';

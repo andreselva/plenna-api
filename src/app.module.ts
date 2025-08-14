@@ -21,15 +21,14 @@ import { DashboardController } from './Dashboard/DashboardController';
 import { MonthlyProgressServices } from './Dashboard/MonthlyProgress/MonthlyProgressServices';
 import { MonthlyProgressRepository } from './Dashboard/MonthlyProgress/MonthlyProgressRepository';
 import { AuthModule } from './Auth/auth.module';
-import { UsersModule } from './Users/users.module';
 import CreditCardStatementsService from './Dashboard/CreditCardStatements/CreditCardStatementsService';
 import CreditCardStatementsRepository from './Dashboard/CreditCardStatements/CreditCardStatementsRepository';
-import { UsersController } from './Users/UserController';
 import { ConfigModule } from '@nestjs/config';
 import { InvoicesModule } from './Finance/Invoices/invoices.module';
 import { FinanceModule } from './Finance/finance.module';
 import { DatabaseModule } from './Config/Database/database.module';
 import { HealthCheckModule } from './Check/health-check.module';
+import { ClientsModule } from './clients/clients.module';
 
 const services = [
   CategoriesService,
@@ -52,18 +51,18 @@ const repositories = [
       isGlobal: true,
     }),
     AuthModule,
-    UsersModule,
     InvoicesModule,
     FinanceModule,
     DatabaseModule,
-    HealthCheckModule
+    HealthCheckModule,
+    ClientsModule
   ],
   controllers: [
     AppController,
     CategoriesController,
     DashboardController,
-    UsersController
   ],
+
   providers: [
     AppService,
     ...services,

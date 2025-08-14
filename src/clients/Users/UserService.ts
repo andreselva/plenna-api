@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import UsersRepository from './UserRepository';
 import UserDTO from './DTOs/UserDTO';
-import User from './Entity/User';
+import User from '../../EntityModels/User';
 import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
 
 @Injectable()
 export class UsersService {
     constructor(
-        private readonly repository: UsersRepository
+        private readonly repository: UsersRepository,
     ) { }
     async findByUsername(username: string) {
         return await this.repository.findUserByUsername(username);
@@ -17,6 +17,7 @@ export class UsersService {
         const senhaHash = await PasswordHasher.hash(user.password);
         user.password = senhaHash;
         const entity = User.fromDTO(user);
+        // const client = await this.clientService.createClient(entity);
         return await this.repository.createUser(entity);
     }
 

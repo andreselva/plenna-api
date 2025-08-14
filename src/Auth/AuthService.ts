@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../Users/UserService';
+import { UsersService } from '../clients/Users/UserService';
 import * as jwt from 'jsonwebtoken';
 import AuthRepository from './AuthRepository';
 import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';

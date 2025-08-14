@@ -1,5 +1,5 @@
 import EntityModel from "src/EntityModels/entity.model";
-import UserDTO from "../DTOs/UserDTO";
+import UserDTO from "../clients/Users/DTOs/UserDTO";
 import IEntity from "src/Shared/interfaces/IEntity";
 import IUserRow from "src/Shared/interfaces/IUserRow";
 

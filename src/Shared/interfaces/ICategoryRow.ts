@@ -6,4 +6,5 @@ export default interface ICategoryRow {
     description: string;
     type: CategoryType;
     color: string;
+    clientId: number
 }

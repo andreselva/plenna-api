@@ -16,4 +16,5 @@ export default interface IExpenseRow {
     idInvoice: number;
     status: ExpenseStatus;
     paymentDate: string;
+    clientId: number;
 }

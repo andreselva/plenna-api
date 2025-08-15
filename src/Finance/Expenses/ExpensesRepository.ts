@@ -1,24 +1,25 @@
 import { Injectable } from "@nestjs/common";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
-import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 import { ExpenseStatus } from "./Types/expense.status.type";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
-import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import { Expense } from "src/EntityModels/Expense";
+import MySQLDatabase from "src/Config/Database/MySQLDatabase";
+import { AuthContextService } from "src/Auth/auth-context.service";
 
 @Injectable()
 export class ExpensesRepository extends BaseRepository<Expense> {
-    constructor(database: MySQLDatabase) {
-        super(database);
+    constructor(database: MySQLDatabase, authContext: AuthContextService) {
+        super(database, authContext);
     }
-
+    
     async getExpenses(periodo: PeriodoDTO): Promise<Expense[]> {
-        const query = "SELECT * FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?";
-        const rows = await this.database.select(query, [periodo.start, periodo.end]);
+        const query = "SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ?";
+        const rows = await this.database.select(query, [this.authContext.getClientId(), periodo.start, periodo.end]);
         return this.extractToEntity(rows, Expense);
     }
 
     async saveExpense(expense: Expense): Promise<Expense> {
+        expense.clientId = this.authContext.getClientId();
         const result = await this.save(expense)
         if (result.affectedRows > 0 && expense.id === 0) {
             expense.id = result.insertId;
@@ -27,8 +28,8 @@ export class ExpensesRepository extends BaseRepository<Expense> {
     }
 
     async deleteExpense(id: number) {
-        const query = "DELETE FROM expense WHERE id = ?";
-        const result = await this.database.execute(query, [id]);
+        const query = "DELETE FROM expense WHERE clientId = ? AND id = ?";
+        const result = await this.database.execute(query, [this.authContext.getClientId(), id]);
 
         if (result.affectedRows > 0) {
             return {
@@ -40,8 +41,8 @@ export class ExpensesRepository extends BaseRepository<Expense> {
     }
 
     async searchForRelatedInstallments(consideredId: number, expenseId: number = 0): Promise<Expense[]> {
-        let query = "SELECT * FROM expense WHERE (sourceAccountId = ? OR id = ?)";
-        const params = [consideredId, consideredId];
+        let query = "SELECT * FROM expense WHERE clientId = ? AND (sourceAccountId = ? OR id = ?)";
+        const params = [this.authContext.getClientId(), consideredId, consideredId];
         if (expenseId > 0) {
             query += " AND id >= ?";
             params.push(expenseId);
@@ -52,30 +53,21 @@ export class ExpensesRepository extends BaseRepository<Expense> {
     }
 
     async updateStatus(id: number, status: ExpenseStatus, paymentDate: string | null) {
-        try {
-            const query = "UPDATE expense SET status = ?, paymentDate = ? WHERE id = ?";
-            const result = await this.database.execute(query, [status, paymentDate, id]);
-
-            if (result.affectedRows === 0) {
-                throw new Error("Failed to update expense status");
-            }
-        } catch (error) {
-            throw new Error(`Failed to update expense status: ${error.message}`);
+        const query = "UPDATE expense SET status = ?, paymentDate = ? WHERE id = ? AND clientId = ?";
+        const result = await this.database.execute(query, [status, paymentDate, id, this.authContext.getClientId()]);
+        if (result.affectedRows === 0) {
+            throw new Error("Failed to update expense status");
         }
     }
 
     async getPayments(id: number): Promise<number> {
-        try {
-            const query = "SELECT SUM(value) as totalPayments FROM payment WHERE payable_type = 'expense' AND payable_id = ?";
-            const result = await this.database.select(query, [id]);
-            return Number(result[0]?.totalPayments) || 0;
-        } catch (error) {
-            throw new Error(`Failed to get payments for expense ID ${id}: ${error.message}`);
-        }
+        const query = "SELECT SUM(value) as totalPayments FROM payment WHERE clientId = ? AND payable_type = 'expense' AND payable_id = ?";
+        const result = await this.database.select(query, [this.authContext.getClientId(), id]);
+        return Number(result[0]?.totalPayments) || 0;
     }
 
     async getExpenseById(id: number) {
-        const query = "SELECT * FROM expense WHERE id = ?";
+        const query = "SELECT * FROM expense WHERE clientId = ? AND id = ?";
         const result = await this.database.select(query, [id]);
         return this.extractToEntity(result, Expense)[0] ?? null;
     }

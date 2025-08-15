@@ -1,21 +1,23 @@
-import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import BankAccount from "../../EntityModels/BankAccount";
 import { Injectable } from "@nestjs/common";
+import { AuthContextService } from "src/Auth/auth-context.service";
+import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
 export default class BankAccountsRepository extends BaseRepository<BankAccount>{
-    constructor(database: MySQLDatabase) { 
-        super(database)
+    constructor(database: MySQLDatabase, authContext: AuthContextService) { 
+        super(database, authContext)
     }
 
     async getBankAccounts(): Promise<BankAccount[]> {
-        const query = "SELECT * FROM bank_account";
-        const rows = await this.database.select(query);
+        const query = "SELECT * FROM bank_account WHERE clientId = ?";
+        const rows = await this.database.select(query, [this.authContext.getClientId()]);
         return this.extractToEntity(rows, BankAccount);
     }
 
     async saveBankAccount(bankAccount: BankAccount): Promise<BankAccount> {
+        bankAccount.clientId = this.authContext.getClientId();
         const result = await this.save(bankAccount);
         if (result.affectedRows > 0 && bankAccount.id === 0) {
             bankAccount.id = result.insertId;
@@ -24,8 +26,8 @@ export default class BankAccountsRepository extends BaseRepository<BankAccount>{
     }
 
     async deleteBankAccount(id: number) {
-        const query = "DELETE FROM bank_account WHERE id = ?";
-        const result = await this.database.execute(query, [id]);
+        const query = "DELETE FROM bank_account WHERE clientId = ? AND id = ?";
+        const result = await this.database.execute(query, [this.authContext.getClientId(), id]);
 
         if (result.affectedRows > 0) {
             return { success: true, message: 'Conta deletada com sucesso.' };

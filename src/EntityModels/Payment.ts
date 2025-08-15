@@ -6,11 +6,12 @@ import IPaymentRow from "src/Shared/interfaces/IPaymentInterface";
 import DateHelper from "src/Shared/Utils/DateHelper";
 
 export default class Payment extends EntityModel implements IEntity {
+    public id: number = 0;
+    public clientId: number;
     public value: number = 0;
     public payment_date: string = '';
     public payable_id: number = 0;
     public payable_type: PaymentType;
-    public id: number = 0;
 
     constructor() {
         super();

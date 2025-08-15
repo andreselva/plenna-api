@@ -4,11 +4,13 @@ import { ExpenseRowDTO } from "./DTOs/ExpenseRowDTO";
 import { Injectable } from "@nestjs/common";
 import DashboardArgs from "../Args/DashboardArgs";
 import DateHelper from "src/Shared/Utils/DateHelper";
+import { AuthContextService } from "src/Auth/auth-context.service";
 
 @Injectable()
 export class BillsDueRepository {
     constructor(
         private readonly database: MySQLDatabase,
+        private readonly authContext: AuthContextService
     ) { }
 
     async getBills(args: DashboardArgs): Promise<BillsDueDTO[]> {
@@ -17,9 +19,10 @@ export class BillsDueRepository {
                         FROM
                             expense
                         WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?
-                        AND  (idCreditCard <= 0 OR idCreditCard is null OR idCreditCard = "")
+                        AND (idCreditCard <= 0 OR idCreditCard is null OR idCreditCard = "")
+                        AND clientId = ?
                         ORDER BY invoiceDueDate`;
-        const rows = await this.database.select(query, [args.startDate, args.endDate]) as ExpenseRowDTO[];
+        const rows = await this.database.select(query, [args.startDate, args.endDate, this.authContext.getClientId()]) as ExpenseRowDTO[];
 
         return rows.map((row) => new BillsDueDTO(
             row.name,

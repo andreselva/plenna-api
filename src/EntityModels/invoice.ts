@@ -6,11 +6,12 @@ import IInvoiceRow from "src/Shared/interfaces/IInvoiceRow";
 import DateHelper from "src/Shared/Utils/DateHelper";
 
 export default class Invoice extends EntityModel implements IEntity {
+    public id: number = 0;
+    public clientId: number;
     public closingDate: string = '';
     public dueDate: string = '';
     public idBankAccount: number = 0;
     public name: string = '';
-    public id: number = 0;
     public status: InvoiceStatus = 'pending';
     public paymentDate: string | null = '';
     public expenses: Expense[] = [];

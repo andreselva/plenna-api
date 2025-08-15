@@ -7,6 +7,7 @@ import { ExpenseDTO } from "src/Finance/Expenses/DTOs/ExpenseDTO";
 
 export class Expense extends EntityModel implements IEntity {
     public id: number = 0;
+    public clientId: number;
     public name: string = '';
     public description: string = '';
     public value: number = 0;

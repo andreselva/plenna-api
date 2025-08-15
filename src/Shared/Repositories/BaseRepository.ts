@@ -4,10 +4,12 @@ import QueryBuilder from "../QueryBuilder/QueryBuilder";
 import DataMapper from "../mapper/DataMapper";
 import { IEntityFactory } from "../interfaces/IEntityFactory";
 import IEntity from "../interfaces/IEntity";
+import { AuthContextService } from "src/Auth/auth-context.service";
 
 export default abstract class BaseRepository<T extends EntityModel> {
     constructor(
         protected readonly database: MySQLDatabase,
+        protected readonly authContext: AuthContextService
     ) {}
 
     async save(entity: IEntity) {

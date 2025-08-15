@@ -7,5 +7,6 @@ export default interface IInvoiceRow {
     closingDate: string;
     dueDate: string;
     paymentDate: string;
-    status: InvoiceStatus
+    status: InvoiceStatus;
+    clientId: number;
 }

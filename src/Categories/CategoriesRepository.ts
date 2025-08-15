@@ -1,20 +1,21 @@
 import { Injectable } from "@nestjs/common";
+import { AuthContextService } from "src/Auth/auth-context.service";
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import Category from "src/EntityModels/Category";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
 export default class CategoriesRepository extends BaseRepository<Category>{
-    constructor(database: MySQLDatabase) {
-        super(database);
+    constructor(database: MySQLDatabase, authContext: AuthContextService) {
+        super(database, authContext)
     }
 
     /**
      * Busca todas as categorias no banco de dados.
      */
     async getCategories(): Promise<Category[]> {
-        const query = 'SELECT * FROM category';
-        const rows = await this.database.select(query);
+        const query = 'SELECT * FROM category WHERE clientId = ?';
+        const rows = await this.database.select(query, [this.authContext.getClientId()]);
         return this.extractToEntity(rows, Category)
     }
 
@@ -22,6 +23,7 @@ export default class CategoriesRepository extends BaseRepository<Category>{
      * Cria uma nova categoria.
      */
     async saveCategory(category: Category): Promise<Category> {
+        category.clientId =  this.authContext.getClientId();
         const result = await this.save(category);
 
         if (result.affectedRows > 0 && category.id === 0) {
@@ -34,8 +36,8 @@ export default class CategoriesRepository extends BaseRepository<Category>{
      * Deleta uma categoria pelo ID.
      */
     async deleteCategory(id: number) {
-        const query = 'DELETE FROM category WHERE id = ?';
-        const result = await this.database.execute(query, [id]);
+        const query = 'DELETE FROM category WHERE clientId = ? AND id = ?';
+        const result = await this.database.execute(query, [this.authContext.getClientId(), id]);
 
         if (result.affectedRows > 0) {
             return { success: true, message: 'Categoria deletada com sucesso.' };

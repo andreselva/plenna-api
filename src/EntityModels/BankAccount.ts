@@ -5,6 +5,7 @@ import IBankAccountRow from "src/Shared/interfaces/IBankAccountRow";
 
 export default class BankAccount extends EntityModel implements IEntity {
     id: number = 0;
+    clientId: number;
     name: string = '';
     generateInvoice: boolean = false;
     icon: string = '';

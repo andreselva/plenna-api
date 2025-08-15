@@ -1,11 +1,13 @@
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
 import MonthlyProgressRowDTO from "./DTOs/MonthlyProgressRowDTO";
 import { Injectable } from "@nestjs/common";
+import { AuthContextService } from "src/Auth/auth-context.service";
 
 @Injectable()
 export class MonthlyProgressRepository {
     constructor(
         private readonly database: MySQLDatabase,
+        private readonly authContext: AuthContextService
     ) { }
 
     async getExpensesData(startDate: string, endDate: string) {
@@ -29,9 +31,10 @@ export class MonthlyProgressRepository {
                         expense
                     WHERE
                         invoiceDueDate BETWEEN ? AND ?
+                        AND clientId = ?
                     GROUP BY month
                     ORDER BY month ASC`;
-        const rows = await this.database.select(query, [startDate, endDate]) as MonthlyProgressRowDTO[];
+        const rows = await this.database.select(query, [startDate, endDate, this.authContext.getClientId()]) as MonthlyProgressRowDTO[];
 
         return rows.map(row => new MonthlyProgressRowDTO(
             row.value,
@@ -60,9 +63,10 @@ export class MonthlyProgressRepository {
                         revenue
                     WHERE
                         invoiceDueDate BETWEEN ? AND ?
+                        AND clientId = ?
                     GROUP BY month
                     ORDER BY month ASC`;
-        const rows = await this.database.select(query, [startDate, endDate]) as MonthlyProgressRowDTO[];
+        const rows = await this.database.select(query, [startDate, endDate, this.authContext.getClientId()]) as MonthlyProgressRowDTO[];
         return rows.map(row => new MonthlyProgressRowDTO(
             row.value,
             row.month

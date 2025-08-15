@@ -1,9 +1,9 @@
 import IEntity from "src/Shared/interfaces/IEntity";
-import { InvoiceStatus } from "../Finance/Invoices/Types/invoice.status.type";
 import EntityModel from "./entity.model";
 import { Expense } from "./Expense";
 import IInvoiceRow from "src/Shared/interfaces/IInvoiceRow";
 import DateHelper from "src/Shared/Utils/DateHelper";
+import { InvoiceStatus } from "src/modules/Finance/Invoices/Types/invoice.status.type";
 
 export default class Invoice extends EntityModel implements IEntity {
     public id: number = 0;

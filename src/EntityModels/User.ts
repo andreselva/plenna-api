@@ -1,6 +1,6 @@
 import EntityModel from "src/EntityModels/entity.model";
 import { Role } from "src/enum/role.enum";
-import UserDTO from "src/management/Users/DTOs/UserDTO";
+import UserDTO from "src/modules/management/Users/DTOs/UserDTO";
 import IEntity from "src/Shared/interfaces/IEntity";
 import IUserRow from "src/Shared/interfaces/IUserRow";
 

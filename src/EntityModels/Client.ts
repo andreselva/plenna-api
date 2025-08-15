@@ -1,7 +1,7 @@
 import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
 import IClientRow from "src/Shared/interfaces/IClientRow";
-import UserDTO from "src/management/Users/DTOs/UserDTO";
+import UserDTO from "src/modules/management/Users/DTOs/UserDTO";
 
 export default class Client extends EntityModel implements IEntity {
     public id: number;

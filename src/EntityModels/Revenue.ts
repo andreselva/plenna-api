@@ -2,7 +2,7 @@ import DateHelper from "src/Shared/Utils/DateHelper";
 import EntityModel from "src/EntityModels/entity.model";
 import IEntity from "src/Shared/interfaces/IEntity";
 import IRevenueRow from "src/Shared/interfaces/IRevenueRow";
-import { RevenueDTO } from "src/Finance/Revenues/DTOs/RevenueDTO";
+import { RevenueDTO } from "src/modules/Finance/Revenues/DTOs/RevenueDTO";
 
 export default class Revenue extends EntityModel implements IEntity {
     public id: number = 0;

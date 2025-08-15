@@ -1,7 +1,7 @@
 import { CategoryType } from "src/enum/category-type.enum";
 import EntityModel from "./entity.model";
 import IEntity from "src/Shared/interfaces/IEntity";
-import CategoryDTO from "src/Categories/CategoryDTO";
+import CategoryDTO from "src/modules/Categories/CategoryDTO";
 import ICategoryRow from "src/Shared/interfaces/ICategoryRow";
 
 export default class Category extends EntityModel implements IEntity {

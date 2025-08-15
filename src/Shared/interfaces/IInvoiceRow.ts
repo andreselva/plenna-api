@@ -1,4 +1,4 @@
-import { InvoiceStatus } from "src/Finance/Invoices/Types/invoice.status.type";
+import { InvoiceStatus } from "src/modules/Finance/Invoices/Types/invoice.status.type";
 
 export default interface IInvoiceRow {
     id: number;

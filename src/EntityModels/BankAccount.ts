@@ -1,7 +1,7 @@
 import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
-import BankAccountDTO from "src/Finance/BankAccounts/DTOs/BankAccountDTO";
 import IBankAccountRow from "src/Shared/interfaces/IBankAccountRow";
+import BankAccountDTO from "src/modules/Finance/BankAccounts/DTOs/BankAccountDTO";
 
 export default class BankAccount extends EntityModel implements IEntity {
     id: number = 0;

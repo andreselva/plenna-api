@@ -1,6 +1,6 @@
 import EntityModel from "src/EntityModels/entity.model";
-import PaymentInicialDataDTO from "../Finance/Payment/DTOs/PaymentInicialDataDTO";
-import { PaymentType } from "../Finance/Payment/Types/payment.type";
+import PaymentInicialDataDTO from "src/modules/Finance/Payment/DTOs/PaymentInicialDataDTO";
+import { PaymentType } from "src/modules/Finance/Payment/Types/payment.type";
 import IEntity from "src/Shared/interfaces/IEntity";
 import IPaymentRow from "src/Shared/interfaces/IPaymentInterface";
 import DateHelper from "src/Shared/Utils/DateHelper";

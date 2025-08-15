@@ -6,16 +6,19 @@ import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
 import AssociateExpensesToInvoiceUseCase from "src/Finance/Invoices/UseCases/AssociateExpensesToInvoice";
 import { Expense } from "src/EntityModels/Expense";
+import { AuthContextService } from "src/Auth/auth-context.service";
 
 @Injectable()
 export class CreateExpense {
     constructor(
         private readonly repository: ExpensesRepository,
         private readonly getExpensesUseCase: GetExpenses,
-        private readonly associateExpensesToInvoiceUC: AssociateExpensesToInvoiceUseCase
+        private readonly associateExpensesToInvoiceUC: AssociateExpensesToInvoiceUseCase,
+        private readonly authContext: AuthContextService
     ) { }
 
     async execute(expense: ExpenseDTO, periodo: PeriodoDTO) {
+        const clientId = this.authContext.getClientId();
         const entity = Expense.fromDTO(expense);
         if (entity.idInvoice === 0 && !entity.linkToInvoice) {
             entity.idCreditCard = 0;

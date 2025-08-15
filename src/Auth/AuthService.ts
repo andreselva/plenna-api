@@ -37,12 +37,12 @@ export class AuthService {
     }
 
     generateToken(user: any): string {
-        const payload = { sub: user.id, username: user.username };
+        const payload = { sub: user.id, username: user.username, role: user.role, clientId: user.clientId };
         return this.jwtService.sign(payload, { secret: this.jwtSecret, expiresIn: '1h' });
     }
 
     generateRefreshToken(user: any): string {
-        const payload = { sub: user.id, username: user.username };
+        const payload = { sub: user.id, username: user.username, role: user.role, clientId: user.clientId };
         return this.jwtService.sign(payload, { secret: this.refreshSecret, expiresIn: '7d' });
     }
 
@@ -78,7 +78,7 @@ export class AuthService {
     async validateUser(username: string, password: string) {
         const userEntity = await this.userService.findByUsername(username);
         if (userEntity && (await PasswordHasher.compare(password, userEntity.password))) {
-            return { id: userEntity.id, username: userEntity.username };
+            return { id: userEntity.id, username: userEntity.username, role: userEntity.role, clientId: userEntity.clientId };
         }
         return null;
     }
@@ -90,14 +90,20 @@ export class AuthService {
 
         try {
             if (!this.jwtSecret) throw new UnauthorizedException();
+
             const decoded = jwt.verify(token, this.jwtSecret) as jwt.JwtPayload;
 
-            if (!decoded || !decoded.sub) throw new UnauthorizedException();
-            const user = await this.userService.findUserById(decoded.sub);
-            if (!user) {
+            if (!decoded || !decoded.sub) {
                 throw new UnauthorizedException();
             }
-            return { id: user.id, username: user.username, name: user.name };
+
+            return { 
+                id: decoded.sub, 
+                username: decoded.username, 
+                role: decoded.role,
+                clientId: decoded.clientId
+            };
+
         } catch (error) {
             console.error('Erro ao verificar o token:', error);
             throw new UnauthorizedException();

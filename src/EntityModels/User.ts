@@ -1,4 +1,5 @@
 import EntityModel from "src/EntityModels/entity.model";
+import { Role } from "src/enum/role.enum";
 import UserDTO from "src/management/Users/DTOs/UserDTO";
 import IEntity from "src/Shared/interfaces/IEntity";
 import IUserRow from "src/Shared/interfaces/IUserRow";
@@ -18,6 +19,7 @@ export default class User extends EntityModel implements IEntity {
     public state: string;
     public zipCode: string;
     public clientId: number;
+    public role: Role = Role.NORMAL_USER;
 
     constructor() {
         super();
@@ -49,6 +51,7 @@ export default class User extends EntityModel implements IEntity {
         user.name = row.name;
         user.id = row.id;
         user.clientId = row.clientId;
+        user.role = row.role;
         return user;
     }
 

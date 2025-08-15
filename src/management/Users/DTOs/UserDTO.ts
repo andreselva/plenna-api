@@ -1,4 +1,5 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Role } from "src/enum/role.enum";
 
 export default class UserDTO {
     @IsString({ message: 'Invalid username!' })

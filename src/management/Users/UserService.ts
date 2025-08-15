@@ -8,6 +8,7 @@ export class UsersService {
     constructor(
         private readonly repository: UsersRepository,
     ) { }
+    
     async findByUsername(username: string) {
         return await this.repository.findUserByUsername(username);
     }

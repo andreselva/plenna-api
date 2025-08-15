@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
 import { ManagementService } from './management.service';
 import { Public } from 'src/common/decorators/public.decorator';
 import UserDTO from './Users/DTOs/UserDTO';
@@ -12,6 +12,7 @@ export class ManagementController {
     @Public()
     @Post('register-user')
     async create(@Body() user: UserDTO) {
-        return await this.service.registerUser(user)
+        throw new UnauthorizedException();
+        // return await this.service.registerUser(user)
     }
 }

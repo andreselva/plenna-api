@@ -2,9 +2,11 @@ import DateHelper from "src/Shared/Utils/DateHelper";
 import EntityModel from "src/EntityModels/entity.model";
 import IEntity from "src/Shared/interfaces/IEntity";
 import IRevenueRow from "src/Shared/interfaces/IRevenueRow";
-import { RevenueDTO } from "src/Finance/Revenues/DTOs/RevenueDTO";
+import { RevenueDTO } from "src/modules/Finance/Revenues/DTOs/RevenueDTO";
 
 export default class Revenue extends EntityModel implements IEntity {
+    public id: number = 0;
+    public clientId: number = 0;
     public name: string = '';
     public description: string = '';
     public value: number = 0;
@@ -14,7 +16,6 @@ export default class Revenue extends EntityModel implements IEntity {
     public typeOfInstallments: string = 'U';
     public sourceAccountId: number = 0;
     public hasInstallments: boolean = false;
-    public id: number = 0;
 
     constructor() {
         super();

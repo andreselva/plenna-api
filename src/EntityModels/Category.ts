@@ -1,15 +1,16 @@
 import { CategoryType } from "src/enum/category-type.enum";
 import EntityModel from "./entity.model";
 import IEntity from "src/Shared/interfaces/IEntity";
-import CategoryDTO from "src/Categories/CategoryDTO";
+import CategoryDTO from "src/modules/Categories/CategoryDTO";
 import ICategoryRow from "src/Shared/interfaces/ICategoryRow";
 
 export default class Category extends EntityModel implements IEntity {
+    public id: number = 0;
+    public clientId: number;
     public name: string = '';
     public description: string = '';
     public type: CategoryType = CategoryType.REVENUE;
     public color: string = '';
-    public id: number = 0;
 
     constructor() {
         super();
@@ -39,6 +40,7 @@ export default class Category extends EntityModel implements IEntity {
         category.color = row.color;
         category.type = row.type;
         category.description = row.description;
+        category.clientId = row.clientId;
 
         return category;
     }

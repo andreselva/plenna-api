@@ -1,4 +1,4 @@
-import { ExpenseStatus } from "src/Finance/Expenses/Types/expense.status.type";
+import { ExpenseStatus } from "src/modules/Finance/Expenses/Types/expense.status.type";
 
 export default interface IExpenseRow {
     id: number;
@@ -16,4 +16,5 @@ export default interface IExpenseRow {
     idInvoice: number;
     status: ExpenseStatus;
     paymentDate: string;
+    clientId: number;
 }

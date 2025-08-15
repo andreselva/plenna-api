@@ -1,6 +1,6 @@
 import { Injectable, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtAuthGuard } from 'src/Auth/JwtAuthGuard';
+import { JwtAuthGuard } from 'src/modules/Auth/JwtAuthGuard';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()

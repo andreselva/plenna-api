@@ -1,4 +1,4 @@
-import { PaymentType } from "src/Finance/Payment/Types/payment.type";
+import { PaymentType } from "src/modules/Finance/Payment/Types/payment.type";
 
 export default interface IPaymentRow {
     id: number;

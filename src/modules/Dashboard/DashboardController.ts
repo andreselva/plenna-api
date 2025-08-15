@@ -1,7 +1,7 @@
 import { Controller, Get, Headers, HttpCode, HttpStatus } from "@nestjs/common";
 import { DashboardServices } from "./DashboardServices";
 import DashboardArgs from "./Args/DashboardArgs";
-import PeriodoDTO from "../DTOs/PeriodoDTO";
+import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Controller('/dashboard')
 export class DashboardController {
@@ -11,11 +11,7 @@ export class DashboardController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    async getDashboardData(
-        @Headers('periodo') periodo: string
-        // @Req() req -> pra usar dps
-    ) {
-        // const user = req.user; -> pra usar depois
+    async getDashboardData(@Headers('periodo') periodo: string) {
         const newPeriodo = JSON.parse(periodo) as PeriodoDTO;
         const args = new DashboardArgs(newPeriodo.start, newPeriodo.end);
         return await this.service.getDashboardData(args);

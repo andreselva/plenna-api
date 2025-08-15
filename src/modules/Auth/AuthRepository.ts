@@ -2,11 +2,12 @@ import { Injectable } from "@nestjs/common";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import RefreshToken from "src/EntityModels/RefreshToken";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
+import { AuthContextService } from "./auth-context.service";
 
 @Injectable()
 export default class AuthRepository extends BaseRepository<RefreshToken>{
-    constructor(database: MySQLDatabase) { 
-        super(database);
+    constructor(database: MySQLDatabase, authContext: AuthContextService) { 
+        super(database, authContext);
     }
 
     async saveRefreshToken(entity: RefreshToken) {

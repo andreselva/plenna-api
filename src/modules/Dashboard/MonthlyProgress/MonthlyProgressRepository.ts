@@ -29,12 +29,11 @@ export class MonthlyProgressRepository {
                         END AS month
                     FROM
                         expense
-                    WHERE
-                        invoiceDueDate BETWEEN ? AND ?
-                        AND clientId = ?
+                    WHERE clientId = ?
+                        AND invoiceDueDate BETWEEN ? AND ?
                     GROUP BY month
                     ORDER BY month ASC`;
-        const rows = await this.database.select(query, [startDate, endDate, this.authContext.getClientId()]) as MonthlyProgressRowDTO[];
+        const rows = await this.database.select(query, [this.authContext.getClientId(), startDate, endDate]) as MonthlyProgressRowDTO[];
 
         return rows.map(row => new MonthlyProgressRowDTO(
             row.value,
@@ -61,12 +60,11 @@ export class MonthlyProgressRepository {
                         END AS month
                     FROM
                         revenue
-                    WHERE
-                        invoiceDueDate BETWEEN ? AND ?
-                        AND clientId = ?
+                    WHERE clientId = ?
+                        AND invoiceDueDate BETWEEN ? AND ?
                     GROUP BY month
                     ORDER BY month ASC`;
-        const rows = await this.database.select(query, [startDate, endDate, this.authContext.getClientId()]) as MonthlyProgressRowDTO[];
+        const rows = await this.database.select(query, [this.authContext.getClientId(), startDate, endDate]) as MonthlyProgressRowDTO[];
         return rows.map(row => new MonthlyProgressRowDTO(
             row.value,
             row.month

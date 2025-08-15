@@ -18,11 +18,11 @@ export class BillsDueRepository {
                             name, invoiceDueDate, value
                         FROM
                             expense
-                        WHERE invoiceDueDate >= ? AND invoiceDueDate <= ?
+                        WHERE clientId = ?
+                        AND invoiceDueDate >= ? AND invoiceDueDate <= ?
                         AND (idCreditCard <= 0 OR idCreditCard is null OR idCreditCard = "")
-                        AND clientId = ?
                         ORDER BY invoiceDueDate`;
-        const rows = await this.database.select(query, [args.startDate, args.endDate, this.authContext.getClientId()]) as ExpenseRowDTO[];
+        const rows = await this.database.select(query, [this.authContext.getClientId(), args.startDate, args.endDate]) as ExpenseRowDTO[];
 
         return rows.map((row) => new BillsDueDTO(
             row.name,

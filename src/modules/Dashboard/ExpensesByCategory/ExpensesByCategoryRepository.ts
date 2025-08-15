@@ -18,12 +18,12 @@ export class ExpensesByCategoryRepository {
                             expense e
                                 JOIN
                             category c ON c.id = e.idCategory AND c.clientId = e.clientId
-                            WHERE e.invoiceDueDate >= ? AND e.invoiceDueDate <= ?
-                            AND e.clientId = ?
+                            WHERE e.clientId = ? 
+                                AND e.invoiceDueDate >= ? AND e.invoiceDueDate <= ?
                         GROUP BY 1
                         ORDER BY value DESC
                         LIMIT 5`;
-        const result = await this.database.select(query, [args.startDate, args.endDate, this.authContext.getClientId()]);
+        const result = await this.database.select(query, [this.authContext.getClientId(), args.startDate, args.endDate]);
 
         return result.map((item: any): ExpensesByCategoryDTO => ({
             name: item.name,

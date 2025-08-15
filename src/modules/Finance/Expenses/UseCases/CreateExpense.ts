@@ -18,7 +18,6 @@ export class CreateExpense {
     ) { }
 
     async execute(expense: ExpenseDTO, periodo: PeriodoDTO) {
-        const clientId = this.authContext.getClientId();
         const entity = Expense.fromDTO(expense);
         if (entity.idInvoice === 0 && !entity.linkToInvoice) {
             entity.idCreditCard = 0;

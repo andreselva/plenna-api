@@ -68,7 +68,7 @@ export class ExpensesRepository extends BaseRepository<Expense> {
 
     async getExpenseById(id: number) {
         const query = "SELECT * FROM expense WHERE clientId = ? AND id = ?";
-        const result = await this.database.select(query, [id]);
+        const result = await this.database.select(query, [this.authContext.getClientId(), id]);
         return this.extractToEntity(result, Expense)[0] ?? null;
     }
 }

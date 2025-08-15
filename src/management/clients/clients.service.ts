@@ -10,9 +10,7 @@ export class ClientsService {
     ) {}
     
     async createClient(user: User) {
-        const client = new Client()
-        client.clientEmail = user.email;
-        client.clientName = user.name;
+        const client = Client.fromUser(user);
         return await this.repository.saveClient(client);
     }
 }

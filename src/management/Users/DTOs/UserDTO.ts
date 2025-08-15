@@ -24,4 +24,36 @@ export default class UserDTO {
     @IsOptional()
     @IsInt({ message: 'Invalid clientId'})
     clientId: number;
+
+    @IsOptional()
+    @IsString({ message: 'Invalid document!' })
+    document: string;
+
+    @IsOptional()
+    @IsString({ message: 'Invalid address!' })
+    address: string;
+
+    @IsOptional()
+    @IsString({ message: 'Invalid number!' })
+    number: string;
+
+    @IsOptional()
+    @IsString({ message: 'Invalid complement!' })
+    complement: string;
+
+    @IsOptional()
+    @IsString({ message: 'Invalid neighborhood!' })
+    neighborhood: string;
+
+    @IsOptional()
+    @IsString({ message: 'Invalid city!' })
+    city: string;
+
+    @IsOptional()
+    @IsString({ message: 'Invalid state!' })
+    state: string;
+
+    @IsOptional()
+    @IsString({ message: 'Invalid zipcode!' })
+    zipCode: string;
 }

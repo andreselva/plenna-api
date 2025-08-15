@@ -28,7 +28,8 @@ import { InvoicesModule } from './Finance/Invoices/invoices.module';
 import { FinanceModule } from './Finance/finance.module';
 import { DatabaseModule } from './Config/Database/database.module';
 import { HealthCheckModule } from './Check/health-check.module';
-import { ClientsModule } from './clients/clients.module';
+import { ClientsModule } from './management/clients/clients.module';
+import { ManagementModule } from './management/management.module';
 
 const services = [
   CategoriesService,
@@ -55,7 +56,8 @@ const repositories = [
     FinanceModule,
     DatabaseModule,
     HealthCheckModule,
-    ClientsModule
+    ClientsModule,
+    ManagementModule
   ],
   controllers: [
     AppController,

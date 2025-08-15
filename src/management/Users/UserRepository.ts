@@ -1,7 +1,7 @@
 import MySQLDatabase from "src/Config/Database/MySQLDatabase";
-import User from "../../EntityModels/User";
 import { Injectable } from "@nestjs/common";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
+import User from "src/EntityModels/User";
 
 @Injectable()
 export default class UsersRepository extends BaseRepository<User> {

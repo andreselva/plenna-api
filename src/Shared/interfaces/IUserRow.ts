@@ -4,4 +4,5 @@ export default interface IUserRow {
     password: string;
     email: string;
     name: string;
+    clientId: number;
 }

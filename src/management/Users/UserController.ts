@@ -12,9 +12,9 @@ export class UsersController {
     @Public()
     @Post('register')
     async createUser(@Body() user: UserDTO) {
-        if (user) {
-            return await this.service.createUser(user);
-        }
+        // if (user) {
+        //     return await this.service.createUser(user);
+        // }
         throw new UnauthorizedException("Você não pode usar esse serviço!");
     }
 }

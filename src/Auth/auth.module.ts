@@ -4,10 +4,11 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './AuthService';
 import { AuthController } from './AuthController';
 import { JwtStrategy } from './JwtStrategy';
-import { UsersModule } from '../clients/Users/users.module';
 import AuthRepository from './AuthRepository';
 import MySQLDatabase from 'src/Config/Database/MySQLDatabase';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UsersModule } from 'src/management/Users/users.module';
+import { ManagementModule } from 'src/management/management.module';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
     }),
 
-    UsersModule,
+    ManagementModule,
   ],
   controllers: [AuthController],
   providers: [

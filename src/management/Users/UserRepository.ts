@@ -25,10 +25,7 @@ export default class UsersRepository extends BaseRepository<User> {
     }
 
     async findUserById(id: number) {
-        const query = `SELECT *
-                        FROM user u 
-                        JOIN clients c on c.id = u.clientId
-                        WHERE u.id = ?`;
+        const query = "SELECT id, username, email, name, role, clientId FROM user WHERE id = ?";
         const result = await this.database.select(query, [id]);
         return this.extractToEntity(result, User)[0] ?? null;
     }

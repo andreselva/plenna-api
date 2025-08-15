@@ -1,7 +1,7 @@
 import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
 import IClientRow from "src/Shared/interfaces/IClientRow";
-import User from "./User";
+import UserDTO from "src/management/Users/DTOs/UserDTO";
 
 export default class Client extends EntityModel implements IEntity {
     public id: number;
@@ -20,7 +20,7 @@ export default class Client extends EntityModel implements IEntity {
         super();
     }
 
-    static fromUser(user: User) {
+    static fromUser(user: UserDTO) {
         const client = new Client();
         client.clientEmail = user.email;
         client.clientName = user.name;

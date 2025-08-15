@@ -12,12 +12,11 @@ export class ManagementService {
         private readonly clientService: ClientsService
     ) {}
 
-
     async registerUser(user: UserDTO) {
         const userEntity = User.fromDTO(user);
         //Seta pra admin nessa rota, pois o cadastro vem da tela de login/cadastro
         userEntity.role = Role.ADMIN;
-        const client = await this.clientService.createClient(userEntity)
+        const client = await this.clientService.createClient(user)
         userEntity.clientId = client.id;
         const createdUser = await this.userService.createUser(userEntity)
         return { user: createdUser };

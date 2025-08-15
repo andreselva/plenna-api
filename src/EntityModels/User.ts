@@ -10,14 +10,6 @@ export default class User extends EntityModel implements IEntity {
     public password: string;
     public email: string;
     public name: string;
-    public document: string;
-    public address: string;
-    public number: string;
-    public complement: string;
-    public neighborhood: string;
-    public city: string;
-    public state: string;
-    public zipCode: string;
     public clientId: number;
     public role: Role = Role.NORMAL_USER;
 
@@ -32,14 +24,6 @@ export default class User extends EntityModel implements IEntity {
         user.email = dto.email;
         user.name = dto.name;
         user.id = dto.id ?? 0
-        user.document = dto.document ?? '';
-        user.address = dto.address ?? '';
-        user.number = dto.number ?? '';
-        user.complement = dto.complement ?? '';
-        user.neighborhood = dto.neighborhood ?? '';
-        user.city = dto.city ?? '';
-        user.state = dto.state ?? '';
-        user.zipCode = dto.zipCode ?? '';
         return user;
     }
 
@@ -64,6 +48,6 @@ export default class User extends EntityModel implements IEntity {
     }
 
     getIgnoredProperties(): string[] {
-        return ['document', 'address', 'number', 'complement', 'neighborhood', 'city', 'state', 'zipCode'];
+        return [];
     }
 }

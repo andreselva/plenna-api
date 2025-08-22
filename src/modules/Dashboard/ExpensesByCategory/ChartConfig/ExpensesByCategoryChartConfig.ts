@@ -12,11 +12,11 @@ export default class ExpensesByCategoryChartConfig {
         'rgb(54, 162, 235)',
         'rgb(255, 205, 86)',
         'rgb(75, 192, 192)',
-        'rgb(153, 102, 255)',
+        'rgb(153, 102, 255)',   
     ];
 
     static readonly borderWidth = 1;
-    static readonly borderRadius = 5;
+    static readonly borderRadius = 0;
 
     static getBackgroundColor() {
         return this.backgroundColor;

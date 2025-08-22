@@ -28,8 +28,9 @@ export class DashboardServices {
                 expensesByCategory: expensesByCategory,
                 billsDue: billsDue,
                 monthlyProgress: monthlyProgress,
-                remainingBalance: currentBalance.remainingBalance,
-                creditCardStatements: creditCardStatements 
+                remainingBalance: currentBalance,
+                creditCardStatements: creditCardStatements.data,
+                highestBillCard: creditCardStatements.highestBillCard
             }
         };
     }

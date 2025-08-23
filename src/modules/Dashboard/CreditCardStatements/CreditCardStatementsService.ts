@@ -25,6 +25,10 @@ export default class CreditCardStatementsService {
             values.push(invoice.value);
         });
 
+        const highestBillCard = invoices.reduce((prev, curr) => {
+            return curr.value > prev.value ? curr : prev;
+        });
+
         const data = new DashboardCreditCardStatementsDTO(
             labels,
             [
@@ -38,6 +42,7 @@ export default class CreditCardStatementsService {
                 )
             ]
         );
-        return data;
+
+        return { data, highestBillCard };
     }
 }

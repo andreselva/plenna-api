@@ -53,4 +53,29 @@ export default class DateHelper {
         return null;
     }
 
+    static getStartingDateOfCurrentMonth() {
+        return DateTime.local().startOf("month").toISODate();
+    }
+
+    static getStartingAndEndDateOfCurrentMonth() {
+        return {
+            initialDate: DateTime.local().startOf("month").toISODate(),
+            endDate: DateTime.local().endOf("month").toISODate()
+        }
+    }
+
+    static getMonthLabels(): Map<number, string> {
+        return new Map<number, string>([
+            [1, 'Jan'], [2, 'Fev'], [3, 'Mar'], [4, 'Abr'], [5, 'Maio'], [6, 'Jun'],
+            [7, 'Jul'], [8, 'Ago'], [9, 'Set'], [10, 'Out'], [11, 'Nov'], [12, 'Dez'],
+        ]);
+    }
+    
+    static getMonthOfDate(date: string, twoDigits = false) {
+        const dt = DateTime.fromISO(date, { zone: "America/Sao_Paulo" });
+        if (twoDigits) {
+            return dt.toFormat('MM');
+        }
+        return dt.month;
+    }
 }

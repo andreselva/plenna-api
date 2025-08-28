@@ -1,23 +1,19 @@
-import { Controller, Get, Query, DefaultValuePipe, ParseIntPipe, ParseBoolPipe } from '@nestjs/common';
+import { Controller, Get, Query, DefaultValuePipe, ParseIntPipe, ParseBoolPipe, ParseEnumPipe } from '@nestjs/common';
+import { ReportsService } from './reports.service';
+import { AnalysisType } from 'src/enum/analysis-type.enum';
 
 @Controller('reports')
 export class ReportsController {
+  constructor(private readonly service: ReportsService) {}
 
   @Get('/financial-summary')
-  getDataFinancialSummary(
+  getFinancialSummaryData(
     @Query('periodo', new DefaultValuePipe(1), ParseIntPipe) periodo: number,
-    @Query('considerarCategorias', new DefaultValuePipe(false), ParseBoolPipe) considerarCategorias: boolean,
-    @Query('considerarFaturas',  new DefaultValuePipe(false), ParseBoolPipe) considerarFaturas: boolean,
+    @Query('tipoAnalise', new DefaultValuePipe(false), new ParseEnumPipe(AnalysisType)) tipoAnalise: AnalysisType
   ) {
-    const filtro = { tipo: 'meses', periodo };
-
-    // Retorno mockado
-    return {
-      allLabels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-      allIncomeData: [5000, 7000, 8000, 6500, 9000, 10000, 9500, 11000, 10500, 9800, 11500, 12000],
-      allExpenseData: [4000, 5000, 6000, 4500, 7000, 6500, 7200, 6800, 7500, 8000, 7700, 8200],
-      summary: `Analisado por ${filtro.tipo}${filtro.tipo === 'meses' ? ` (${filtro.periodo}m)` : ``}. ` +
-               `Categorias: ${considerarCategorias ? 'sim' : 'não'}, Faturas: ${considerarFaturas ? 'sim' : 'não'}.`
-    };
+    return this.service.getFinancialSummaryData({
+      period: periodo, 
+      typeAnalysis: tipoAnalise
+    });
   }
 }

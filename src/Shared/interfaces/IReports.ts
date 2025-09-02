@@ -1,3 +1,3 @@
 export interface IReports<I, O> {
-  proccess(input: I): Promise<O>;
+  process(input: I): Promise<O>;
 }

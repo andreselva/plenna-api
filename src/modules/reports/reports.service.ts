@@ -9,6 +9,6 @@ export class ReportsService {
     ) {}
     
     getFinancialSummaryData(input: IFinancialSummaryInput) {
-        return this.financialSummaryService.proccess(input);
+        return this.financialSummaryService.process(input);
     }
 }

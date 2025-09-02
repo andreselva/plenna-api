@@ -1,4 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { AnalysisType } from "src/enum/analysis-type.enum";
 import ReportsRepository from "src/modules/reports/reports.repository";
 import { IFinancialSummaryInput } from "src/Shared/interfaces/IFinancialSummaryInput";
 import { IFinancialSummaryOutput } from "src/Shared/interfaces/IFinancialSummaryOutput";
@@ -7,27 +8,31 @@ import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export default class FinancialSummaryService implements IReports<IFinancialSummaryInput, IFinancialSummaryOutput> {
-    private labels = DateHelper.getMonthLabels();
     constructor(private readonly repository: ReportsRepository) {}
     
-    async proccess(dto: IFinancialSummaryInput): Promise<IFinancialSummaryOutput> {
-        const { initialDate, endDate } = DateHelper.getStartingAndEndDateOfCurrentMonth();
+    async process(dto: IFinancialSummaryInput): Promise<IFinancialSummaryOutput> {
+        const { initialDate, endDate } = this.definePeriod(dto);
         const categories = await this.repository.getCategories();
         const labels: string[] = [];
         const allExpenses: number[] = [];
         const allRevenues: number[] = [];
+        const labelsMap = DateHelper.getMonthLabels();
+        const monthsRange = DateHelper.listMonthsBetween(initialDate, endDate);
 
-        if (dto.period === 1) {
-            const month = DateHelper.getMonthOfDate(initialDate);
-            labels.push(this.labels.get(month) as string);
-            
-            const sumExpenses = (await this.repository.getExpenses(initialDate, endDate))
-                .reduce((acc, expense) => Number(acc) + Number(expense.value), 0);
-            const sumRevenues = (await this.repository.getRevenues(initialDate, endDate))
-                .reduce((acc, revenue) => Number(acc) + Number(revenue.value), 0);
-            
-            allExpenses.push(sumExpenses);
-            allRevenues.push(sumRevenues);
+        const expenses = new Map(
+            (await this.repository.getExpenses(initialDate, endDate))
+            .map(expense => [`${expense.y}-${expense.m}`, Number(expense.total)])
+        );
+
+        const revenues = new Map(
+            (await this.repository.getRevenues(initialDate, endDate))
+            .map(revenue => [`${revenue.y}-${revenue.m}`, Number(revenue.total)])
+        );
+
+        for (const { y, m } of monthsRange) {
+            labels.push(labelsMap.get(m)!)
+            allExpenses.push(expenses.get(`${y}-${m}`) ?? 0)
+            allRevenues.push(revenues.get(`${y}-${m}`) ?? 0)
         }
 
         return {
@@ -35,6 +40,22 @@ export default class FinancialSummaryService implements IReports<IFinancialSumma
             allExpenseData: allExpenses,
             allIncomeData: allRevenues,
             summary: '----'
+        }
+    }
+
+    private definePeriod(dto: IFinancialSummaryInput) {
+        switch (dto.period) {
+            case 1: {
+                return DateHelper.getStartingAndEndDateOfCurrentMonth();
+            }
+            case 3:
+            case 6:
+            case 12: {
+                const plus = dto.typeAnalysis === AnalysisType.FUTURE;
+                return DateHelper.getFirstAndLastDateByNumberOfMonths(dto.period, plus);
+            }
+            default:
+                throw new BadRequestException(`Invalid period.`);
         }
     }
 

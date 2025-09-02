@@ -7,7 +7,7 @@ export class ReportsController {
   constructor(private readonly service: ReportsService) {}
 
   @Get('/financial-summary')
-  getFinancialSummaryData(
+  getFinancialSummary(
     @Query('periodo', new DefaultValuePipe(1), ParseIntPipe) periodo: number,
     @Query('tipoAnalise', new DefaultValuePipe(false), new ParseEnumPipe(AnalysisType)) tipoAnalise: AnalysisType
   ) {

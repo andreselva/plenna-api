@@ -24,16 +24,13 @@ export default class ReportsRepository {
     async getExpenses(initialDate: string, endDate: string) {
         const clientId = this.authContext.getClientId();
         const query = `SELECT
-                            YEAR(invoiceDueDate) AS y,
-                            MONTH(invoiceDueDate) AS m,
-                            SUM(value) AS total
+                            *
                         FROM expense
                             WHERE clientId = ?
                                 AND invoiceDueDate >= ?
-                                AND invoiceDueDate <  ?
-                        GROUP BY y, m
-                        ORDER BY y, m`;
-        return await this.database.select(query, [clientId, initialDate, endDate]);
+                                AND invoiceDueDate <=  ?`;
+        const rows = await this.database.select(query, [clientId, initialDate, endDate]);
+        return DataMapper.toEntities(rows, Expense);
     }
 
     async getRevenues(initialDate: string, endDate: string) {

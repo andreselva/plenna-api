@@ -67,6 +67,13 @@ export default class DateHelper {
         ]);
     }
     
+    /**
+     * Retorna o dígito do mês da data enviada
+     * 
+     * @param date string - A data desejada para extrair o mês.
+     * @param twoDigits - boolean - Define se retorna o mês com apenas 1 dígito ou 2 (Ex: 1 ou 01)
+     * @returns 
+     */
     static getMonthOfDate(date: string, twoDigits = false) {
         const dt = DateTime.fromISO(date, { zone: "America/Sao_Paulo" });
         if (twoDigits) {
@@ -97,6 +104,13 @@ export default class DateHelper {
         }
     }
 
+    /**
+     * Retorna os meses existentes em um intervalo de datas.
+     * 
+     * @param initialDate - string - A data inicial 
+     * @param endDate - string - A data final
+     * @returns 
+     */
     static listMonthsBetween(initialDate: string, endDate: string) {
         const start = DateTime.fromISO(initialDate).startOf("month");
         const end = DateTime.fromISO(endDate).startOf("month");
@@ -113,5 +127,22 @@ export default class DateHelper {
             current = current.plus({ months: 1 })
         }
         return months;
+    }
+
+    /**
+     * Retorna o objeto com o ano-mes e mes.
+     * 
+     * @param date - string - A data para extrair os dados.
+     * @returns 
+     */
+    static getYearAndMonth(date: string) {
+        return {
+            yearAndMonth: DateTime.fromISO(date).toFormat("yyyy-MM"),
+            month: DateTime.fromISO(date).month
+        };
+    }
+
+    static ymKey(y: number, m: number) {
+        return `${y}-${String(m).padStart(2, '0')}`;
     }
 }

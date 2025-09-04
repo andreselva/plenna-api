@@ -29,7 +29,7 @@ export default class OpenAIService {
                     - Faça a avaliação se essa categoria pode conter gastos supérfluos.
                     - Faça a análise de risco financeiro.
 
-                    Importante: gere o texto em html. Evite títulos muito grandes, limitando em um h6.
+                    Importante: de espaçamento e quebras de linhas corretamente entre os tópicos.
                     `
                 }
             ],

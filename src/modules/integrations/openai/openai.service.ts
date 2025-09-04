@@ -4,8 +4,6 @@ export default class OpenAIService {
     private client: OpenAI;
     private standardModel = "gpt-5-nano";
 
-    private API_KEY = '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';
-
     constructor() {
         this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || this.API_KEY })
     }

@@ -10,6 +10,8 @@ import { ManagementModule } from './modules/management/management.module';
 import { FinanceModule } from './modules/Finance/finance.module';
 import { CategoryModule } from './modules/Categories/category.module';
 import { DashboardModule } from './modules/Dashboard/dashboard.module';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -22,7 +24,9 @@ import { DashboardModule } from './modules/Dashboard/dashboard.module';
     HealthCheckModule,
     ManagementModule,
     DashboardModule,
-    CategoryModule
+    CategoryModule,
+    IntegrationsModule,
+    ReportsModule
   ],
   controllers: [
     AppController,

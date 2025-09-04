@@ -17,6 +17,7 @@ services:
       - DB_NAME=railway
       - JWT_SECRET=samantinha
       - JWT_REFRESH_SECRET=samantinha
+      - OPENAI_API_KEY=openai
     depends_on:
       - db
     networks:

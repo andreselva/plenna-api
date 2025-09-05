@@ -28,4 +28,10 @@ export default class UsersRepository extends BaseRepository<User> {
         const result = await this.database.select(query, [id]);
         return this.extractToEntity(result, User)[0] ?? null;
     }
+
+    async getUsers() {
+        const query = "SELECT * FROM user WHERE clientId = ?";
+        const result = await this.database.select(query, [this.authContext.getClientId()]);
+        return this.extractToEntity(result, User);
+    }
 }

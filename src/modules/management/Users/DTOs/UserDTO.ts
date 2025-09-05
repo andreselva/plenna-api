@@ -57,4 +57,8 @@ export default class UserDTO {
     @IsOptional()
     @IsString({ message: 'Invalid zipcode!' })
     zipCode: string;
+
+    @IsOptional()
+    @IsEnum(Role, {message: 'Invalid role!'})
+    role: string;
 }

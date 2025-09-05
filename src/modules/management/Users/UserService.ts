@@ -22,4 +22,10 @@ export class UsersService {
     async findUserById(id: string) {
         return await this.repository.findUserById(Number(id));
     }
+    
+    async getUsers() {
+        const users = await this.repository.getUsers();
+        return {users: users};
+    }
+
 }

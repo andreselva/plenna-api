@@ -76,6 +76,7 @@ export class Expense extends EntityModel implements IEntity {
         expense.linkToInvoice = Boolean(row.linkToInvoice);
         expense.idInvoice = row.idInvoice;
         expense.status = row.status;
+        expense.clientId = row.clientId;
         return expense;
     }
 

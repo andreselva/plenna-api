@@ -24,10 +24,13 @@ export default class CreditCardStatementsService {
             labels.push(invoice.name);
             values.push(invoice.value);
         });
-
-        const highestBillCard = invoices.reduce((prev, curr) => {
-            return curr.value > prev.value ? curr : prev;
-        });
+        
+        let highestBillCard = {};
+        if (invoices.length > 0) {
+            highestBillCard = invoices.reduce((prev, curr) => {
+                return curr.value > prev.value ? curr : prev;
+            });
+        }
 
         const data = new DashboardCreditCardStatementsDTO(
             labels,

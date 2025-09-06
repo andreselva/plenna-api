@@ -35,6 +35,7 @@ export default class Invoice extends EntityModel implements IEntity {
         invoice.dueDate = DateHelper.toISODate(row.dueDate) as string;
         invoice.paymentDate = DateHelper.toISODate(row.paymentDate) ?? '';
         invoice.status = row.status;
+        invoice.clientId = row.clientId;
         return invoice;
     }
 

@@ -20,7 +20,7 @@ export default class GetInvoicesUseCase {
     async get(periodo: PeriodoDTO): Promise<InvoicesResponse> {
         const invoices = await this.repository.getInvoices(periodo);
         if (invoices && invoices.length > 0) {
-            return {invoices: await this.setExpensesAndPayments(invoices)};
+            return {invoices: (await this.setExpensesAndPayments(invoices)).filter(invoice => invoice.value > 0)};
         }
         return {invoices: []};
     }

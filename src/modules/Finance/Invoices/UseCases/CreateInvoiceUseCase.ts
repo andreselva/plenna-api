@@ -58,7 +58,11 @@ export default class CreateInvoiceUseCase {
         // Isso garante que elas estejam no mesmo ciclo de faturamento.
         let dueDateDt = closingDateDt.set({ day: settings.dueDate });
 
-        if (dueDateDt <= closingDateDt) {
+        if (
+            dueDateDt <= closingDateDt || 
+            lastInvoice?.dueDate === dueDateDt.startOf('day').toISODate() ||
+            dueDateDt <= DateTime.fromISO(lastInvoice?.dueDate)
+        ) {
             dueDateDt = dueDateDt.plus({ months: 1 });
         }
 

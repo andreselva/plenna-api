@@ -30,8 +30,4 @@ export class ManagementService {
         const createdUser = await this.userService.createUser(userEntity)
         return { user: createdUser };
     }
-
-    async getUsers() {
-        return await this.userService.getUsers();
-    }
 }

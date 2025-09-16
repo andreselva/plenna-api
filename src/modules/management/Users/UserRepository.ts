@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import User from "src/EntityModels/User";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
@@ -23,9 +23,14 @@ export default class UsersRepository extends BaseRepository<User> {
         return user;
     }
 
-    async findUserById(id: number) {
-        const query = "SELECT id, username, email, name, role, clientId FROM user WHERE id = ?";
-        const result = await this.database.select(query, [id]);
+    async findUserById(id: number, clientId: number|null = null) {
+        if (clientId === null) {
+            clientId = this.authContext.getClientId();
+
+            if (!clientId) throw new InternalServerErrorException(`ClientId is not defined.`);
+        }
+        const query = "SELECT id, username, email, name, role, clientId FROM user WHERE id = ? AND clientId = ?";
+        const result = await this.database.select(query, [id, clientId]);
         return this.extractToEntity(result, User)[0] ?? null;
     }
 
@@ -33,5 +38,18 @@ export default class UsersRepository extends BaseRepository<User> {
         const query = "SELECT * FROM user WHERE clientId = ?";
         const result = await this.database.select(query, [this.authContext.getClientId()]);
         return this.extractToEntity(result, User);
+    }
+
+    async updatePassword(newPassword: string, userId: number) {
+        const clientId = this.authContext.getClientId();
+        const query = "UPDATE user SET password = ? WHERE id = ? AND clientId = ?";
+        return await this.database.execute(query, [newPassword, userId, clientId]);
+    }
+
+    async getUserById(userId: number) {
+        const clientId = this.authContext.getClientId();
+        const query = "SELECT * FROM user WHERE id = ? AND clientId = ?";
+        const result = await this.database.select(query, [userId, clientId]);
+        return this.extractToEntity(result, User)[0] ?? null;
     }
 }

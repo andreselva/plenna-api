@@ -1,7 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import UsersRepository from './UserRepository';
 import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
 import User from 'src/EntityModels/User';
+import UserPasswordResetDTO from './DTOs/UserPasswordResetDTO';
 
 @Injectable()
 export class UsersService {
@@ -21,8 +22,8 @@ export class UsersService {
         return await this.repository.createUser(user);
     }
 
-    async findUserById(id: string) {
-        return await this.repository.findUserById(Number(id));
+    async findUserById(id: string, clientId: string) {
+        return await this.repository.findUserById(Number(id), Number(clientId));
     }
     
     async getUsers() {
@@ -31,6 +32,19 @@ export class UsersService {
             user.password = 'alan-turing'
         })
         return {users: users};
+    }
+
+    async resetPassword(userId: number, dto: UserPasswordResetDTO) {
+        if (userId > 0) {
+            const entity = await this.repository.getUserById(userId);
+            if (entity) {
+                const verifiedPassword = await PasswordHasher.compare(dto.oldPassword, entity.password);
+                if (!verifiedPassword) throw new ForbiddenException(`Senha atual incorreta.`);
+                const newPasswordHash = await PasswordHasher.hash(dto.password);
+                return await this.repository.updatePassword(newPasswordHash, userId);
+            }
+            throw new NotFoundException(`Usuário não encontrado.`);
+        }
     }
 
 }

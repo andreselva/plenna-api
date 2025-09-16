@@ -56,7 +56,7 @@ export class AuthService {
             const isRefreshTokenValid = await this.repository.isRefreshTokenValid(refreshToken, Number(decoded.sub));
             if (!isRefreshTokenValid) throw new UnauthorizedException();
 
-            const user = await this.userService.findUserById(decoded.sub);
+            const user = await this.userService.findUserById(decoded.sub, decoded.clientId);
             if (!user) throw new UnauthorizedException();
             
             const newAccessToken = this.generateToken(user);

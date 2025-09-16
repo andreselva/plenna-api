@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Param, Patch, Post, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Put, UnauthorizedException } from '@nestjs/common';
 import { ManagementService } from './management.service';
 import { Public } from 'src/common/decorators/public.decorator';
 import UserDTO from './Users/DTOs/UserDTO';
 import UserPasswordResetDTO from './Users/DTOs/UserPasswordResetDTO';
 import { UsersService } from './Users/UserService';
+import { Role } from 'src/enum/role.enum';
+import { Roles } from 'src/common/decorators/roles.decoratos';
 
 @Controller('management')
 export class ManagementController {
@@ -20,11 +22,16 @@ export class ManagementController {
     }
 
     @Post()
+    @Roles(Role.ADMIN)
     async createNewUserByScreen(@Body() user: UserDTO) {
+        if (!user.password || user.password === undefined || user.password === null) {
+            throw new BadRequestException(`Senha não informada!`);
+        }
         return await this.service.registerUser(user);
     }
 
     @Get('/users')
+    @Roles(Role.ADMIN)
     async getUsers() {
         return await this.usersService.getUsers();
     }
@@ -36,5 +43,18 @@ export class ManagementController {
     ) {
         await this.usersService.resetPassword(userId, dto);
         return { message: 'Senha atualizada com sucesso!' };
+    }
+
+    @Delete('/users/:userId')
+    @Roles(Role.ADMIN)
+    async deleteUser(
+        @Param('userId') userId: number
+    ) {
+        return await this.usersService.deleteUser(userId);
+    }
+
+    @Put('/users')
+    async updateUser(@Body() user: UserDTO) {
+        return await this.usersService.updateUser(user);
     }
 }

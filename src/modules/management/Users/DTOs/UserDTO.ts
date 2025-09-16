@@ -7,7 +7,7 @@ export default class UserDTO {
     username: string;
 
     @IsString({ message: 'Invalid password!' })
-    @IsNotEmpty({ message: 'Invalid password.' })
+    @IsOptional({ message: 'Invalid password.' })
     password: string;
 
     @IsString({ message: 'Invalid email!' })
@@ -60,5 +60,5 @@ export default class UserDTO {
 
     @IsOptional()
     @IsEnum(Role, {message: 'Invalid role!'})
-    role: string;
+    role: Role;
 }

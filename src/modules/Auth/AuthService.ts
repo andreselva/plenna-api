@@ -42,7 +42,7 @@ export class AuthService {
     }
 
     generateRefreshToken(user: any): string {
-        const payload = { sub: user.id, username: user.username, role: user.role, clientId: user.clientId, name: user.name };
+        const payload = { sub: user.id, clientId: user.clientId };
         return this.jwtService.sign(payload, { secret: this.refreshSecret, expiresIn: '7d' });
     }
 

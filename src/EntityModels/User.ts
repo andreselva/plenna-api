@@ -13,6 +13,8 @@ export default class User extends EntityModel implements IEntity {
     public clientId: number;
     public role: Role = Role.NORMAL_USER;
 
+    public static ignoredProperties: string[] = [];
+
     constructor() {
         super();
     }
@@ -20,10 +22,11 @@ export default class User extends EntityModel implements IEntity {
     static fromDTO(dto: UserDTO) {
         const user = new User();
         user.username = dto.username;
-        user.password = dto.password;
+        user.password = dto.password ?? '';
         user.email = dto.email;
         user.name = dto.name;
-        user.id = dto.id ?? 0
+        user.id = dto.id ?? 0;
+        user.role = dto.role ?? Role.NORMAL_USER;
         return user;
     }
 
@@ -48,6 +51,12 @@ export default class User extends EntityModel implements IEntity {
     }
 
     getIgnoredProperties(): string[] {
-        return [];
+        return User.ignoredProperties;
+    }
+
+    addIgnoredProperty(property: string): void {
+        if (!User.ignoredProperties.includes(property)) {
+            User.ignoredProperties.push(property);
+        }
     }
 }

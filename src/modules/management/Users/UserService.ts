@@ -3,11 +3,14 @@ import UsersRepository from './UserRepository';
 import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
 import User from 'src/EntityModels/User';
 import UserPasswordResetDTO from './DTOs/UserPasswordResetDTO';
+import UserDTO from './DTOs/UserDTO';
+import { AuthContextService } from 'src/modules/Auth/auth-context.service';
 
 @Injectable()
 export class UsersService {
     constructor(
         private readonly repository: UsersRepository,
+        private readonly authContext: AuthContextService
     ) { }
     
     async findByUsername(username: string) {
@@ -19,7 +22,7 @@ export class UsersService {
         if (existUser) throw new ConflictException(`Nome de usuário já existente. Escolha outro nome de usuário.`);
         const senhaHash = await PasswordHasher.hash(user.password);
         user.password = senhaHash;
-        return await this.repository.createUser(user);
+        return await this.repository.saveUser(user);
     }
 
     async findUserById(id: string, clientId: string) {
@@ -47,4 +50,22 @@ export class UsersService {
         }
     }
 
+    async deleteUser(userId: number) {
+        await this.repository.deleteUser(userId);
+        await this.repository.deleteRefreshToken(userId);
+        return;
+    }
+
+    async updateUser(user: UserDTO) {
+        const entity = User.fromDTO(user);
+        const oldUserVersion = await this.repository.findUserById(entity.id, entity.clientId);
+        if (entity.role !== oldUserVersion.role) {
+            //revoga o refreshtoken para forçar login quando o access_token expirar
+            await this.repository.deleteRefreshToken(user.id);
+        }
+        //Não atualizamos a senha pelo update de usuário. A redefinição de senha acontece por outro endpoint.
+        entity.addIgnoredProperty('password');
+        await this.repository.saveUser(entity);
+        return await this.getUsers();
+    }
 }

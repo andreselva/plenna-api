@@ -15,7 +15,11 @@ export default class UsersRepository extends BaseRepository<User> {
         return this.extractToEntity(result, User)[0] ?? null;
     }
 
-    async createUser(user: User) {
+    async saveUser(user: User) {
+        if (!user.clientId) {
+            user.clientId = this.authContext.getClientId();
+        }
+        
         const result = await this.save(user);
         if (result.insertId > 0 && user.id === 0) {
             user.id = result.insertId;
@@ -51,5 +55,15 @@ export default class UsersRepository extends BaseRepository<User> {
         const query = "SELECT * FROM user WHERE id = ? AND clientId = ?";
         const result = await this.database.select(query, [userId, clientId]);
         return this.extractToEntity(result, User)[0] ?? null;
+    }
+
+    async deleteUser(userId: number) {
+        const clientId = this.authContext.getClientId();
+        const query = "DELETE FROM user WHERE id = ? AND clientId = ?";
+        return await this.database.execute(query, [userId, clientId]);
+    }
+
+    async deleteRefreshToken(userId: number) {
+        return await this.database.execute('DELETE FROM refresh_token WHERE idUser = ?', [userId]);
     }
 }

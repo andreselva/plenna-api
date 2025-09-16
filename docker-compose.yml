@@ -18,6 +18,7 @@ services:
       - JWT_SECRET=samantinha
       - JWT_REFRESH_SECRET=samantinha
       - OPENAI_API_KEY=openai
+      - PORT=8001
     depends_on:
       - db
     networks:

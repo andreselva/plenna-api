@@ -37,12 +37,12 @@ export class AuthService {
     }
 
     generateToken(user: any): string {
-        const payload = { sub: user.id, username: user.username, role: user.role, clientId: user.clientId };
+        const payload = { sub: user.id, username: user.username, role: user.role, clientId: user.clientId, name: user.name };
         return this.jwtService.sign(payload, { secret: this.jwtSecret, expiresIn: '1h' });
     }
 
     generateRefreshToken(user: any): string {
-        const payload = { sub: user.id, username: user.username, role: user.role, clientId: user.clientId };
+        const payload = { sub: user.id, clientId: user.clientId };
         return this.jwtService.sign(payload, { secret: this.refreshSecret, expiresIn: '7d' });
     }
 
@@ -56,7 +56,7 @@ export class AuthService {
             const isRefreshTokenValid = await this.repository.isRefreshTokenValid(refreshToken, Number(decoded.sub));
             if (!isRefreshTokenValid) throw new UnauthorizedException();
 
-            const user = await this.userService.findUserById(decoded.sub);
+            const user = await this.userService.findUserById(decoded.sub, decoded.clientId);
             if (!user) throw new UnauthorizedException();
             
             const newAccessToken = this.generateToken(user);
@@ -78,7 +78,7 @@ export class AuthService {
     async validateUser(username: string, password: string) {
         const userEntity = await this.userService.findByUsername(username);
         if (userEntity && (await PasswordHasher.compare(password, userEntity.password))) {
-            return { id: userEntity.id, username: userEntity.username, role: userEntity.role, clientId: userEntity.clientId };
+            return { id: userEntity.id, username: userEntity.username, role: userEntity.role, clientId: userEntity.clientId, name: userEntity.name };
         }
         return null;
     }
@@ -101,7 +101,8 @@ export class AuthService {
                 id: decoded.sub, 
                 username: decoded.username, 
                 role: decoded.role,
-                clientId: decoded.clientId
+                clientId: decoded.clientId,
+                name: decoded.name
             };
 
         } catch (error) {

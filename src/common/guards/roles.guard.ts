@@ -5,7 +5,9 @@ import { ROLES_KEY } from '../decorators/roles.decoratos';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector
+  ) {}
 
   /**
    * Este método é o núcleo do Guard. Ele decide se a requisição pode ou não prosseguir.
@@ -29,12 +31,12 @@ export class RolesGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
 
     // Se não houver usuário (ex: token inválido ou ausente), nega o acesso.
-    if (!user || !user.funcao) {
+    if (!user || !user.role) {
         return false;
     }
 
     // Comparar a função do usuário com as funções requeridas
     // O método 'some' retorna true se pelo menos uma das roles requeridas corresponder à do usuário.
-    return requiredRoles.some((role) => user.funcao === role);
+    return requiredRoles.some((role) => user.role === role);
   }
 }

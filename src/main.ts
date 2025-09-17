@@ -5,6 +5,7 @@ import { GlobalAuthGuard } from './common/guards/global-auth.guard';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ValidationPipe } from '@nestjs/common';
+import { RolesGuard } from './common/guards/roles.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,9 @@ async function bootstrap() {
 
   //Habilitar o guards em todas as rotas. Rotas públicas devem usar @Public.
   app.useGlobalGuards(new GlobalAuthGuard(reflector));
+
+  //Habilitar proteção de rotas por função.
+  app.useGlobalGuards(new RolesGuard(reflector));
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true, // Remove propriedades que não estão no DTO
@@ -32,8 +36,8 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const port = process.env.PORT || 8001;
-  await app.listen(port);
+  const port = process.env.PORT;
+  await app.listen(port as string);
 }
 
 bootstrap();

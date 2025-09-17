@@ -23,10 +23,7 @@ export default class AuthRepository extends BaseRepository<RefreshToken>{
     async isRefreshTokenValid(refreshToken: string, idUser: number) {
         const query = "SELECT 1 FROM refresh_token WHERE refresh_token = ? AND idUser = ? LIMIT 1";
         const result = await this.database.select(query, [refreshToken, idUser]);
-        if (result && result.length === 1) {
-            return true;
-        }
-        return false;
+        return result && result.length === 1;
     }
 
     async deleteRefreshToken(idUser: number) {

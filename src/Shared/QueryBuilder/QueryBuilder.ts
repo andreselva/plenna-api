@@ -20,24 +20,35 @@ export default class QueryBuilder {
     static buildQuery(entity: object, tableName: string, primaryKey: string, ignoreProperties: string[] = []): { sql: string, values: any[] } {
         const allProperties = Object.keys(entity);
 
-        const columns = allProperties.filter(prop =>
-            typeof entity[prop as keyof object] !== 'function' && 
-            prop !== primaryKey &&
-            !ignoreProperties.includes(prop)
+        const columns = allProperties.filter(
+            (prop) =>
+                typeof entity[prop] !== "function" &&
+                prop !== primaryKey &&
+                !ignoreProperties.includes(prop)
         );
 
-        const primaryKeyValue = entity[primaryKey as keyof object];
+        const primaryKeyValue = entity[primaryKey];
 
         if (primaryKeyValue === null || primaryKeyValue === undefined || primaryKeyValue === 0) {
-            const values = columns.map(col => entity[col as keyof object]);
-            const sql = `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES (${this.getPlaceholders(values)})`;
+            const values = columns.map((col) => entity[col]);
+            const sql = `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES (${this.getPlaceholders(
+                values
+            )})`;
             return { sql, values };
         } else {
-            const setClause = columns.map(col => `${col} = ?`).join(", ");
-            const valuesForSet = columns.map(col => entity[col as keyof object]);
-            const allValues = [...valuesForSet, primaryKeyValue];
-            const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${primaryKey} = ?`;
-            return { sql, values: allValues };
+            const setClause = columns.map((col) => `${col} = ?`).join(", ");
+            const valuesForSet = columns.map((col) => entity[col]);
+
+            let whereClause = `${primaryKey} = ?`;
+            const values: any[] = [...valuesForSet, primaryKeyValue];
+
+            if ("clientId" in entity && !ignoreProperties.includes("clientId")) {
+                whereClause += " AND clientId = ?";
+                values.push(entity.clientId);
+            }
+
+            const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereClause}`;
+            return { sql, values };
         }
     }
 }

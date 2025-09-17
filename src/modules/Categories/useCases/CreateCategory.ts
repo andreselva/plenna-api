@@ -2,21 +2,18 @@ import { Injectable } from "@nestjs/common";
 import CategoryDTO from "../CategoryDTO";
 import CategoriesRepository from "../CategoriesRepository";
 import Category from "src/EntityModels/Category";
-import { CategoryKind } from "src/enum/category-kind.enum";
+import GetCategories from "./GetCategories";
 
 @Injectable()
 export default class CreateCategory {
     constructor(
-        private readonly repository: CategoriesRepository
+        private readonly repository: CategoriesRepository,
+        private readonly getCategoriesUC: GetCategories
     ) {}
 
-    async execute(category: CategoryDTO): Promise<{category: Category}|true> {
+    async execute(category: CategoryDTO): Promise<{ categories: Category[] }> {
         const entity = Category.fromDTO(category); 
-        const categoryCreated = await this.repository.saveCategory(entity);
-
-        if (categoryCreated.kind === CategoryKind.SUBCATEGORY) {
-            return true;
-        }
-        return { category: categoryCreated };    
+        await this.repository.saveCategory(entity);
+        return await this.getCategoriesUC.execute();
     }
 }   

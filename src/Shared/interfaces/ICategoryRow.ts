@@ -1,3 +1,4 @@
+import { CategoryKind } from "src/enum/category-kind.enum";
 import { CategoryType } from "src/enum/category-type.enum";
 
 export default interface ICategoryRow {
@@ -6,5 +7,7 @@ export default interface ICategoryRow {
     description: string;
     type: CategoryType;
     color: string;
-    clientId: number
+    clientId: number;
+    parentId: number;
+    kind: CategoryKind
 }

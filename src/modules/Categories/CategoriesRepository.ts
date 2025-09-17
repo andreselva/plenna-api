@@ -14,9 +14,18 @@ export default class CategoriesRepository extends BaseRepository<Category>{
      * Busca todas as categorias no banco de dados.
      */
     async getCategories(): Promise<Category[]> {
-        const query = 'SELECT * FROM category WHERE clientId = ?';
+        const query = `SELECT * FROM category WHERE clientId = ? AND kind = 'C'`;
         const rows = await this.database.select(query, [this.authContext.getClientId()]);
         return this.extractToEntity(rows, Category)
+    }
+
+    /**
+     * Busca todas as subcategorias de uma categoria no banco de dados.
+     */
+    async getSubcategoriesByParentId(parentId: number): Promise<Category[]> {
+        const query = `SELECT * FROM category WHERE clientId = ? AND kind = 'S' AND parentId = ?`
+        const rows = await this.database.select(query, [this.authContext.getClientId(), parentId]);
+        return this.extractToEntity(rows, Category);
     }
 
     /**

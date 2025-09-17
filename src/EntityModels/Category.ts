@@ -14,8 +14,9 @@ export default class Category extends EntityModel implements IEntity {
     public color: string = '';
     public parentId: number;
     public kind: CategoryKind;
+    public subcategories: Category[] = [];
 
-    public static ignoredProperties: string[] = [];
+    public static ignoredProperties: string[] = ['subcategories'];
 
     constructor() {
         super();

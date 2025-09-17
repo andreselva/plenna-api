@@ -8,7 +8,14 @@ export default class GetCategories {
     ) {}
 
     async execute() {
-        const result = await this.categoriesRepository.getCategories();
-        return {categories: result};
+        const categories = await this.categoriesRepository.getCategories();
+
+        await Promise.all(
+            categories.map(async (category) => {
+                category.subcategories = await this.categoriesRepository.getSubcategoriesByParentId(category.id);
+            })
+        );
+        
+        return {categories: categories};
     }
 }

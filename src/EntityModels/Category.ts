@@ -3,6 +3,7 @@ import EntityModel from "./entity.model";
 import IEntity from "src/Shared/interfaces/IEntity";
 import CategoryDTO from "src/modules/Categories/CategoryDTO";
 import ICategoryRow from "src/Shared/interfaces/ICategoryRow";
+import { CategoryKind } from "src/enum/category-kind.enum";
 
 export default class Category extends EntityModel implements IEntity {
     public id: number = 0;
@@ -11,6 +12,11 @@ export default class Category extends EntityModel implements IEntity {
     public description: string = '';
     public type: CategoryType = CategoryType.REVENUE;
     public color: string = '';
+    public parentId: number;
+    public kind: CategoryKind;
+    public subcategories: Category[] = [];
+
+    public static ignoredProperties: string[] = ['subcategories'];
 
     constructor() {
         super();
@@ -22,6 +28,8 @@ export default class Category extends EntityModel implements IEntity {
         category.description = dto.description;
         category.type = dto.type ?? CategoryType.REVENUE;
         category.color = dto.color;
+        category.parentId = dto.parentId;
+        category.kind = dto.kind ?? CategoryKind.CATEGORY;
         category.id = dto.id ?? 0;
         return category;
     }
@@ -41,6 +49,8 @@ export default class Category extends EntityModel implements IEntity {
         category.type = row.type;
         category.description = row.description;
         category.clientId = row.clientId;
+        category.parentId = row.parentId;
+        category.kind = row.kind;
 
         return category;
     }
@@ -54,6 +64,10 @@ export default class Category extends EntityModel implements IEntity {
     }
 
     getIgnoredProperties(): string[] {
-        return [];
+        return Category.ignoredProperties;
+    }
+
+    addIgnoredProperty(property: string) {
+        Category.ignoredProperties.push(property);
     }
 }

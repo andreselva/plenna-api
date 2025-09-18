@@ -23,6 +23,9 @@ export class Expense extends EntityModel implements IEntity {
     public status: ExpenseStatus = ExpenseStatus.PENDING;
     public totalPaid: number = 0;
     public updateInstallments: boolean = false;
+    public idSubcategory: number;
+
+    public static ignoredProperties: string[] = ['totalPaid', 'updateInstallments'];
 
     constructor() {
         super();
@@ -51,6 +54,7 @@ export class Expense extends EntityModel implements IEntity {
         expense.idInvoice = dto.idInvoice ?? 0;
         expense.status = dto.status ?? ExpenseStatus.PENDING;
         expense.totalPaid = dto.totalPaid ?? 0;
+        expense.idSubcategory = dto.idSubcategory;
         return expense;
     }
 
@@ -77,6 +81,7 @@ export class Expense extends EntityModel implements IEntity {
         expense.idInvoice = row.idInvoice;
         expense.status = row.status;
         expense.clientId = row.clientId;
+        expense.idSubcategory = row.idSubcategory;
         return expense;
     }
 
@@ -89,6 +94,10 @@ export class Expense extends EntityModel implements IEntity {
     }
 
     getIgnoredProperties() {
-        return ['totalPaid', 'updateInstallments'];
+        return Expense.ignoredProperties;
+    }
+
+    addIgnoredProperty(property: string) {
+        Expense.ignoredProperties.push(property);
     }
 }

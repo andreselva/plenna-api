@@ -81,4 +81,8 @@ export class ExpenseDTO {
   @IsOptional()
   @IsDateString({}, { message: 'Data de pagamento inválida.' })
   paymentDate: string;
+
+  @IsOptional()
+  @IsInt({ message: 'Invalid subcategory ID.'})
+  idSubcategory: number;
 }

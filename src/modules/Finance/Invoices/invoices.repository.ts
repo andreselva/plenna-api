@@ -8,6 +8,7 @@ import DataMapper from "src/Shared/mapper/DataMapper";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import Invoice from "src/EntityModels/invoice";
+import { ExpenseStatus } from "../Expenses/Types/expense.status.type";
 
 @Injectable()
 export default class InvoicesRepository extends BaseRepository<Invoice>{
@@ -83,5 +84,10 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
         const query = "SELECT SUM(value) as total FROM expense WHERE clientId = ? AND idInvoice = ?";
         const result = await this.database.select(query, [this.authContext.getClientId(), idInvoice]);
         return Number(result[0].total) ?? 0;
+    }
+
+    async updateStatusExpenseByIdInvoice(idInvoice: number, status: ExpenseStatus) {
+        const query = "UPDATE expense SET status = ? WHERE idInvoice = ? AND clientId = ?";
+        await this.database.execute(query, [status, idInvoice, this.authContext.getClientId()]);
     }
 }

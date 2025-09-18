@@ -5,6 +5,7 @@ import User from 'src/EntityModels/User';
 import UserPasswordResetDTO from './DTOs/UserPasswordResetDTO';
 import UserDTO from './DTOs/UserDTO';
 import { AuthContextService } from 'src/modules/Auth/auth-context.service';
+import { Role } from 'src/enum/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -12,7 +13,7 @@ export class UsersService {
         private readonly repository: UsersRepository,
         private readonly authContext: AuthContextService
     ) { }
-    
+
     async findByUsername(username: string) {
         return await this.repository.findUserByUsername(username);
     }
@@ -28,13 +29,10 @@ export class UsersService {
     async findUserById(id: string, clientId: string) {
         return await this.repository.findUserById(Number(id), Number(clientId));
     }
-    
+
     async getUsers() {
         const users = await this.repository.getUsers();
-        users.map((user) => {
-            user.password = 'alan-turing'
-        })
-        return {users: users};
+        return { users: users.map((user) => this.sanitizeUser(user)) };
     }
 
     async resetPassword(userId: number, dto: UserPasswordResetDTO) {
@@ -57,15 +55,62 @@ export class UsersService {
     }
 
     async updateUser(user: UserDTO) {
-        const entity = User.fromDTO(user);
-        const oldUserVersion = await this.repository.findUserById(entity.id, entity.clientId);
-        if (entity.role !== oldUserVersion.role) {
-            //revoga o refreshtoken para forçar login quando o access_token expirar
-            await this.repository.deleteRefreshToken(user.id);
+        if (!user.id) {
+            throw new NotFoundException('Usuário não informado.');
         }
-        //Não atualizamos a senha pelo update de usuário. A redefinição de senha acontece por outro endpoint.
+
+        const requester = this.authContext.getUser();
+        if (!requester) {
+            throw new UnauthorizedException();
+        }
+
+        const entity = await this.repository.getUserById(user.id);
+        if (!entity) {
+            throw new NotFoundException('Usuário não encontrado.');
+        }
+
+        const isAdmin = requester.role === Role.ADMIN;
+        if (!isAdmin && requester.id !== entity.id) {
+            throw new ForbiddenException('Você não tem permissão para alterar este usuário.');
+        }
+
+        if (!isAdmin && user.role && user.role !== entity.role) {
+            throw new ForbiddenException('Você não tem permissão para alterar a função.');
+        }
+
+        const roleWillChange = isAdmin && user.role && user.role !== entity.role;
+
+        if (isAdmin) {
+            entity.username = user.username ?? entity.username;
+            entity.role = user.role ?? entity.role;
+        }
+
+        entity.email = user.email ?? entity.email;
+        entity.name = user.name ?? entity.name;
+
         entity.addIgnoredProperty('password');
+
         await this.repository.saveUser(entity);
-        return await this.getUsers();
+
+        if (roleWillChange) {
+            await this.repository.deleteRefreshToken(entity.id);
+        }
+
+        if (isAdmin) {
+            const users = await this.repository.getUsers();
+            return { users: users.map((item) => this.sanitizeUser(item)) };
+        }
+
+        return { user: this.sanitizeUser(entity) };
+    }
+
+    private sanitizeUser(user: User) {
+        return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+        };
     }
 }

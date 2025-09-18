@@ -54,6 +54,7 @@ export class ManagementController {
     }
 
     @Put('/users')
+    @Roles(Role.ADMIN, Role.NORMAL_USER)
     async updateUser(@Body() user: UserDTO) {
         return await this.usersService.updateUser(user);
     }

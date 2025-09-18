@@ -6,14 +6,35 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { RolesGuard } from './common/guards/roles.guard';
+import { NextFunction, Request, Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
   const reflector = app.get(Reflector);
 
   // Habilita cookie parser
   app.use(cookieParser());
+
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Referrer-Policy', 'same-origin');
+    res.setHeader('X-DNS-Prefetch-Control', 'off');
+    res.setHeader('X-XSS-Protection', '0');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+    if (process.env.NODE_ENV !== 'development') {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+      res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'self'; frame-ancestors 'self'; object-src 'none'; base-uri 'self'"
+      );
+    }
+
+    next();
+  });
 
   //Habilitar o guards em todas as rotas. Rotas públicas devem usar @Public.
   app.useGlobalGuards(new GlobalAuthGuard(reflector));

@@ -9,6 +9,7 @@ import MySQLDatabase from 'src/modules/Config/Database/MySQLDatabase';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthContextService } from './auth-context.service';
 import { ManagementModule } from 'src/modules/management/management.module';
+import { AuthRateLimitGuard } from 'src/common/guards/auth-rate-limit.guard';
 
 @Global()
 @Module({
@@ -32,7 +33,8 @@ import { ManagementModule } from 'src/modules/management/management.module';
     JwtStrategy,
     AuthRepository,
     MySQLDatabase,
-    AuthContextService
+    AuthContextService,
+    AuthRateLimitGuard
   ],
   exports: [
     PassportModule,  // para que outros módulos possam usar Guards

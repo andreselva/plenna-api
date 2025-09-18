@@ -5,7 +5,7 @@ export class AuthCookieOptions {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
+            sameSite: 'lax',
             domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
             maxAge: 60 * 60 * 1000,//1h
         };
@@ -15,7 +15,7 @@ export class AuthCookieOptions {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
+            sameSite: 'lax',
             domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
             maxAge: 7 * 24 * 60 * 60 * 1000
         }
@@ -25,7 +25,7 @@ export class AuthCookieOptions {
         return {
             httpOnly: false,
             secure: true,
-            sameSite: 'none',
+            sameSite: 'lax',
             domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
             maxAge: 60 * 60 * 1000,
         };
@@ -35,7 +35,7 @@ export class AuthCookieOptions {
         return {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
+            sameSite: 'lax',
             domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
         }
     }
@@ -44,7 +44,7 @@ export class AuthCookieOptions {
         return {
             httpOnly: false,
             secure: true,
-            sameSite: 'none',
+            sameSite: 'lax',
             domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
         }
     }

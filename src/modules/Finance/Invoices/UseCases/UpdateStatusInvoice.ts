@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import InvoicesRepository from "../invoices.repository";
 import { InvoiceStatus } from "../Types/invoice.status.type";
 import Invoice from "src/EntityModels/invoice";
+import { ExpenseStatus } from "../../Expenses/Types/expense.status.type";
 
 @Injectable()
 export default class UpdateStatusInvoice {
@@ -19,7 +20,8 @@ export default class UpdateStatusInvoice {
                 const status = this.defineStatus(totalPayments, invoiceValue);
                 invoice.status = status;
                 invoice.paymentDate = paymentDate;
-                return await this.repository.save(invoice);
+                await this.repository.save(invoice);
+                return await this.repository.updateStatusExpenseByIdInvoice(invoice.id, this.defineStatusExpenses(invoice.status));
             } else {
                 throw new Error("Invoice not found");
             }
@@ -35,6 +37,19 @@ export default class UpdateStatusInvoice {
             return Invoice.STATUS_PARCIAL;
         } else {
             return Invoice.STATUS_PENDING;
+        }
+    }
+
+    private defineStatusExpenses(statusInvoice: InvoiceStatus) {
+        switch (statusInvoice) {
+            case Invoice.STATUS_PAID:
+                return ExpenseStatus.PAID;
+            case Invoice.STATUS_PARCIAL:
+                return ExpenseStatus.PARTIAL;
+            case Invoice.STATUS_PENDING:
+                return ExpenseStatus.PENDING;
+            default:
+                return ExpenseStatus.PENDING;
         }
     }
 }

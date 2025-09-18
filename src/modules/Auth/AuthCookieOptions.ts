@@ -2,50 +2,49 @@ import { CookieOptions } from "express";
 
 export class AuthCookieOptions {
     static accessToken(): CookieOptions {
-        return {
+        return this.buildCookieOptions({
             httpOnly: true,
-            secure: true,
-            sameSite: 'lax',
-            domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
             maxAge: 60 * 60 * 1000,//1h
-        };
+        });
     }
 
     static refreshToken(): CookieOptions {
-        return {
+        return this.buildCookieOptions({
             httpOnly: true,
-            secure: true,
-            sameSite: 'lax',
-            domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
             maxAge: 7 * 24 * 60 * 60 * 1000
-        }
+        });
     }
 
     static csrfToken(): CookieOptions {
-        return {
+        return this.buildCookieOptions({
             httpOnly: false,
-            secure: true,
-            sameSite: 'lax',
-            domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
             maxAge: 60 * 60 * 1000,
-        };
+        });
     }
 
     static clearToken(): CookieOptions {
-        return {
+        return this.buildCookieOptions({
             httpOnly: true,
-            secure: true,
-            sameSite: 'lax',
-            domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
-        }
+        });
     }
 
     static clearCsrfToken(): CookieOptions {
-        return {
+        return this.buildCookieOptions({
             httpOnly: false,
-            secure: true,
+        });
+    }
+
+    private static buildCookieOptions(overrides: Partial<CookieOptions>): CookieOptions {
+        const isProduction = process.env.NODE_ENV === 'production';
+        const base: CookieOptions = {
+            secure: isProduction,
             sameSite: 'lax',
-            domain: process.env.NODE_ENV === 'development' ? '' : '.plenna.me',
+        };
+
+        if (isProduction) {
+            base.domain = '.plenna.me';
         }
+
+        return { ...base, ...overrides };
     }
 }

@@ -1,28 +1,23 @@
-import { Body, Controller, Get, Put } from '@nestjs/common';
-import { get } from 'http';
+import { Body, Controller, Get, Param, ParseIntPipe, Put } from '@nestjs/common';
+import { AppointmentsService } from './appointments.service';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 
 @Controller('appointments')
 export class AppointmentsController {
 
+    constructor(private readonly appointmentsService: AppointmentsService) {}
+
     @Get()
     async getAppointments() {
-        return { appointments: [
-            {
-                id: 1,
-                name: 'Envio de e-mail para contas com vencimento próximo',
-                description: 'Notifica clientes/usuários sobre vencimentos próximos.',
-                isActive: false,
-                recurrence: 'hourly'
-            }
-        ]}
+        return this.appointmentsService.listAppointments();
     }
 
-    @Put()
-    async enableAppointment(@Body() appointment: any) {
-        if (appointment) {
-            return await this.getAppointments();
-        }
-        return false;
+    @Put(':id/status')
+    async updateStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() payload: UpdateAppointmentDto,
+    ) {
+        return this.appointmentsService.updateStatus(id, payload);
     }
 
 }

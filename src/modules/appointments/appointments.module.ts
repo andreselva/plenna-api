@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
-import { Queue } from 'bullmq';
 import { AppointmentsService } from './appointments.service';
 import { AppointmentsController } from './appointments.controller';
 import { AppointmentsQueueService } from './appointments-queue.service';
-import { APPOINTMENTS_QUEUE_NAME, APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from './appointments.constants';
+import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from './appointments.constants';
 import { AppointmentsWorkerService } from './appointments-worker.service';
 import { UpcomingExpensesService } from './services/upcoming-expenses.service';
 import { UpcomingExpensesEmailService } from './services/upcoming-expenses-email.service';
 import { UpcomingExpensesEmailAppointment } from './definitions/upcoming-expenses-email.appointment';
+import { createQueue } from './queue.provider';
+import { AppointmentsDebugController } from './debug/appointments.debug.controller';
+import { AppointmentsBootstrapService } from './startup/appointments-bootstrap.service';
 
 @Module({
   providers: [
@@ -17,9 +19,10 @@ import { UpcomingExpensesEmailAppointment } from './definitions/upcoming-expense
     UpcomingExpensesService,
     UpcomingExpensesEmailService,
     UpcomingExpensesEmailAppointment,
+    AppointmentsBootstrapService,
     {
       provide: APPOINTMENTS_QUEUE_TOKEN,
-      useFactory: () => Queue.get(APPOINTMENTS_QUEUE_NAME),
+      useFactory: () => createQueue(),
     },
     {
       provide: AVAILABLE_APPOINTMENTS_TOKEN,
@@ -27,6 +30,9 @@ import { UpcomingExpensesEmailAppointment } from './definitions/upcoming-expense
       inject: [UpcomingExpensesEmailAppointment],
     },
   ],
-  controllers: [AppointmentsController]
+  controllers: [
+    AppointmentsController,
+    AppointmentsDebugController,
+  ],
 })
 export class AppointmentsModule {}

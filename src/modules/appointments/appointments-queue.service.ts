@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Queue } from 'bullmq';
 import { APPOINTMENTS_QUEUE_TOKEN } from './appointments.constants';
 import { ExecutableAppointment } from './executable-appointment.base';
 import { AppointmentJobData } from './types/appointment-job-data.type';
+import { Queue } from './queue.provider';
 
 interface ScheduledAppointment<TConfig = unknown> {
   appointmentId: number;

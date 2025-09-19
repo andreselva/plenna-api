@@ -1,4 +1,12 @@
 services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "no", "--save", "60", "1000"]
+    networks:
+      - backend-network
+
   backend:
     container_name: plenna-api
     build:
@@ -19,8 +27,11 @@ services:
       - JWT_REFRESH_SECRET=samantinha
       - OPENAI_API_KEY=openai
       - PORT=8001
+      - USE_FAKE_QUEUE=false
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - db
+      - redis
     networks:
       - backend-network
     volumes:

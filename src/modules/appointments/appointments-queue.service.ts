@@ -3,7 +3,7 @@ import { Recurrence } from 'src/enum/recurrence.enum';
 import { APPOINTMENTS_QUEUE_TOKEN } from './appointments.constants';
 import { ExecutableAppointment } from './executable-appointment.base';
 import { AppointmentJobData } from './types/appointment-job-data.type';
-import { Queue } from './queue.provider';
+import type { Queue } from './queue.provider';
 
 interface ScheduledAppointment<TConfig = unknown> {
   appointmentId: number;
@@ -32,6 +32,7 @@ export class AppointmentsQueueService {
     options: { config: TConfig | null; recurrence?: Recurrence; timezone?: string | null },
   ): Promise<void> {
     const jobId = appointment.buildJobId(clientId);
+    await this.clearFromQueue(appointment, clientId);
     const recurrence = options.recurrence ?? appointment.recurrence;
     const timezone = options.timezone ?? appointment.timezone ?? null;
     const repeat = appointment.buildRepeatOptions(recurrence, timezone);
@@ -62,14 +63,7 @@ export class AppointmentsQueueService {
   }
 
   async unschedule<TConfig>(appointment: ExecutableAppointment<TConfig>, clientId: number): Promise<void> {
-    const jobId = appointment.buildJobId(clientId);
-    const scheduled = this.scheduled.get(jobId);
-    const recurrence = scheduled?.recurrence ?? appointment.recurrence;
-    const timezone = scheduled?.timezone ?? appointment.timezone ?? null;
-    const repeat = appointment.buildRepeatOptions(recurrence, timezone);
-    this.logger.log(`Removendo agendamento ${appointment.type} do cliente ${clientId}`);
-    await this.queue.removeRepeatable(appointment.type, repeat, jobId);
-    this.scheduled.delete(jobId);
+    await this.clearFromQueue(appointment, clientId);
   }
 
   async isScheduled<TConfig>(appointment: ExecutableAppointment<TConfig>, clientId: number): Promise<boolean> {
@@ -115,5 +109,59 @@ export class AppointmentsQueueService {
     scheduled.recurrence = options.recurrence ?? scheduled.recurrence ?? null;
     scheduled.timezone = options.timezone ?? scheduled.timezone ?? null;
     this.scheduled.set(jobId, scheduled);
+  }
+
+  private async clearFromQueue<TConfig>(
+    appointment: ExecutableAppointment<TConfig>,
+    clientId: number,
+  ): Promise<void> {
+    const jobId = appointment.buildJobId(clientId);
+    const repeatables = await this.queue.getRepeatableJobs();
+    if (
+      !this.scheduled.has(jobId) &&
+      !repeatables.some((item) =>
+        item.id === jobId || item.key === jobId || item.key.endsWith(`:${jobId}`),
+      )
+    ) {
+      return;
+    }
+
+    const scheduled = this.scheduled.get(jobId);
+    const queueWithKeyRemoval = this.queue as Queue<AppointmentJobData> & {
+      removeRepeatableByKey?: (key: string) => Promise<void>;
+      remove?: (id: string) => Promise<void | number>;
+    };
+
+    this.logger.log(`Removendo agendamentos anteriores de ${appointment.type} do cliente ${clientId}`);
+
+    const matches = repeatables.filter(
+      (item) => item.id === jobId || item.key === jobId || item.key.endsWith(`:${jobId}`),
+    );
+
+    await Promise.all(
+      matches.map(async ({ key }) => {
+        if (queueWithKeyRemoval.removeRepeatableByKey) {
+          await queueWithKeyRemoval.removeRepeatableByKey(key);
+          return;
+        }
+
+        const recurrence = scheduled?.recurrence ?? appointment.recurrence;
+        const timezone = scheduled?.timezone ?? appointment.timezone ?? null;
+        const repeat = appointment.buildRepeatOptions(recurrence, timezone);
+        await this.queue.removeRepeatable(appointment.type, repeat, jobId);
+      }),
+    );
+
+    if (queueWithKeyRemoval.remove) {
+      try {
+        await queueWithKeyRemoval.remove(jobId);
+      } catch (error) {
+        this.logger.debug(
+          `Não foi possível remover job ${jobId} diretamente: ${(error as Error).message}`,
+        );
+      }
+    }
+
+    this.scheduled.delete(jobId);
   }
 }

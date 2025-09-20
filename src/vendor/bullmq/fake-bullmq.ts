@@ -200,6 +200,14 @@ export class Queue<DataType = any, NameType extends string = string> {
     }
   }
 
+  async removeRepeatableByKey(key: string): Promise<void> {
+    const existing = this.repeatableJobs.get(key);
+    if (existing) {
+      this.clearInterval(existing);
+      this.repeatableJobs.delete(key);
+    }
+  }
+
   async getRepeatableJobs(): Promise<Array<{ id: string; key: string; name: string; next: number | null }>> {
     return Array.from(this.repeatableJobs.values()).map(({ job, next }) => ({
       id: job.id,

@@ -13,6 +13,7 @@ interface ScheduledAppointment<TConfig = unknown> {
   config: TConfig | null;
   recurrence: Recurrence | null;
   timezone: string | null;
+  repeatJobKey: string | null;
 }
 
 @Injectable()
@@ -26,16 +27,30 @@ export class AppointmentsQueueService {
     private readonly queue: Queue<AppointmentJobData>,
   ) {}
 
+  private sanitizeId(id: string): string {
+    return id.replace(/:/g, '__');
+  }
+
+  private legacySuffix(type: string, clientId: number): string {
+    return `:${type}:${clientId}`;
+  }
+
   async schedule<TConfig>(
     appointment: ExecutableAppointment<TConfig>,
     clientId: number,
     options: { config: TConfig | null; recurrence?: Recurrence; timezone?: string | null },
   ): Promise<void> {
-    const jobId = appointment.buildJobId(clientId);
+    const rawJobId = appointment.buildJobId(clientId);
+    const jobId = this.sanitizeId(rawJobId);          
+
     await this.clearFromQueue(appointment, clientId);
+
     const recurrence = options.recurrence ?? appointment.recurrence;
-    const timezone = options.timezone ?? appointment.timezone ?? null;
-    const repeat = appointment.buildRepeatOptions(recurrence, timezone);
+    const timezone  = options.timezone ?? appointment.timezone ?? null;
+
+    const baseRepeat = appointment.buildRepeatOptions(recurrence, timezone);
+    const repeat = { ...baseRepeat, key: jobId } as typeof baseRepeat & { key: string };
+
     const payload: AppointmentJobData<TConfig> = {
       appointmentId: appointment.id,
       clientId,
@@ -44,12 +59,17 @@ export class AppointmentsQueueService {
       timezone,
     };
 
-    this.logger.log(`Agendando ${appointment.type} para o cliente ${clientId} (${JSON.stringify(repeat)})`);
-    await this.queue.add(appointment.type, payload, {
+    this.logger.log(
+      `Agendando ${appointment.type} para o cliente ${clientId} (${JSON.stringify(repeat)})`,
+    );
+
+    const job = await this.queue.add(appointment.type, payload, {
       jobId,
       repeat,
       removeOnComplete: true,
     });
+
+    const repeatJobKey = (job as any)?.repeatJobKey ?? null;
 
     this.scheduled.set(jobId, {
       appointmentId: appointment.id,
@@ -59,21 +79,39 @@ export class AppointmentsQueueService {
       config: options.config,
       recurrence,
       timezone,
+      repeatJobKey,
     });
   }
 
-  async unschedule<TConfig>(appointment: ExecutableAppointment<TConfig>, clientId: number): Promise<void> {
+  async unschedule<TConfig>(
+    appointment: ExecutableAppointment<TConfig>,
+    clientId: number,
+  ): Promise<void> {
     await this.clearFromQueue(appointment, clientId);
   }
 
-  async isScheduled<TConfig>(appointment: ExecutableAppointment<TConfig>, clientId: number): Promise<boolean> {
-    const jobId = appointment.buildJobId(clientId);
+  async isScheduled<TConfig>(
+    appointment: ExecutableAppointment<TConfig>,
+    clientId: number,
+  ): Promise<boolean> {
+    const rawJobId = appointment.buildJobId(clientId);
+    const jobId = this.sanitizeId(rawJobId);
+
     if (this.scheduled.has(jobId)) {
       return true;
     }
 
     const repeatables = await this.queue.getJobSchedulers();
-    const found = repeatables.find((item) => item.id === jobId || item.key === jobId);
+
+    // Procura por chave nova (igual ao jobId saneado) e também por legado (termina com ":type:clientId")
+    const legacy = this.legacySuffix(appointment.type, clientId);
+    const found = repeatables.find(
+      (r: any) =>
+        r.key === jobId ||
+        r.id === jobId ||
+        (typeof r.key === 'string' && r.key.endsWith(legacy)),
+    );
+
     if (found) {
       this.scheduled.set(jobId, {
         appointmentId: appointment.id,
@@ -83,14 +121,19 @@ export class AppointmentsQueueService {
         config: null,
         recurrence: null,
         timezone: null,
+        repeatJobKey: (found as any).key ?? null,
       });
     }
 
     return Boolean(found);
   }
 
-  getConfig<TConfig>(appointment: ExecutableAppointment<TConfig>, clientId: number): TConfig | null {
-    const jobId = appointment.buildJobId(clientId);
+  getConfig<TConfig>(
+    appointment: ExecutableAppointment<TConfig>,
+    clientId: number,
+  ): TConfig | null {
+    const rawJobId = appointment.buildJobId(clientId);
+    const jobId = this.sanitizeId(rawJobId);
     return (this.scheduled.get(jobId)?.config as TConfig | null) ?? null;
   }
 
@@ -99,11 +142,11 @@ export class AppointmentsQueueService {
     clientId: number,
     options: { config: TConfig | null; recurrence?: Recurrence; timezone?: string | null },
   ): void {
-    const jobId = appointment.buildJobId(clientId);
+    const rawJobId = appointment.buildJobId(clientId);
+    const jobId = this.sanitizeId(rawJobId);
+
     const scheduled = this.scheduled.get(jobId);
-    if (!scheduled) {
-      return;
-    }
+    if (!scheduled) return;
 
     scheduled.config = options.config;
     scheduled.recurrence = options.recurrence ?? scheduled.recurrence ?? null;
@@ -115,43 +158,49 @@ export class AppointmentsQueueService {
     appointment: ExecutableAppointment<TConfig>,
     clientId: number,
   ): Promise<void> {
-    const jobId = appointment.buildJobId(clientId);
-    const repeatables = await this.queue.getRepeatableJobs();
-    if (
-      !this.scheduled.has(jobId) &&
-      !repeatables.some((item) =>
-        item.id === jobId || item.key === jobId || item.key.endsWith(`:${jobId}`),
-      )
-    ) {
+    const rawJobId = appointment.buildJobId(clientId);
+    const jobId = this.sanitizeId(rawJobId);          
+    const legacy = this.legacySuffix(appointment.type, clientId);
+
+    const repeatables = await this.queue.getJobSchedulers();
+
+    const scheduled = this.scheduled.get(jobId);
+    const repeatKeyFromMemory = scheduled?.repeatJobKey ?? null;
+
+    const match = repeatables.find(
+      (item: any) =>
+        (repeatKeyFromMemory && item.key === repeatKeyFromMemory) ||
+        item.key === jobId ||
+        item.id === jobId ||
+        (typeof item.key === 'string' && item.key.endsWith(legacy)),
+    );
+
+    if (!this.scheduled.has(jobId) && !match) {
       return;
     }
 
-    const scheduled = this.scheduled.get(jobId);
     const queueWithKeyRemoval = this.queue as Queue<AppointmentJobData> & {
       removeRepeatableByKey?: (key: string) => Promise<void>;
       remove?: (id: string) => Promise<void | number>;
     };
 
-    this.logger.log(`Removendo agendamentos anteriores de ${appointment.type} do cliente ${clientId}`);
-
-    const matches = repeatables.filter(
-      (item) => item.id === jobId || item.key === jobId || item.key.endsWith(`:${jobId}`),
+    this.logger.log(
+      `Removendo agendamentos anteriores de ${appointment.type} do cliente ${clientId}`,
     );
 
-    await Promise.all(
-      matches.map(async ({ key }) => {
-        if (queueWithKeyRemoval.removeRepeatableByKey) {
-          await queueWithKeyRemoval.removeRepeatableByKey(key);
-          return;
-        }
+    if (match && queueWithKeyRemoval.removeJobScheduler) {
+      await queueWithKeyRemoval.removeJobScheduler((match as any).key);
+    } else if (match) {
+      const recurrence = scheduled?.recurrence ?? appointment.recurrence;
+      const timezone  = scheduled?.timezone   ?? appointment.timezone ?? null;
 
-        const recurrence = scheduled?.recurrence ?? appointment.recurrence;
-        const timezone = scheduled?.timezone ?? appointment.timezone ?? null;
-        const repeat = appointment.buildRepeatOptions(recurrence, timezone);
-        await this.queue.removeRepeatable(appointment.type, repeat, jobId);
-      }),
-    );
+      const baseRepeat = appointment.buildRepeatOptions(recurrence, timezone);
+      const repeat = { ...baseRepeat, key: jobId } as typeof baseRepeat & { key: string };
 
+      await this.queue.removeJobScheduler(jobId);
+    }
+
+    // Limpa job “solto” com o mesmo id (não impacta repeatables)
     if (queueWithKeyRemoval.remove) {
       try {
         await queueWithKeyRemoval.remove(jobId);

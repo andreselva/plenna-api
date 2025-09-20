@@ -20,6 +20,8 @@ interface AppointmentSettingRow {
   config: string | null;
 }
 
+type RawConfig = string | Buffer | Record<string, unknown> | null;
+
 @Injectable()
 export class AppointmentSettingsService {
   private readonly logger = new Logger(AppointmentSettingsService.name);
@@ -84,16 +86,7 @@ export class AppointmentSettingsService {
   }
 
   private mapRow(row: AppointmentSettingRow): AppointmentSetting {
-    let parsedConfig: unknown = null;
-    if (row.config) {
-      try {
-        parsedConfig = JSON.parse(row.config) as Record<string, unknown>;
-      } catch (error) {
-        this.logger.warn(
-          `Falha ao converter config do agendamento ${row.appointmentType} do cliente ${row.clientId}: ${(error as Error).message}`,
-        );
-      }
-    }
+    const parsedConfig = this.normalizeConfig(row.config as RawConfig);
 
     return {
       clientId: row.clientId,
@@ -103,5 +96,29 @@ export class AppointmentSettingsService {
       timezone: row.timezone,
       config: parsedConfig,
     };
+  }
+
+  private normalizeConfig(raw: RawConfig): Record<string, unknown> | null {
+    if (raw == null) return null;
+
+    if (typeof raw === 'object' && !Buffer.isBuffer(raw)) {
+      return raw as Record<string, unknown>;
+    }
+
+    if (Buffer.isBuffer(raw)) {
+      try {
+        return JSON.parse(raw.toString('utf8')) as Record<string, unknown>;
+      } catch (e) {
+        this.logger.warn(`Falha ao converter config (Buffer): ${(e as Error).message}`);
+        return null;
+      }
+    }
+
+    try {
+      return JSON.parse(raw as string) as Record<string, unknown>;
+    } catch (e) {
+      this.logger.warn(`Falha ao converter config (string): ${(e as Error).message}`);
+      return null;
+    }
   }
 }

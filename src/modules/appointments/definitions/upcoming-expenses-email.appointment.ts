@@ -1,14 +1,15 @@
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Recurrence } from 'src/enum/recurrence.enum';
 import { ExecutableAppointment } from '../executable-appointment.base';
 import { UpcomingExpensesEmailService } from '../services/upcoming-expenses-email.service';
-import { UpcomingExpensesService } from '../services/upcoming-expenses.service';
 import { AppointmentJobData } from '../types/appointment-job-data.type';
+import { UpcomingExpensesService } from '../services/upcoming-expenses.service';
 
 export interface UpcomingExpensesEmailConfig {
   days?: number;
 }
 
+@Injectable()
 export class UpcomingExpensesEmailAppointment extends ExecutableAppointment<UpcomingExpensesEmailConfig> {
   private readonly logger = new Logger(UpcomingExpensesEmailAppointment.name);
 

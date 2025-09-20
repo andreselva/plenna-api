@@ -72,7 +72,7 @@ export class AppointmentsQueueService {
       return true;
     }
 
-    const repeatables = await this.queue.getRepeatableJobs();
+    const repeatables = await this.queue.getJobSchedulers();
     const found = repeatables.find((item) => item.id === jobId || item.key === jobId);
     if (found) {
       this.scheduled.set(jobId, {

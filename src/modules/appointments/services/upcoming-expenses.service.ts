@@ -33,7 +33,7 @@ export class UpcomingExpensesService {
     job: AppointmentJobData<{ days?: number }>,
     timezone: string,
   ): Promise<UpcomingExpensesSummary> {
-    const days = job.config?.days && job.config.days > 0 ? job.config.days : 15;
+    const days = job.config?.days && job.config.days > 0 ? job.config.days : 45;
     const now = DateTime.now().setZone(timezone).startOf('day');
     const end = now.plus({ days }).endOf('day');
 
@@ -77,14 +77,13 @@ export class UpcomingExpensesService {
   }
 
   private async loadExpenses(clientId: number, start: string, end: string): Promise<Expense[]> {
-    const query =
-      'SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ?';
+    const query = `SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ? AND status = 'pending'`;
     const rows = await this.database.select(query, [clientId, start, end]);
     return DataMapper.toEntities(rows, Expense).map((expense) => Expense.fromEntity(expense));
   }
 
   private async loadInvoices(clientId: number, start: string, end: string): Promise<Invoice[]> {
-    const query = 'SELECT * FROM invoices WHERE clientId = ? AND dueDate >= ? AND dueDate <= ?';
+    const query = `SELECT * FROM invoices WHERE clientId = ? AND dueDate >= ? AND dueDate <= ? AND status = 'pending'`;
     const rows = await this.database.select(query, [clientId, start, end]);
     return DataMapper.toEntities(rows, Invoice).map((invoice) => Object.assign(new Invoice(), invoice));
   }

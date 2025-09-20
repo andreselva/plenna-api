@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Recurrence } from 'src/enum/recurrence.enum';
 import { APPOINTMENTS_QUEUE_TOKEN } from './appointments.constants';
 import { ExecutableAppointment } from './executable-appointment.base';
 import { AppointmentJobData } from './types/appointment-job-data.type';
@@ -10,6 +11,8 @@ interface ScheduledAppointment<TConfig = unknown> {
   clientId: number;
   jobId: string;
   config: TConfig | null;
+  recurrence: Recurrence | null;
+  timezone: string | null;
 }
 
 @Injectable()
@@ -26,14 +29,18 @@ export class AppointmentsQueueService {
   async schedule<TConfig>(
     appointment: ExecutableAppointment<TConfig>,
     clientId: number,
-    config: TConfig | null,
+    options: { config: TConfig | null; recurrence?: Recurrence; timezone?: string | null },
   ): Promise<void> {
     const jobId = appointment.buildJobId(clientId);
-    const repeat = appointment.buildRepeatOptions();
+    const recurrence = options.recurrence ?? appointment.recurrence;
+    const timezone = options.timezone ?? appointment.timezone ?? null;
+    const repeat = appointment.buildRepeatOptions(recurrence, timezone);
     const payload: AppointmentJobData<TConfig> = {
       appointmentId: appointment.id,
       clientId,
-      config,
+      config: options.config,
+      recurrence,
+      timezone,
     };
 
     this.logger.log(`Agendando ${appointment.type} para o cliente ${clientId} (${JSON.stringify(repeat)})`);
@@ -48,13 +55,18 @@ export class AppointmentsQueueService {
       appointmentType: appointment.type,
       clientId,
       jobId,
-      config,
+      config: options.config,
+      recurrence,
+      timezone,
     });
   }
 
   async unschedule<TConfig>(appointment: ExecutableAppointment<TConfig>, clientId: number): Promise<void> {
     const jobId = appointment.buildJobId(clientId);
-    const repeat = appointment.buildRepeatOptions();
+    const scheduled = this.scheduled.get(jobId);
+    const recurrence = scheduled?.recurrence ?? appointment.recurrence;
+    const timezone = scheduled?.timezone ?? appointment.timezone ?? null;
+    const repeat = appointment.buildRepeatOptions(recurrence, timezone);
     this.logger.log(`Removendo agendamento ${appointment.type} do cliente ${clientId}`);
     await this.queue.removeRepeatable(appointment.type, repeat, jobId);
     this.scheduled.delete(jobId);
@@ -75,6 +87,8 @@ export class AppointmentsQueueService {
         clientId,
         jobId,
         config: null,
+        recurrence: null,
+        timezone: null,
       });
     }
 
@@ -84,5 +98,22 @@ export class AppointmentsQueueService {
   getConfig<TConfig>(appointment: ExecutableAppointment<TConfig>, clientId: number): TConfig | null {
     const jobId = appointment.buildJobId(clientId);
     return (this.scheduled.get(jobId)?.config as TConfig | null) ?? null;
+  }
+
+  remember<TConfig>(
+    appointment: ExecutableAppointment<TConfig>,
+    clientId: number,
+    options: { config: TConfig | null; recurrence?: Recurrence; timezone?: string | null },
+  ): void {
+    const jobId = appointment.buildJobId(clientId);
+    const scheduled = this.scheduled.get(jobId);
+    if (!scheduled) {
+      return;
+    }
+
+    scheduled.config = options.config;
+    scheduled.recurrence = options.recurrence ?? scheduled.recurrence ?? null;
+    scheduled.timezone = options.timezone ?? scheduled.timezone ?? null;
+    this.scheduled.set(jobId, scheduled);
   }
 }

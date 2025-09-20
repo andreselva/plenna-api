@@ -30,7 +30,8 @@ export class UpcomingExpensesEmailAppointment extends ExecutableAppointment<Upco
 
   async execute(job: AppointmentJobData<UpcomingExpensesEmailConfig>): Promise<void> {
     this.logger.debug(`Processando agendamento ${this.type} para o cliente ${job.clientId}`);
-    const summary = await this.summaryService.getSummary(job, this.timezone ?? 'America/Sao_Paulo');
+    const timezone = job.timezone ?? this.timezone ?? 'America/Sao_Paulo';
+    const summary = await this.summaryService.getSummary(job, timezone);
     this.emailService.send(job.clientId, summary);
   }
 }

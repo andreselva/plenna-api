@@ -1,5 +1,5 @@
-import { Recurrence } from "src/enum/recurrence.enum";
-import { IAppointment } from "src/Shared/interfaces/IAppointment";
+import { Recurrence } from 'src/enum/recurrence.enum';
+import { IAppointment } from 'src/Shared/interfaces/IAppointment';
 
 export abstract class AppointmentBase<TConfig = unknown> implements IAppointment<TConfig> {
   constructor(
@@ -17,9 +17,13 @@ export abstract class AppointmentBase<TConfig = unknown> implements IAppointment
     return `${this.type}:${clientId}`;
   }
 
-  buildRepeatOptions(): { pattern?: string; every?: number; tz?: string } {
-    const tz = this.timezone || 'America/Sao_Paulo';
-    switch (this.recurrence) {
+  buildRepeatOptions(
+    recurrenceOverride?: Recurrence,
+    timezoneOverride?: string | null,
+  ): { pattern?: string; every?: number; tz?: string } {
+    const recurrence = recurrenceOverride ?? this.recurrence;
+    const tz = timezoneOverride ?? this.timezone ?? 'America/Sao_Paulo';
+    switch (recurrence) {
       case Recurrence.EVERY_15_MIN: return { every: 15 * 60 * 1000 };
       case Recurrence.HOURLY:       return { pattern: '0 * * * *', tz };
       case Recurrence.DAILY_08:     return { pattern: '0 8 * * *', tz };

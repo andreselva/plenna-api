@@ -16,7 +16,7 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
     private readonly appointments: ExecutableAppointment[],
   ) {}
 
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
     this.worker = createWorker<AppointmentJobData>(async (job) => {
       const appointment = this.appointments.find((item) => item.type === job.name);
       if (!appointment) {

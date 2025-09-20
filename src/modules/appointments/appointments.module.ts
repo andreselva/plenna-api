@@ -7,6 +7,7 @@ import { AppointmentsWorkerService } from './appointments-worker.service';
 import { UpcomingExpensesService } from './services/upcoming-expenses.service';
 import { UpcomingExpensesEmailService } from './services/upcoming-expenses-email.service';
 import { UpcomingExpensesEmailAppointment } from './definitions/upcoming-expenses-email.appointment';
+import { AppointmentSettingsService } from './services/appointment-settings.service';
 import { createQueue } from './queue.provider';
 import { AppointmentsDebugController } from './debug/appointments.debug.controller';
 import { AppointmentsBootstrapService } from './startup/appointments-bootstrap.service';
@@ -20,6 +21,7 @@ import { AppointmentsBootstrapService } from './startup/appointments-bootstrap.s
     UpcomingExpensesEmailService,
     UpcomingExpensesEmailAppointment,
     AppointmentsBootstrapService,
+    AppointmentSettingsService,
     {
       provide: APPOINTMENTS_QUEUE_TOKEN,
       useFactory: () => createQueue(),

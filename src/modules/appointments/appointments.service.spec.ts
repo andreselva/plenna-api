@@ -7,11 +7,21 @@ import { ExecutableAppointment } from './executable-appointment.base';
 import { Recurrence } from 'src/enum/recurrence.enum';
 import { AppointmentJobData } from './types/appointment-job-data.type';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { AppointmentSettingsService } from './services/appointment-settings.service';
+
+jest.mock('./appointments-queue.service', () => ({
+  AppointmentsQueueService: class {},
+}));
+
+jest.mock('./queue.provider', () => ({
+  Queue: class {},
+}));
 
 describe('AppointmentsService', () => {
   let service: AppointmentsService;
   let queueService: jest.Mocked<AppointmentsQueueService>;
   let authContext: jest.Mocked<AuthContextService>;
+  let settingsService: jest.Mocked<AppointmentSettingsService>;
 
   class SampleAppointment extends ExecutableAppointment {
     constructor() {
@@ -37,6 +47,15 @@ describe('AppointmentsService', () => {
             unschedule: jest.fn(),
             isScheduled: jest.fn().mockResolvedValue(false),
             getConfig: jest.fn().mockReturnValue(null),
+            remember: jest.fn(),
+          },
+        },
+        {
+          provide: AppointmentSettingsService,
+          useValue: {
+            findAllByClient: jest.fn().mockResolvedValue(new Map()),
+            findOne: jest.fn().mockResolvedValue(null),
+            upsert: jest.fn(),
           },
         },
         {
@@ -53,6 +72,7 @@ describe('AppointmentsService', () => {
     service = module.get<AppointmentsService>(AppointmentsService);
     queueService = module.get(AppointmentsQueueService);
     authContext = module.get(AuthContextService);
+    settingsService = module.get(AppointmentSettingsService);
   });
 
   it('should be defined', () => {
@@ -64,13 +84,28 @@ describe('AppointmentsService', () => {
     expect(result.appointments).toHaveLength(1);
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(queueService.isScheduled).toHaveBeenCalledWith(appointmentInstance, authContext.getClientId());
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(settingsService.findAllByClient).toHaveBeenCalledWith(authContext.getClientId());
   });
 
   it('should schedule appointments when enabling', async () => {
     const payload: UpdateAppointmentDto = { isActive: true };
     await service.updateStatus(1, payload);
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(queueService.schedule).toHaveBeenCalledWith(appointmentInstance, authContext.getClientId(), null);
+    expect(queueService.schedule).toHaveBeenCalledWith(appointmentInstance, authContext.getClientId(), {
+      config: null,
+      recurrence: appointmentInstance.recurrence,
+      timezone: appointmentInstance.timezone ?? null,
+    });
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(settingsService.upsert).toHaveBeenCalledWith({
+      appointmentType: appointmentInstance.type,
+      clientId: authContext.getClientId(),
+      config: null,
+      isActive: true,
+      recurrence: appointmentInstance.recurrence,
+      timezone: appointmentInstance.timezone ?? null,
+    });
   });
 
   it('should unschedule appointments when disabling', async () => {
@@ -78,5 +113,14 @@ describe('AppointmentsService', () => {
     await service.updateStatus(1, payload);
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(queueService.unschedule).toHaveBeenCalledWith(appointmentInstance, authContext.getClientId());
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(settingsService.upsert).toHaveBeenCalledWith({
+      appointmentType: appointmentInstance.type,
+      clientId: authContext.getClientId(),
+      config: null,
+      isActive: false,
+      recurrence: appointmentInstance.recurrence,
+      timezone: appointmentInstance.timezone ?? null,
+    });
   });
 });

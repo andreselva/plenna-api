@@ -8,7 +8,7 @@ export class AppointmentsController {
     constructor(private readonly appointmentsService: AppointmentsService) {}
 
     @Get()
-    async getAppointments() {
+    getAppointments() {
         return this.appointmentsService.listAppointments();
     }
 

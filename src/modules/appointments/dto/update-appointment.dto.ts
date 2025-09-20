@@ -1,4 +1,5 @@
-import { IsBoolean, IsOptional } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Recurrence } from 'src/enum/recurrence.enum';
 
 export class UpdateAppointmentDto {
   @IsBoolean()
@@ -6,4 +7,12 @@ export class UpdateAppointmentDto {
 
   @IsOptional()
   config?: Record<string, unknown> | null;
+
+  @IsOptional()
+  @IsEnum(Recurrence)
+  recurrence?: Recurrence;
+
+  @IsOptional()
+  @IsString()
+  timezone?: string | null;
 }

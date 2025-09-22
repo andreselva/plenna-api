@@ -1,0 +1,38 @@
+<h2>Contas a vencer nos próximos {{summary.period.days}} dias</h2>
+
+<p>Período analisado: {{summary.period.start}} até {{summary.period.end}}</p>
+
+{{#if summary.expensesWithoutInvoice.length}}
+  <h3>Contas sem fatura vinculada:</h3>
+  <ul>
+    {{#each summary.expensesWithoutInvoice}}
+      <li>
+        <b>{{this.name}}</b> | Vencimento: {{this.invoiceDueDate}} | Valor: {{this.value}}
+      </li>
+    {{/each}}
+  </ul>
+{{else}}
+  <p><i>Nenhuma conta avulsa encontrada no período.</i></p>
+{{/if}}
+
+{{#if summary.invoices.length}}
+  <h3>Faturas:</h3>
+  {{#each summary.invoices}}
+    <p>
+      <b>{{this.invoice.name}}</b> |
+      Vencimento: {{this.invoice.dueDate}} |
+      Total: {{this.invoice.value}}
+    </p>
+    {{#if this.expenses.length}}
+      <ul>
+        {{#each this.expenses}}
+          <li>
+            • {{this.name}} | Valor: {{this.value}} | Status: {{this.status}}
+          </li>
+        {{/each}}
+      </ul>
+    {{/if}}
+  {{/each}}
+{{else}}
+  <p><i>Nenhuma fatura com vencimento próximo encontrada.</i></p>
+{{/if}}

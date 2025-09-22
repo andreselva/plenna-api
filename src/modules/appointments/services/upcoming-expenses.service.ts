@@ -2,9 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { Expense } from 'src/EntityModels/Expense';
 import Invoice from 'src/EntityModels/invoice';
-import MySQLDatabase from 'src/modules/Config/Database/MySQLDatabase';
-import DataMapper from 'src/Shared/mapper/DataMapper';
 import { AppointmentJobData } from '../types/appointment-job-data.type';
+import AppointmentsRepository from '../appointments.repository';
 
 export interface UpcomingInvoiceSummary {
   invoice: Invoice;
@@ -27,7 +26,7 @@ export interface UpcomingExpensesSummary {
 export class UpcomingExpensesService {
   private readonly logger = new Logger(UpcomingExpensesService.name);
 
-  constructor(private readonly database: MySQLDatabase) {}
+  constructor(private readonly repository: AppointmentsRepository) {}
 
   async getSummary(
     job: AppointmentJobData<{ days?: number }>,
@@ -44,15 +43,15 @@ export class UpcomingExpensesService {
       timezone,
     };
 
-    const expenses = await this.loadExpenses(job.clientId, period.start, period.end);
+    const expenses = await this.repository.loadExpenses(job.clientId, period.start, period.end);
     const expensesWithoutInvoice = expenses.filter(
       (expense) => !expense.linkToInvoice || expense.idInvoice === 0,
     );
 
-    const invoices = await this.loadInvoices(job.clientId, period.start, period.end);
+    const invoices = await this.repository.loadInvoices(job.clientId, period.start, period.end);
     const invoiceSummaries = await Promise.all(
       invoices.map(async (invoice) => {
-        const relatedExpenses = await this.loadExpensesByInvoice(job.clientId, invoice.id);
+        const relatedExpenses = await this.repository.loadExpensesByInvoice(job.clientId, invoice.id);
         invoice.expenses = relatedExpenses;
         invoice.value = relatedExpenses.reduce((acc, expense) => acc + Number(expense.value), 0);
         return {
@@ -74,23 +73,5 @@ export class UpcomingExpensesService {
       expensesWithoutInvoice,
       invoices: invoiceSummaries,
     };
-  }
-
-  private async loadExpenses(clientId: number, start: string, end: string): Promise<Expense[]> {
-    const query = `SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ? AND status = 'pending'`;
-    const rows = await this.database.select(query, [clientId, start, end]);
-    return DataMapper.toEntities(rows, Expense).map((expense) => Expense.fromEntity(expense));
-  }
-
-  private async loadInvoices(clientId: number, start: string, end: string): Promise<Invoice[]> {
-    const query = `SELECT * FROM invoices WHERE clientId = ? AND dueDate >= ? AND dueDate <= ? AND status = 'pending'`;
-    const rows = await this.database.select(query, [clientId, start, end]);
-    return DataMapper.toEntities(rows, Invoice).map((invoice) => Object.assign(new Invoice(), invoice));
-  }
-
-  private async loadExpensesByInvoice(clientId: number, invoiceId: number): Promise<Expense[]> {
-    const query = 'SELECT * FROM expense WHERE clientId = ? AND idInvoice = ?';
-    const rows = await this.database.select(query, [clientId, invoiceId]);
-    return DataMapper.toEntities(rows, Expense).map((expense) => Expense.fromEntity(expense));
   }
 }

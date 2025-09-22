@@ -4,6 +4,7 @@ import { ExecutableAppointment } from '../executable-appointment.base';
 import { UpcomingExpensesEmailService } from '../services/upcoming-expenses-email.service';
 import { AppointmentJobData } from '../types/appointment-job-data.type';
 import { UpcomingExpensesService } from '../services/upcoming-expenses.service';
+import AppointmentsRepository from '../appointments.repository';
 
 export interface UpcomingExpensesEmailConfig {
   days?: number;
@@ -16,6 +17,7 @@ export class UpcomingExpensesEmailAppointment extends ExecutableAppointment<Upco
   constructor(
     private readonly summaryService: UpcomingExpensesService,
     private readonly emailService: UpcomingExpensesEmailService,
+    private readonly repository: AppointmentsRepository
   ) {
     super(
       1,
@@ -33,6 +35,10 @@ export class UpcomingExpensesEmailAppointment extends ExecutableAppointment<Upco
     this.logger.debug(`Processando agendamento ${this.type} para o cliente ${job.clientId}`);
     const timezone = job.timezone ?? this.timezone ?? 'America/Sao_Paulo';
     const summary = await this.summaryService.getSummary(job, timezone);
-    this.emailService.send(job.clientId, summary);
+    const users = await this.repository.loadUsers();
+
+    for (const user of users) {
+      this.emailService.send(job.clientId, summary, user.email);
+    }
   }
 }

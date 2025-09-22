@@ -11,8 +11,11 @@ import { createQueue } from './queue.provider';
 import { AppointmentsDebugController } from './debug/appointments.debug.controller';
 import { AppointmentsBootstrapService } from './startup/appointments-bootstrap.service';
 import { UpcomingExpensesService } from './services/upcoming-expenses.service';
+import AppointmentsRepository from './appointments.repository';
+import { EmailModule } from '../email/email.module';
 
 @Module({
+  imports: [EmailModule],
   providers: [
     AppointmentsService,
     AppointmentsQueueService,
@@ -22,6 +25,7 @@ import { UpcomingExpensesService } from './services/upcoming-expenses.service';
     UpcomingExpensesEmailAppointment,
     AppointmentsBootstrapService,
     AppointmentSettingsService,
+    AppointmentsRepository,
     {
       provide: APPOINTMENTS_QUEUE_TOKEN,
       useFactory: () => createQueue(),

@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { APP_BOOTSTRAP_LISTENER } from '@nestjs/core';
 import { AppointmentsService } from './appointments.service';
 import { AppointmentsController } from './appointments.controller';
 import { AppointmentsQueueService } from './appointments-queue.service';
@@ -38,14 +37,6 @@ import type { Redis } from 'ioredis';
       provide: AVAILABLE_APPOINTMENTS_TOKEN,
       useFactory: (upcomingExpenses: UpcomingExpensesEmailAppointment) => [upcomingExpenses],
       inject: [UpcomingExpensesEmailAppointment],
-    },
-    {
-      provide: APP_BOOTSTRAP_LISTENER,
-      multi: true,
-      inject: [AppointmentsWorkerService],
-      useFactory: (worker: AppointmentsWorkerService) => async () => {
-        await worker.ensureInitialized();
-      },
     },
   ],
   controllers: [

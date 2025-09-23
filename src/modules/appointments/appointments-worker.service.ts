@@ -13,7 +13,6 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
   private worker: Worker<AppointmentJobData> | null = null;
   private scheduler: QueueScheduler | null = null;
   private started = false;
-  private startPromise: Promise<void> | null = null;
 
   constructor(
     @Inject(APPOINTMENTS_QUEUE_TOKEN)
@@ -25,91 +24,40 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
   ) {}
 
   onModuleInit(): void {
-    void this.ensureInitialized();
+    this.startWorker();
   }
 
-  async ensureInitialized(): Promise<void> {
+  ensureInitialized(): void {
+    this.startWorker();
+  }
+
+  private startWorker() {
     if (this.started) {
       return;
     }
 
-    if (!this.startPromise) {
-      this.startPromise = this.startWorker()
-        .catch((error) => {
-          this.logger.error('Falha ao iniciar o worker de Appointments', error as Error);
-          this.started = false;
-          throw error;
-        })
-        .finally(() => {
-          this.startPromise = null;
-        });
+    this.scheduler = createQueueScheduler(this.redis);
+    if (this.scheduler?.waitUntilReady) {
+      this.scheduler
+        .waitUntilReady()
+        .then(() => this.logger.log('Scheduler de Appointments pronto'))
+        .catch((error) =>
+          this.logger.error('Falha ao iniciar o scheduler de Appointments', error as Error),
+        );
     }
 
-    await this.startPromise;
-  }
-
-  private async startWorker(): Promise<void> {
-    if (this.started) {
-      return;
-    }
-
-    let scheduler: QueueScheduler | null = null;
-    let worker: Worker<AppointmentJobData> | null = null;
-
-    try {
-      scheduler = createQueueScheduler(this.redis);
-      if (scheduler?.waitUntilReady) {
-        await scheduler.waitUntilReady();
+    this.worker = createWorker<AppointmentJobData>(async (job) => {
+      const appointment = this.appointments.find((item) => item.type === job.name);
+      if (!appointment) {
+        this.logger.warn(`Nenhum manipulador encontrado para o agendamento ${job.name}`);
+        return;
       }
-      this.logger.log('Scheduler de Appointments pronto');
-    } catch (error) {
-      this.logger.error('Falha ao iniciar o scheduler de Appointments', error as Error);
-      throw error;
-    }
+      this.logger.debug(`Executando job: ${job.name} (${job.id})`);
+      await appointment.execute(job.data);
+    }, this.redis);
 
-    try {
-      worker = createWorker<AppointmentJobData>(async (job) => {
-        const appointment = this.appointments.find((item) => item.type === job.name);
-        if (!appointment) {
-          this.logger.warn(`Nenhum manipulador encontrado para o agendamento ${job.name}`);
-          return;
-        }
-        this.logger.debug(`Executando job: ${job.name} (${job.id})`);
-        await appointment.execute(job.data);
-      }, this.redis);
-    } catch (error) {
-      await scheduler?.close?.().catch(() => undefined);
-      this.logger.error('Falha ao criar o worker de Appointments', error as Error);
-      throw error;
-    }
-
-    if (typeof (worker as any)?.on === 'function') {
-      (worker as any).on('error', (err: Error) => {
-        this.logger.error('Erro não tratado no worker de Appointments', err);
-      });
-      (worker as any).on('failed', (job: any, err: Error) => {
-        const jobId = job?.id ?? 'desconhecido';
-        const jobName = job?.name ?? 'desconhecido';
-        this.logger.error(`Job ${jobName} (${jobId}) falhou`, err);
-      });
-    }
-
-    if (worker?.waitUntilReady) {
-      try {
-        await worker.waitUntilReady();
-        this.logger.log('Worker de Appointments conectado ao Redis');
-      } catch (error) {
-        await worker.close?.().catch(() => undefined);
-        await scheduler?.close?.().catch(() => undefined);
-        this.logger.error('Falha ao conectar o worker de Appointments', error as Error);
-        throw error;
-      }
-    }
-
-    this.scheduler = scheduler;
-    this.worker = worker;
-    this.started = true;
     this.logger.log('Worker de Appointments iniciado');
+    this.started = true;
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -124,6 +72,5 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
     }
     this.scheduler = null;
     this.started = false;
-    this.startPromise = null;
   }
 }

@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/comm
 import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from '../appointments.constants';
 import { Queue } from '../queue.provider';
 import { ExecutableAppointment } from '../executable-appointment.base';
+import { AppointmentsWorkerService } from '../appointments-worker.service';
 
 @Injectable()
 export class AppointmentsBootstrapService implements OnApplicationBootstrap {
@@ -12,9 +13,11 @@ export class AppointmentsBootstrapService implements OnApplicationBootstrap {
     private readonly queue: Queue,
     @Inject(AVAILABLE_APPOINTMENTS_TOKEN)
     private readonly appointments: ExecutableAppointment[],
+    private readonly worker: AppointmentsWorkerService,
   ) {}
 
   async onApplicationBootstrap() {
+    this.worker.ensureInitialized();
     try {
       const repeatables = await this.queue.getRepeatableJobs?.();
       if (!repeatables || !Array.isArray(repeatables)) {

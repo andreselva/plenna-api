@@ -5,12 +5,14 @@ import { AppointmentJobData } from './types/appointment-job-data.type';
 import { createQueueScheduler, createWorker, Queue, QueueScheduler } from './queue.provider';
 import { REDIS_CONNECTION } from '../redis/redis.module';
 import type { Redis } from 'ioredis';
+import type { Worker } from './queue.provider';
 
 @Injectable()
 export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AppointmentsWorkerService.name);
-  private worker: any;
+  private worker: Worker<AppointmentJobData> | null = null;
   private scheduler: QueueScheduler | null = null;
+  private started = false;
 
   constructor(
     @Inject(APPOINTMENTS_QUEUE_TOKEN)
@@ -22,6 +24,18 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
   ) {}
 
   onModuleInit(): void {
+    this.startWorker();
+  }
+
+  ensureInitialized(): void {
+    this.startWorker();
+  }
+
+  private startWorker() {
+    if (this.started) {
+      return;
+    }
+
     this.scheduler = createQueueScheduler(this.redis);
     if (this.scheduler?.waitUntilReady) {
       this.scheduler
@@ -43,6 +57,7 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
     }, this.redis);
 
     this.logger.log('Worker de Appointments iniciado');
+    this.started = true;
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -50,9 +65,12 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
       await this.worker.close();
       this.logger.log('Worker de Appointments finalizado');
     }
+    this.worker = null;
     if (this.scheduler?.close) {
       await this.scheduler.close();
       this.logger.log('Scheduler de Appointments finalizado');
     }
+    this.scheduler = null;
+    this.started = false;
   }
 }

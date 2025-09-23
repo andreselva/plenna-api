@@ -29,12 +29,12 @@ services:
       - PORT=8001
       - USE_FAKE_QUEUE=false
       - REDIS_URL=redis://redis:6379
-      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_HOST=email-smtp.sa-east-1.amazonaws.com
       - EMAIL_PORT=587
       - EMAIL_SECURE=false
-      - EMAIL_USER=selvaandre99@gmail.com
-      - EMAIL_PASS=123
-      - EMAIL_FROM="Plenna <no-reply@plenna.app>"
+      - EMAIL_USER=AKIA2JSBZUOU34GGTB45
+      - EMAIL_PASS=BB9CQ/v/cyVKoP8N8YwJ0fl3x9xr/+G4qlLgU1PM24Tm
+      - EMAIL_FROM="Plenna <no-reply@plenna.me>"
       - EMAIL_JOB_ATTEMPS=5
       - EMAIL_JOB_BACKOFF_MS=10000
       - EMAIL_WORKER_CONCURRENCY=5

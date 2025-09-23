@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nest
 import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from './appointments.constants';
 import { ExecutableAppointment } from './executable-appointment.base';
 import { AppointmentJobData } from './types/appointment-job-data.type';
-import { createWorker, Queue } from './queue.provider';
+import { createQueueScheduler, createWorker, Queue, QueueScheduler } from './queue.provider';
 import { REDIS_CONNECTION } from '../redis/redis.module';
 import type { Redis } from 'ioredis';
 
@@ -10,6 +10,7 @@ import type { Redis } from 'ioredis';
 export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AppointmentsWorkerService.name);
   private worker: any;
+  private scheduler: QueueScheduler | null = null;
 
   constructor(
     @Inject(APPOINTMENTS_QUEUE_TOKEN)
@@ -21,6 +22,16 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
   ) {}
 
   onModuleInit(): void {
+    this.scheduler = createQueueScheduler(this.redis);
+    if (this.scheduler?.waitUntilReady) {
+      this.scheduler
+        .waitUntilReady()
+        .then(() => this.logger.log('Scheduler de Appointments pronto'))
+        .catch((error) =>
+          this.logger.error('Falha ao iniciar o scheduler de Appointments', error as Error),
+        );
+    }
+
     this.worker = createWorker<AppointmentJobData>(async (job) => {
       const appointment = this.appointments.find((item) => item.type === job.name);
       if (!appointment) {
@@ -38,6 +49,10 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
     if (this.worker?.close) {
       await this.worker.close();
       this.logger.log('Worker de Appointments finalizado');
+    }
+    if (this.scheduler?.close) {
+      await this.scheduler.close();
+      this.logger.log('Scheduler de Appointments finalizado');
     }
   }
 }

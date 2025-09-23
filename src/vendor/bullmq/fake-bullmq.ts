@@ -270,7 +270,14 @@ export class Worker<DataType = any, NameType extends string = string> {
 }
 
 export class QueueScheduler {
-  constructor(public readonly name: string) {}
+  constructor(public readonly name: string, _options?: unknown) {
+    void _options;
+  }
+
+  async waitUntilReady() {
+    return;
+  }
+
   async close() {
     return;
   }

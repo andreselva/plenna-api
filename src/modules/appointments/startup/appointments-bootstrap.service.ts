@@ -17,7 +17,7 @@ export class AppointmentsBootstrapService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    this.worker.ensureInitialized();
+    await this.worker.ensureInitialized();
     try {
       const repeatables = await this.queue.getRepeatableJobs?.();
       if (!repeatables || !Array.isArray(repeatables)) {

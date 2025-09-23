@@ -1,11 +1,14 @@
-import { Queue as BullQueue, Worker as BullWorker, QueueEvents } from 'bullmq';
+import { Queue as BullQueue, Worker as BullWorker, QueueEvents as BullQueueEvents } from 'bullmq';
+import { Queue as FakeQueue, Worker as FakeWorker, QueueEvents as FakeQueueEvents } from '../../vendor/bullmq/fake-bullmq';
+import type { Processor } from 'bullmq';
+import type { Redis } from 'ioredis';
 import { APPOINTMENTS_QUEUE_NAME } from './appointments.constants';
 
 const useFake = String(process.env.USE_FAKE_QUEUE ?? 'false').toLowerCase() === 'true';
 
-let QueueImpl: any;
-let WorkerImpl: any;
-let QueueEventsImpl: any;
+const QueueImpl = (useFake ? FakeQueue : BullQueue) as typeof BullQueue;
+const WorkerImpl = (useFake ? FakeWorker : BullWorker) as typeof BullWorker;
+const QueueEventsImpl = (useFake ? FakeQueueEvents : BullQueueEvents) as typeof BullQueueEvents;
 
 function parseRedisConnection() {
   const url = process.env.REDIS_URL;
@@ -29,37 +32,31 @@ function parseRedisConnection() {
   };
 }
 
-if (useFake) {
-  const fake = require('../../vendor/bullmq/fake-bullmq');
-  QueueImpl = fake.Queue;
-  WorkerImpl = fake.Worker;
-  QueueEventsImpl = fake.QueueEvents;
-} else {
-  const real = require('bullmq');
-  QueueImpl = real.Queue;
-  WorkerImpl = real.Worker;
-  QueueEventsImpl = real.QueueEvents;
-}
-
 export type Queue<Data = any> = BullQueue<Data>;
 export type Worker<Data = any> = BullWorker<Data>;
 
-export function createQueue<Data = any>() {
+export function createQueue<Data = any>(redis?: Redis) {
   if (useFake) {
     // 👇 cast pra acessar o static get do fake sem o TS implicar
     return (QueueImpl as any).get(APPOINTMENTS_QUEUE_NAME) as Queue<Data>;
   }
-  return new QueueImpl(APPOINTMENTS_QUEUE_NAME, { connection: parseRedisConnection() }) as Queue<Data>;
+  const connection = redis ?? parseRedisConnection();
+  return new QueueImpl(APPOINTMENTS_QUEUE_NAME, { connection }) as Queue<Data>;
 }
 
-export function createWorker<Data = any>(processor: import('bullmq').Processor<Data>) {
+export function createWorker<Data = any>(
+  processor: Processor<Data>,
+  redis?: Redis,
+) {
   if (useFake) {
     return new WorkerImpl(APPOINTMENTS_QUEUE_NAME, processor) as Worker<Data>;
   }
-  return new WorkerImpl(APPOINTMENTS_QUEUE_NAME, processor, { connection: parseRedisConnection() }) as Worker<Data>;
+  const connection = redis ?? parseRedisConnection();
+  return new WorkerImpl(APPOINTMENTS_QUEUE_NAME, processor, { connection }) as Worker<Data>;
 }
 
-export function createQueueEvents() {
+export function createQueueEvents(redis?: Redis) {
   if (useFake) return new QueueEventsImpl(APPOINTMENTS_QUEUE_NAME);
-  return new QueueEventsImpl(APPOINTMENTS_QUEUE_NAME, { connection: parseRedisConnection() });
+  const connection = redis ?? parseRedisConnection();
+  return new QueueEventsImpl(APPOINTMENTS_QUEUE_NAME, { connection });
 }

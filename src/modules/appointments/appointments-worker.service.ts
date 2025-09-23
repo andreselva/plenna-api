@@ -3,6 +3,8 @@ import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from './appoin
 import { ExecutableAppointment } from './executable-appointment.base';
 import { AppointmentJobData } from './types/appointment-job-data.type';
 import { createWorker, Queue } from './queue.provider';
+import { REDIS_CONNECTION } from '../redis/redis.module';
+import type { Redis } from 'ioredis';
 
 @Injectable()
 export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy {
@@ -14,6 +16,8 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
     private readonly queue: Queue<AppointmentJobData>,
     @Inject(AVAILABLE_APPOINTMENTS_TOKEN)
     private readonly appointments: ExecutableAppointment[],
+    @Inject(REDIS_CONNECTION)
+    private readonly redis: Redis,
   ) {}
 
   onModuleInit(): void {
@@ -25,7 +29,7 @@ export class AppointmentsWorkerService implements OnModuleInit, OnModuleDestroy 
       }
       this.logger.debug(`Executando job: ${job.name} (${job.id})`);
       await appointment.execute(job.data);
-    });
+    }, this.redis);
 
     this.logger.log('Worker de Appointments iniciado');
   }

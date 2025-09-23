@@ -13,9 +13,11 @@ import { AppointmentsBootstrapService } from './startup/appointments-bootstrap.s
 import { UpcomingExpensesService } from './services/upcoming-expenses.service';
 import AppointmentsRepository from './appointments.repository';
 import { EmailModule } from '../email/email.module';
+import { RedisModule, REDIS_CONNECTION } from '../redis/redis.module';
+import type { Redis } from 'ioredis';
 
 @Module({
-  imports: [EmailModule],
+  imports: [EmailModule, RedisModule],
   providers: [
     AppointmentsService,
     AppointmentsQueueService,
@@ -28,7 +30,8 @@ import { EmailModule } from '../email/email.module';
     AppointmentsRepository,
     {
       provide: APPOINTMENTS_QUEUE_TOKEN,
-      useFactory: () => createQueue(),
+      useFactory: (redis: Redis) => createQueue(redis),
+      inject: [REDIS_CONNECTION],
     },
     {
       provide: AVAILABLE_APPOINTMENTS_TOKEN,

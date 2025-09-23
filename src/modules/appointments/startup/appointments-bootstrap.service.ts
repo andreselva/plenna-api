@@ -1,6 +1,5 @@
 import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from '../appointments.constants';
-import { createQueue } from '../queue.provider';
 import { Queue } from '../queue.provider';
 import { ExecutableAppointment } from '../executable-appointment.base';
 

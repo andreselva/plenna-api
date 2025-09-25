@@ -208,6 +208,10 @@ export class Queue<DataType = any, NameType extends string = string> {
     }
   }
 
+  async removeJobScheduler(key: string): Promise<void> {
+    await this.removeRepeatableByKey(key);
+  }
+
   async getRepeatableJobs(): Promise<Array<{ id: string; key: string; name: string; next: number | null }>> {
     return Array.from(this.repeatableJobs.values()).map(({ job, next }) => ({
       id: job.id,
@@ -215,6 +219,10 @@ export class Queue<DataType = any, NameType extends string = string> {
       name: job.name,
       next: next ? next.getTime() : null,
     }));
+  }
+
+  async getJobSchedulers(): Promise<Array<{ id: string; key: string; name: string; next: number | null }>> {
+    return this.getRepeatableJobs();
   }
 
   registerWorker(worker: Worker<DataType, NameType>) {

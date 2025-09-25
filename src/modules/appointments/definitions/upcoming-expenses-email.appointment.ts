@@ -37,8 +37,8 @@ export class UpcomingExpensesEmailAppointment extends ExecutableAppointment<Upco
     const summary = await this.summaryService.getSummary(job, timezone);
     const users = await this.repository.loadUsers();
 
-    for (const user of users) {
-      this.emailService.send(job.clientId, summary, user.email);
-    }
+    await Promise.all(
+      users.map((user) => this.emailService.send(job.clientId, summary, user.email)),
+    );
   }
 }

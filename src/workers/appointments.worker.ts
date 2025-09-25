@@ -1,55 +1,30 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
-import { Worker, Job } from 'bullmq';
+import { Worker } from 'bullmq';
 
-import { WorkerModule } from './worker.module';
+import { AppointmentsWorkerModule } from './appointments-worker.module';
 import { APPOINTMENTS_QUEUE_NAME } from 'src/modules/appointments/appointments.constants';
 import { AppointmentJobData } from 'src/modules/appointments/types/appointment-job-data.type';
 
 // usamos diretamente a implementação do worker (tem runWithContext)
 import { WorkerAuthContextService } from './worker-auth-context.service';
 import { AppointmentsWorkerService } from './appointments-worker.service';
-
-function parseRedisConnection() {
-  const url = process.env.REDIS_URL;
-  if (url) {
-    const u = new URL(url);
-    const useTLS = u.protocol === 'rediss:';
-    return {
-      host: u.hostname,
-      port: Number(u.port || 6379),
-      username: u.username || undefined,
-      password: u.password || undefined,
-      tls: useTLS ? {} : undefined,
-    };
-  }
-  return {
-    host: process.env.REDIS_HOST || 'redis',
-    port: +(process.env.REDIS_PORT || 6379),
-    username: process.env.REDIS_USERNAME || undefined,
-    password: process.env.REDIS_PASSWORD || undefined,
-    tls: process.env.REDIS_TLS === 'true' ? {} : undefined,
-  };
-}
+import { createRedisConnectionOptions } from './redis-connection';
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(WorkerModule, {
+  const app = await NestFactory.createApplicationContext(AppointmentsWorkerModule, {
     logger: ['error', 'warn', 'log', 'debug'],
   });
 
   const logger = new Logger('AppointmentsWorker');
 
-  // Tipamos o serviço com a assinatura mínima que vamos usar (tem .process)
-  type AppointmentsWorkerWithProcess = {
-    process: (job: Job<AppointmentJobData>) => Promise<void> | void;
-  };
-
-  const appointmentsWorker = app.get(AppointmentsWorkerService) as unknown as AppointmentsWorkerWithProcess;
+  const appointmentsWorker = app.get(AppointmentsWorkerService);
 
   // Pega a nossa implementação que disponibiliza runWithContext
   const authContext = app.get(WorkerAuthContextService);
 
-  const connection = parseRedisConnection();
+  const connection = createRedisConnectionOptions();
+  const concurrency = Number(process.env.APPOINTMENTS_WORKER_CONCURRENCY ?? 5);
 
   const worker = new Worker<AppointmentJobData>(
     APPOINTMENTS_QUEUE_NAME,
@@ -80,7 +55,7 @@ async function bootstrap() {
         }
       });
     },
-    { connection, concurrency: +(process.env.APPOINTMENTS_WORKER_CONCURRENCY || 5) },
+    { connection, concurrency },
   );
 
   worker.on('failed', (job, err) => {
@@ -94,13 +69,11 @@ async function bootstrap() {
     logger.debug(`[DONE] ${job?.name} -> ${job?.id}`);
   });
 
-  logger.log(
-    `Appointments worker iniciado (concurrency=${+(process.env.APPOINTMENTS_WORKER_CONCURRENCY || 5)})`,
-  );
+  logger.log(`Appointments worker iniciado (concurrency=${concurrency})`);
 }
 
 bootstrap().catch((e) => {
-  // eslint-disable-next-line no-console
+   
   console.error(e);
   process.exit(1);
 });

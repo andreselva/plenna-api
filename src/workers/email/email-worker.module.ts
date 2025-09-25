@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { WorkerAuthModule } from './worker-auth.module';
 import { EmailModule } from 'src/modules/email/email.module';
+import { WorkerAuthModule } from '../worker-auth.module';
 import { EmailWorkerService } from './email-worker.service';
 
 @Module({

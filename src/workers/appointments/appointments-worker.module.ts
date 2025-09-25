@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { WorkerAuthModule } from './worker-auth.module';
 import { DatabaseModule } from 'src/modules/Config/Database/database.module';
 import { RedisModule } from 'src/modules/redis/redis.module';
 import { AppointmentsModule } from 'src/modules/appointments/appointments.module';
+import { WorkerAuthModule } from '../worker-auth.module';
 import { AppointmentsWorkerService } from './appointments-worker.service';
 
 @Module({

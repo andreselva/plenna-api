@@ -7,9 +7,9 @@ import { APPOINTMENTS_QUEUE_NAME } from 'src/modules/appointments/appointments.c
 import { AppointmentJobData } from 'src/modules/appointments/types/appointment-job-data.type';
 
 // usamos diretamente a implementação do worker (tem runWithContext)
-import { WorkerAuthContextService } from './worker-auth-context.service';
+import { WorkerAuthContextService } from '../worker-auth-context.service';
 import { AppointmentsWorkerService } from './appointments-worker.service';
-import { createRedisConnectionOptions } from './redis-connection';
+import { createRedisConnectionOptions } from '../redis-connection';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppointmentsWorkerModule, {

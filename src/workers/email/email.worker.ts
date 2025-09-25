@@ -4,11 +4,11 @@ import { NestFactory } from '@nestjs/core';
 import { Worker } from 'bullmq';
 
 import { EmailWorkerModule } from './email-worker.module';
-import { WorkerAuthContextService } from './worker-auth-context.service';
+import { WorkerAuthContextService } from '../worker-auth-context.service';
 import { EmailWorkerService } from './email-worker.service';
 import { EMAIL_QUEUE_NAME } from 'src/modules/email/email.constants';
 import { SendMailPayload, SendTemplatePayload } from 'src/modules/email/email.types';
-import { createRedisConnectionOptions } from './redis-connection';
+import { createRedisConnectionOptions } from '../redis-connection';
 
 type EmailJobData = SendMailPayload | (SendTemplatePayload & { clientId?: number | null });
 

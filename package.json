@@ -18,8 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "start:worker:appointments": "ts-node-dev --respawn -r tsconfig-paths/register --project tsconfig.worker.json src/workers/appointments.worker.ts",
-    "start:worker:email": "ts-node-dev --respawn -r tsconfig-paths/register --project tsconfig.worker.json src/workers/email.worker.ts"
+    "start:worker:email": "ts-node-dev --respawn -r tsconfig-paths/register --project tsconfig.worker.json ./src/workers/email/email.worker.ts",
+    "start:worker:appointments": "ts-node-dev --respawn -r tsconfig-paths/register --project tsconfig.worker.json ./src/workers/appointments/appointments.worker.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

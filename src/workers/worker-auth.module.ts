@@ -1,7 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 
 import { AuthContextService } from 'src/modules/Auth/auth-context.service';
-
 import { WorkerAuthContextService } from './worker-auth-context.service';
 
 @Global()

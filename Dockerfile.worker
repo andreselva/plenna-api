@@ -11,5 +11,5 @@ COPY . .
 
 EXPOSE 8001 9229
 
-# Usa o tsconfig.worker.json e o entrypoint do worker
-CMD ["npm", "run", "start:worker:appointments"]
+# Usa o tsconfig.worker.json e permite escolher o script do worker via WORKER_SCRIPT
+CMD ["sh", "-c", "npm run ${WORKER_SCRIPT:-start:worker:appointments}"]

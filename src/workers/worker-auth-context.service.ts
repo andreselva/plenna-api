@@ -45,6 +45,16 @@ export class WorkerAuthContextService {
     return this.getContext().roles;
   }
 
+  getRole(): string | null {
+    const user = this.getUser();
+    if (user?.role) {
+      return user.role;
+    }
+
+    const roles = this.getRoles();
+    return roles.length > 0 ? roles[0] ?? null : null;
+  }
+
   isAdmin(): boolean {
     const roles = this.getContext().roles ?? [];
     return roles.includes('admin') || roles.includes('system');

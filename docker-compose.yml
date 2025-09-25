@@ -67,7 +67,8 @@ services:
       - ./:/app
       - backend_node_modules:/app/node_modules
 
-  w-appointments:
+  worker-appointments:
+    container_name: w-appointments
     build:
       context: .
       dockerfile: Dockerfile.worker
@@ -96,7 +97,8 @@ services:
       - ./:/app
       - backend_node_modules:/app/node_modules
 
-  w-email:
+  worker-email:
+    container_name: w-email
     build:
       context: .
       dockerfile: Dockerfile.worker

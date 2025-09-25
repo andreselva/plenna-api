@@ -11,7 +11,7 @@ COPY . .
 RUN npm run build
 
 # Build dos workers (tsconfig separado -> ./dist-worker)
-RUN npx tsc -p tsconfig.worker.json
+RUN npm run build:worker
 
 # --------- Stage 2: Runtime ---------
 FROM node:20-alpine

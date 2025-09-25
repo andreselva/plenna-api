@@ -25,6 +25,9 @@ async function bootstrap() {
 
   const connection = createRedisConnectionOptions();
   const concurrency = config.get<number>('email.concurrency') ?? 5;
+  const lockDuration = config.get<number>('email.lockDurationMs') ?? 120000;
+  const rawLockRenewTime = config.get<number>('email.lockRenewTimeMs') ?? 30000;
+  const lockRenewTime = Math.max(5000, Math.min(rawLockRenewTime, Math.floor(lockDuration / 2)));
 
   const worker = new Worker<EmailJobData>(
     EMAIL_QUEUE_NAME,
@@ -54,13 +57,13 @@ async function bootstrap() {
         }
       });
     },
-    { connection, concurrency },
+    { connection, concurrency, lockDuration, lockRenewTime },
   );
 
   worker.on('failed', (job, err) => {
     logger.error(
-      `[FAILED EVENT] ${job?.name} -> ${job?.id}: ${(err as Error).message}`,
-      (err as Error).stack,
+      `[FAILED EVENT] ${job?.name} -> ${job?.id}: ${(err).message}`,
+      (err).stack,
     );
   });
 
@@ -81,7 +84,9 @@ async function bootstrap() {
     }
   });
 
-  logger.log(`Email worker iniciado (concurrency=${concurrency})`);
+  logger.log(
+    `Email worker iniciado (concurrency=${concurrency}, lockDuration=${lockDuration}ms, lockRenewTime=${lockRenewTime}ms)`,
+  );
 }
 
 bootstrap().catch((err) => {

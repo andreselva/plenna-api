@@ -29,7 +29,7 @@ export class EmailService {
   }
 
   async enqueueRaw(payload: SendMailPayload, opts?: JobsOptions) {
-    const jobId = `send-mail-${Date.now()}-${Math.random().toString(36).slice(2)}`; // sem ':'
+    const jobId = `send-mail-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const job = await this.queue.add(EMAIL_JOB.SEND_MAIL, payload, this.defaultJobOptions({ jobId, ...opts }));
     this.logger.log(`Enfileirado SEND_MAIL (${job.id}) para ${JSON.stringify(payload.to)}`);
     return job.id;

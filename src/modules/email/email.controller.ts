@@ -7,7 +7,6 @@ export class EmailController {
   constructor(private readonly email: EmailService) {}
 
   // GET /email/test?to=andre@exemplo.com
-  @Public()
   @Get('test')
   async test(@Query('to') to: string) {
     const id = await this.email.enqueueTemplate({

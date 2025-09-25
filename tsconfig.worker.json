@@ -1,0 +1,39 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist-worker",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"]
+    },
+    "moduleResolution": "node",
+    "types": ["node"]
+  },
+  "include": [
+    "src/workers/**/*.ts",
+    "src/modules/appointments/definitions/**/*.ts",
+    "src/modules/appointments/services/**/*.ts",
+    "src/modules/appointments/appointments.repository.ts",
+    "src/modules/appointments/executable-appointment.base.ts",
+    "src/modules/appointments/types/**/*.ts",
+    "src/modules/redis/**/*.ts",
+    "src/modules/email/**/*.ts",
+    "src/modules/database/**/*.ts",
+  ],
+  "exclude": [
+    "src/modules/appointments/queue.provider.ts",
+    "src/modules/appointments/appointments.module.ts",
+    "src/modules/appointments/appointments.controller.ts" ,
+    "src/modules/appointments/appointments.debug.controller.ts",
+    "src/modules/appointments/appointments.service.ts",
+    "src/modules/appointments/appointments-queue.service.ts",
+    "src/modules/appointments/appointments-worker.service.ts",
+    "src/modules/appointments/appointments-bootstrap.service.ts",
+
+    "src/main.ts",
+    "src/app.module.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.e2e-spec.ts"
+  ]
+}

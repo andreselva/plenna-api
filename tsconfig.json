@@ -34,5 +34,5 @@
   "include": [
     "src",
     "src/types/express.d.ts"
-  ]
+, "tsconfig.worker.json"  ]
 }

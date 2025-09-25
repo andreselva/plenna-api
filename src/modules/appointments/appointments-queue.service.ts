@@ -41,7 +41,7 @@ export class AppointmentsQueueService {
     options: { config: TConfig | null; recurrence?: Recurrence; timezone?: string | null },
   ): Promise<void> {
     const rawJobId = appointment.buildJobId(clientId);
-    const jobId = this.sanitizeId(rawJobId);          
+    const jobId = this.sanitizeId(rawJobId);
 
     await this.clearFromQueue(appointment, clientId);
 
@@ -49,6 +49,7 @@ export class AppointmentsQueueService {
     const timezone  = options.timezone ?? appointment.timezone ?? null;
 
     const baseRepeat = appointment.buildRepeatOptions(recurrence, timezone);
+    // BullMQ v5 usa “key” para identificar o agendamento; vamos fixar como nosso jobId saneado
     const repeat = { ...baseRepeat, key: jobId } as typeof baseRepeat & { key: string };
 
     const payload: AppointmentJobData<TConfig> = {
@@ -101,11 +102,11 @@ export class AppointmentsQueueService {
       return true;
     }
 
-    const repeatables = await this.queue.getJobSchedulers();
+    const schedulers = await this.queue.getJobSchedulers();
 
     // Procura por chave nova (igual ao jobId saneado) e também por legado (termina com ":type:clientId")
     const legacy = this.legacySuffix(appointment.type, clientId);
-    const found = repeatables.find(
+    const found = schedulers.find(
       (r: any) =>
         r.key === jobId ||
         r.id === jobId ||
@@ -159,15 +160,15 @@ export class AppointmentsQueueService {
     clientId: number,
   ): Promise<void> {
     const rawJobId = appointment.buildJobId(clientId);
-    const jobId = this.sanitizeId(rawJobId);          
+    const jobId = this.sanitizeId(rawJobId);
     const legacy = this.legacySuffix(appointment.type, clientId);
 
-    const repeatables = await this.queue.getJobSchedulers();
+    const schedulers = await this.queue.getJobSchedulers();
 
     const scheduled = this.scheduled.get(jobId);
     const repeatKeyFromMemory = scheduled?.repeatJobKey ?? null;
 
-    const match = repeatables.find(
+    const match = schedulers.find(
       (item: any) =>
         (repeatKeyFromMemory && item.key === repeatKeyFromMemory) ||
         item.key === jobId ||
@@ -180,7 +181,7 @@ export class AppointmentsQueueService {
     }
 
     const queueWithKeyRemoval = this.queue as Queue<AppointmentJobData> & {
-      removeRepeatableByKey?: (key: string) => Promise<void>;
+      removeJobScheduler?: (key: string) => Promise<void>;
       remove?: (id: string) => Promise<void | number>;
     };
 
@@ -191,16 +192,9 @@ export class AppointmentsQueueService {
     if (match && queueWithKeyRemoval.removeJobScheduler) {
       await queueWithKeyRemoval.removeJobScheduler((match as any).key);
     } else if (match) {
-      const recurrence = scheduled?.recurrence ?? appointment.recurrence;
-      const timezone  = scheduled?.timezone   ?? appointment.timezone ?? null;
-
-      const baseRepeat = appointment.buildRepeatOptions(recurrence, timezone);
-      const repeat = { ...baseRepeat, key: jobId } as typeof baseRepeat & { key: string };
-
-      await this.queue.removeJobScheduler(jobId);
+      await (this.queue as any).removeJobScheduler((match as any).key ?? jobId);
     }
 
-    // Limpa job “solto” com o mesmo id (não impacta repeatables)
     if (queueWithKeyRemoval.remove) {
       try {
         await queueWithKeyRemoval.remove(jobId);

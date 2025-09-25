@@ -11,4 +11,5 @@ COPY . .
 
 EXPOSE 8001 9229
 
-CMD ["npm", "run", "start:dev"]
+# Usa o tsconfig.worker.json e o entrypoint do worker
+CMD ["npm", "run", "start:worker:appointments"]

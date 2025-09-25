@@ -3,13 +3,11 @@ import { AppointmentsService } from './appointments.service';
 import { AppointmentsController } from './appointments.controller';
 import { AppointmentsQueueService } from './appointments-queue.service';
 import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from './appointments.constants';
-import { AppointmentsWorkerService } from './appointments-worker.service';
 import { UpcomingExpensesEmailService } from './services/upcoming-expenses-email.service';
 import { UpcomingExpensesEmailAppointment } from './definitions/upcoming-expenses-email.appointment';
 import { AppointmentSettingsService } from './services/appointment-settings.service';
 import { createQueue } from './queue.provider';
 import { AppointmentsDebugController } from './debug/appointments.debug.controller';
-import { AppointmentsBootstrapService } from './startup/appointments-bootstrap.service';
 import { UpcomingExpensesService } from './services/upcoming-expenses.service';
 import AppointmentsRepository from './appointments.repository';
 import { EmailModule } from '../email/email.module';
@@ -21,11 +19,9 @@ import type { Redis } from 'ioredis';
   providers: [
     AppointmentsService,
     AppointmentsQueueService,
-    AppointmentsWorkerService,
     UpcomingExpensesService,
     UpcomingExpensesEmailService,
     UpcomingExpensesEmailAppointment,
-    AppointmentsBootstrapService,
     AppointmentSettingsService,
     AppointmentsRepository,
     {
@@ -43,5 +39,8 @@ import type { Redis } from 'ioredis';
     AppointmentsController,
     AppointmentsDebugController,
   ],
+  exports: [
+    AVAILABLE_APPOINTMENTS_TOKEN
+  ]
 })
 export class AppointmentsModule {}

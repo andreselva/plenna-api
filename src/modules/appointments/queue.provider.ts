@@ -2,15 +2,13 @@ import {
   Queue as BullQueue,
   Worker as BullWorker,
   QueueEvents as BullQueueEvents,
-  QueueScheduler as BullQueueScheduler,
+  type Processor,
 } from 'bullmq';
 import {
   Queue as FakeQueue,
   Worker as FakeWorker,
   QueueEvents as FakeQueueEvents,
-  QueueScheduler as FakeQueueScheduler,
 } from '../../vendor/bullmq/fake-bullmq';
-import type { Processor, QueueSchedulerOptions } from 'bullmq';
 import type { Redis } from 'ioredis';
 import { APPOINTMENTS_QUEUE_NAME } from './appointments.constants';
 
@@ -19,7 +17,6 @@ const useFake = String(process.env.USE_FAKE_QUEUE ?? 'false').toLowerCase() === 
 const QueueImpl = (useFake ? FakeQueue : BullQueue) as typeof BullQueue;
 const WorkerImpl = (useFake ? FakeWorker : BullWorker) as typeof BullWorker;
 const QueueEventsImpl = (useFake ? FakeQueueEvents : BullQueueEvents) as typeof BullQueueEvents;
-const QueueSchedulerImpl = (useFake ? FakeQueueScheduler : BullQueueScheduler) as typeof BullQueueScheduler;
 
 function parseRedisConnection() {
   const url = process.env.REDIS_URL;
@@ -45,11 +42,9 @@ function parseRedisConnection() {
 
 export type Queue<Data = any> = BullQueue<Data>;
 export type Worker<Data = any> = BullWorker<Data>;
-export type QueueScheduler = BullQueueScheduler;
 
 export function createQueue<Data = any>(redis?: Redis) {
   if (useFake) {
-    // 👇 cast pra acessar o static get do fake sem o TS implicar
     return (QueueImpl as any).get(APPOINTMENTS_QUEUE_NAME) as Queue<Data>;
   }
   const connection = redis ?? parseRedisConnection();
@@ -71,12 +66,4 @@ export function createQueueEvents(redis?: Redis) {
   if (useFake) return new QueueEventsImpl(APPOINTMENTS_QUEUE_NAME);
   const connection = redis ?? parseRedisConnection();
   return new QueueEventsImpl(APPOINTMENTS_QUEUE_NAME, { connection });
-}
-
-export function createQueueScheduler(redis?: Redis, options?: QueueSchedulerOptions) {
-  if (useFake) {
-    return new QueueSchedulerImpl(APPOINTMENTS_QUEUE_NAME);
-  }
-  const connection = redis ?? parseRedisConnection();
-  return new QueueSchedulerImpl(APPOINTMENTS_QUEUE_NAME, { connection, ...options });
 }

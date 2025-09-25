@@ -15,7 +15,7 @@ export const REDIS_CONNECTION = 'REDIS_CONNECTION';
           maxRetriesPerRequest: null,
           enableReadyCheck: true,
 
-          enableOfflineQueue: true,  // (remova o false)
+          enableOfflineQueue: true,
 
           retryStrategy: (times) => Math.min(500 * Math.pow(2, times - 1), 10_000),
 

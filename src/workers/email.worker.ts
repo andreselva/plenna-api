@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { Worker } from 'bullmq';
 
-import { WorkerModule } from './worker.module';
+import { EmailWorkerModule } from './email-worker.module';
 import { WorkerAuthContextService } from './worker-auth-context.service';
 import { EmailWorkerService } from './email-worker.service';
 import { EMAIL_QUEUE_NAME } from 'src/modules/email/email.constants';
@@ -13,7 +13,7 @@ import { createRedisConnectionOptions } from './redis-connection';
 type EmailJobData = SendMailPayload | (SendTemplatePayload & { clientId?: number | null });
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(WorkerModule, {
+  const app = await NestFactory.createApplicationContext(EmailWorkerModule, {
     logger: ['error', 'warn', 'log', 'debug'],
   });
 

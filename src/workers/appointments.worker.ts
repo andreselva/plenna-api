@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { Worker } from 'bullmq';
 
-import { WorkerModule } from './worker.module';
+import { AppointmentsWorkerModule } from './appointments-worker.module';
 import { APPOINTMENTS_QUEUE_NAME } from 'src/modules/appointments/appointments.constants';
 import { AppointmentJobData } from 'src/modules/appointments/types/appointment-job-data.type';
 
@@ -12,7 +12,7 @@ import { AppointmentsWorkerService } from './appointments-worker.service';
 import { createRedisConnectionOptions } from './redis-connection';
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(WorkerModule, {
+  const app = await NestFactory.createApplicationContext(AppointmentsWorkerModule, {
     logger: ['error', 'warn', 'log', 'debug'],
   });
 

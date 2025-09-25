@@ -40,7 +40,7 @@ async function bootstrap() {
         user: clientId ? { id: 0, username: 'worker', role: 'system', clientId } : null,
       };
 
-      logger.debug(`Executando ${job.name} (${job.id})`);
+      logger.log(`Executando ${job.name} (${job.id})`);
 
       return authContext.runWithContext(ctx, async () => {
         try {
@@ -69,11 +69,11 @@ async function bootstrap() {
       return;
     }
 
-    logger.debug(`[DONE] ${job.name} -> ${job.id}`);
+    logger.log(`[DONE] ${job.name} -> ${job.id}`);
 
     try {
       await job.remove();
-      logger.debug(`Job removido do Redis: ${job.id}`);
+      logger.log(`Job removido do Redis: ${job.id}`);
     } catch (err) {
       logger.warn(
         `Falha ao remover o job ${job.id} do Redis: ${(err as Error).message}`,

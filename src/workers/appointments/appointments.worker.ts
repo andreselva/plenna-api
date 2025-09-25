@@ -39,9 +39,7 @@ async function bootstrap() {
           : null,
       };
 
-      logger.debug(
-        `Executando ${job.name} (${job.id})${job.repeatJobKey ? ` (repeat:${job.repeatJobKey})` : ''}`,
-      );
+      logger.log(`Executando ${job.name} (${job.id})${job.repeatJobKey ? ` (repeat:${job.repeatJobKey})` : ''}`,);
 
       return authContext.runWithContext(ctx, async () => {
         try {
@@ -66,7 +64,7 @@ async function bootstrap() {
   });
 
   worker.on('completed', (job) => {
-    logger.debug(`[DONE] ${job?.name} -> ${job?.id}`);
+    logger.log(`[DONE] ${job?.name} -> ${job?.id}`);
   });
 
   logger.log(`Appointments worker iniciado (concurrency=${concurrency})`);

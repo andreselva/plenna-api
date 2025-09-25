@@ -12,6 +12,9 @@ import { CategoryModule } from './modules/Categories/category.module';
 import { DashboardModule } from './modules/Dashboard/dashboard.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { EmailModule } from './modules/email/email.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -26,7 +29,10 @@ import { ReportsModule } from './modules/reports/reports.module';
     DashboardModule,
     CategoryModule,
     IntegrationsModule,
-    ReportsModule
+    ReportsModule,
+    AppointmentsModule,
+    EmailModule,
+    RedisModule
   ],
   controllers: [
     AppController,

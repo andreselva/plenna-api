@@ -30,6 +30,7 @@
   },
   "include": [
     "src",
-    "src/types/express.d.ts"
+    "src/types/express.d.ts",
+    "tsconfig.worker.json"
   ]
 }

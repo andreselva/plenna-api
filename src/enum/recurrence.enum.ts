@@ -1,0 +1,7 @@
+export enum Recurrence {
+  EVERY_15_MIN = 'EVERY_15_MIN',
+  HOURLY = 'HOURLY',
+  DAILY_08 = 'DAILY_08',
+  WEEKDAYS_08 = 'WEEKDAYS_08',
+  WEEKLY_MON_09 = 'WEEKLY_MON_09',
+}

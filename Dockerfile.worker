@@ -11,4 +11,5 @@ COPY . .
 
 EXPOSE 8001 9229
 
-CMD ["npm", "run", "start:dev"]
+# Usa o tsconfig.worker.json e permite escolher o script do worker via WORKER_SCRIPT
+CMD ["sh", "-c", "npm run ${WORKER_SCRIPT:-start:worker:appointments}"]

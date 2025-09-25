@@ -17,7 +17,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "start:worker:email": "ts-node-dev --respawn -r tsconfig-paths/register --project tsconfig.worker.json ./src/workers/email/email.worker.ts",
+    "start:worker:appointments": "ts-node-dev --respawn -r tsconfig-paths/register --project tsconfig.worker.json ./src/workers/appointments/appointments.worker.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -27,13 +29,17 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "bcryptjs": "^3.0.2",
+    "bullmq": "^5.58.8",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
+    "handlebars": "^4.7.8",
     "install": "^0.13.0",
+    "ioredis": "^5.7.0",
     "luxon": "^3.6.1",
     "mysql2": "^3.14.0",
+    "nodemailer": "^7.0.6",
     "openai": "^5.16.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -79,6 +85,9 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

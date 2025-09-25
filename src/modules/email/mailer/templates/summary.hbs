@@ -1,0 +1,9 @@
+<h2>Resumo Financeiro - {{period}}</h2>
+<p>Olá {{name}},</p>
+<p>Receitas: <b>{{revenues}}</b> | Despesas: <b>{{expenses}}</b> | Saldo: <b>{{balance}}</b></p>
+<p>Top categorias:</p>
+<ul>
+  {{#each topCategories}}
+    <li>{{this.name}} - {{this.total}}</li>
+  {{/each}}
+</ul>

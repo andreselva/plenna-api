@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "postbuild": "npm run copy:email-templates:dist",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "ts-node-dev --respawn --transpile-only --poll -r tsconfig-paths/register --inspect=0.0.0.0:9229 --project tsconfig.json src/main.ts",
@@ -19,7 +20,12 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "start:worker:email": "ts-node-dev --respawn -r tsconfig-paths/register --project tsconfig.worker.json ./src/workers/email/email.worker.ts",
-    "start:worker:appointments": "ts-node-dev --respawn -r tsconfig-paths/register --project tsconfig.worker.json ./src/workers/appointments/appointments.worker.ts"
+    "start:worker:appointments": "ts-node-dev --respawn -r tsconfig-paths/register --project tsconfig.worker.json ./src/workers/appointments/appointments.worker.ts",
+    "build:worker": "tsc -p tsconfig.worker.json",
+    "postbuild:worker": "npm run copy:email-templates:dist-worker",
+    "copy:email-templates": "node scripts/copy-email-templates.js dist/modules/email/mailer/templates dist-worker/modules/email/mailer/templates",
+    "copy:email-templates:dist": "node scripts/copy-email-templates.js dist/modules/email/mailer/templates",
+    "copy:email-templates:dist-worker": "node scripts/copy-email-templates.js dist-worker/modules/email/mailer/templates"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

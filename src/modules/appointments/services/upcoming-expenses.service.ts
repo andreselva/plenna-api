@@ -32,7 +32,7 @@ export class UpcomingExpensesService {
     job: AppointmentJobData<{ days?: number }>,
     timezone: string,
   ): Promise<UpcomingExpensesSummary> {
-    const days = job.config?.days && job.config.days > 0 ? job.config.days : 45;
+    const days = job.config?.days && job.config.days > 0 ? job.config.days : 15;
     const now = DateTime.now().setZone(timezone).startOf('day');
     const end = now.plus({ days }).endOf('day');
 

@@ -63,7 +63,8 @@ class SesHttpClient {
       'POST',
       url.pathname,
       '',
-      `${canonicalHeadersParts.join('\n')}\n`,
+      canonicalHeadersParts.join('\n'),
+      '',
       signedHeadersParts.join(';'),
       payloadHash,
     ].join('\n');

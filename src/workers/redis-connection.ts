@@ -7,6 +7,7 @@ export function createRedisConnectionOptions(): ConnectionOptions {
     const useTLS = parsed.protocol === 'rediss:';
 
     return {
+      family: 0,
       host: parsed.hostname,
       port: Number(parsed.port || 6379),
       username: parsed.username || undefined,
@@ -16,6 +17,7 @@ export function createRedisConnectionOptions(): ConnectionOptions {
   }
 
   return {
+    family: 0,
     host: process.env.REDIS_HOST || 'redis',
     port: Number(process.env.REDIS_PORT || 6379),
     username: process.env.REDIS_USERNAME || undefined,

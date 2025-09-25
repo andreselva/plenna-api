@@ -269,9 +269,7 @@ export class AppointmentsQueueService {
         try {
           await queueWithKeyRemoval.remove(identifier);
         } catch (error) {
-          this.logger.debug(
-            `Não foi possível remover job ${identifier} diretamente: ${(error as Error).message}`,
-          );
+          this.logger.warn(`Não foi possível remover job ${identifier} diretamente: ${(error as Error).message}`,);
         }
       }
     }

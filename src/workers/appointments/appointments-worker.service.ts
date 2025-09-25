@@ -22,7 +22,7 @@ export class AppointmentsWorkerService {
       return;
     }
 
-    this.logger.debug(`Executando job ${job.name} (${job.id})`);
+    this.logger.log(`Executando job ${job.name} (${job.id})`);
     await handler.execute(job.data as AppointmentJobData);
   }
 }

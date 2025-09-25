@@ -63,7 +63,7 @@ export class UpcomingExpensesService {
     );
 
     if (invoiceSummaries.length === 0 && expensesWithoutInvoice.length === 0) {
-      this.logger.debug(
+      this.logger.log(
         `Nenhuma despesa encontrada para o cliente ${job.clientId} no período ${period.start} a ${period.end}`,
       );
     }

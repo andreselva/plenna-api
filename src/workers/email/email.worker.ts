@@ -64,8 +64,21 @@ async function bootstrap() {
     );
   });
 
-  worker.on('completed', (job) => {
-    logger.debug(`[DONE] ${job?.name} -> ${job?.id}`);
+  worker.on('completed', async (job) => {
+    if (!job) {
+      return;
+    }
+
+    logger.debug(`[DONE] ${job.name} -> ${job.id}`);
+
+    try {
+      await job.remove();
+      logger.debug(`Job removido do Redis: ${job.id}`);
+    } catch (err) {
+      logger.warn(
+        `Falha ao remover o job ${job.id} do Redis: ${(err as Error).message}`,
+      );
+    }
   });
 
   logger.log(`Email worker iniciado (concurrency=${concurrency})`);

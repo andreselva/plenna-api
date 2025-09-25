@@ -14,9 +14,6 @@
     "paths": {
       "src/*": [
         "src/*"
-      ],
-      "bullmq": [
-        "src/vendor/bullmq"
       ]
     },
     "incremental": true,
@@ -33,6 +30,7 @@
   },
   "include": [
     "src",
-    "src/types/express.d.ts"
-, "tsconfig.worker.json"  ]
+    "src/types/express.d.ts",
+    "tsconfig.worker.json"
+  ]
 }

@@ -24,9 +24,15 @@ async function bootstrap() {
   const authContext = app.get(WorkerAuthContextService);
 
   const connection = createRedisConnectionOptions();
-  const concurrency = config.get<number>('email.concurrency') ?? 5;
-  const lockDuration = config.get<number>('email.lockDurationMs') ?? 120000;
-  const rawLockRenewTime = config.get<number>('email.lockRenewTimeMs') ?? 30000;
+
+  const parsePositiveInteger = (value: string | number | undefined, fallback: number) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  };
+
+  const concurrency = parsePositiveInteger(config.get('email.concurrency'), 5);
+  const lockDuration = parsePositiveInteger(config.get('email.lockDurationMs'), 120000);
+  const rawLockRenewTime = parsePositiveInteger(config.get('email.lockRenewTimeMs'), 30000);
   const lockRenewTime = Math.max(5000, Math.min(rawLockRenewTime, Math.floor(lockDuration / 2)));
 
   const worker = new Worker<EmailJobData>(

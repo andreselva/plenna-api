@@ -12,6 +12,10 @@ export class MailerService {
   private readonly from: string;
 
   constructor(private readonly config: ConfigService) {
+    const connectionTimeout = this.config.get<number>('email.connectionTimeoutMs') ?? 10000;
+    const socketTimeout = this.config.get<number>('email.socketTimeoutMs') ?? 20000;
+    const greetingTimeout = this.config.get<number>('email.greetingTimeoutMs') ?? 10000;
+
     this.transporter = nodemailer.createTransport({
       host: this.config.get<string>('email.host'),
       port: this.config.get<number>('email.port'),
@@ -20,6 +24,10 @@ export class MailerService {
         user: this.config.get<string>('email.user'),
         pass: this.config.get<string>('email.pass'),
       },
+      pool: true,
+      connectionTimeout,
+      socketTimeout,
+      greetingTimeout,
     });
 
     this.from = this.config.get<string>('email.from')!;

@@ -1,4 +1,3 @@
-import { createHash, createHmac } from 'crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
@@ -6,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
 import MailComposer from 'nodemailer/lib/mail-composer';
+import { SESv2Client, SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-sesv2';
 
 type EmailProvider = 'ses' | 'smtp';
 
@@ -18,148 +18,37 @@ type SendOptions = {
   attachments?: { filename: string; content: any; contentType?: string }[];
 };
 
-type SesClientConfig = {
-  region: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-  sessionToken?: string;
-  endpoint?: string;
-};
-
-class SesHttpClient {
-  constructor(private readonly config: SesClientConfig) {}
-
-  async sendEmail(payload: Record<string, unknown>): Promise<{ MessageId?: string }> {
-    const { region, accessKeyId, secretAccessKey, sessionToken, endpoint } = this.config;
-    const service = 'ses';
-    const url = new URL(
-      '/v2/email/outbound-emails',
-      endpoint ?? `https://email.${region}.amazonaws.com`,
-    );
-
-    const body = JSON.stringify(payload);
-    const contentType = 'application/json';
-    const iso = new Date().toISOString();
-    const dateStamp = iso.slice(0, 10).replace(/-/g, '');
-    const timeStamp = iso.slice(11, 19).replace(/:/g, '');
-    const amzDate = `${dateStamp}T${timeStamp}Z`;
-
-    const payloadHash = createHash('sha256').update(body).digest('hex');
-
-    const canonicalHeadersParts = [
-      `content-type:${contentType}`,
-      `host:${url.host}`,
-      `x-amz-content-sha256:${payloadHash}`,
-      `x-amz-date:${amzDate}`,
-    ];
-    const signedHeadersParts = ['content-type', 'host', 'x-amz-content-sha256', 'x-amz-date'];
-
-    if (sessionToken) {
-      canonicalHeadersParts.push(`x-amz-security-token:${sessionToken}`);
-      signedHeadersParts.push('x-amz-security-token');
-    }
-
-    const canonicalRequest = [
-      'POST',
-      url.pathname,
-      '',
-      canonicalHeadersParts.join('\n'),
-      '',
-      signedHeadersParts.join(';'),
-      payloadHash,
-    ].join('\n');
-
-    const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
-    const stringToSign = [
-      'AWS4-HMAC-SHA256',
-      amzDate,
-      credentialScope,
-      createHash('sha256').update(canonicalRequest).digest('hex'),
-    ].join('\n');
-
-    const signature = this.signString(stringToSign, dateStamp, region, service, secretAccessKey);
-
-    const headers: Record<string, string> = {
-      'content-type': contentType,
-      'x-amz-date': amzDate,
-      'x-amz-content-sha256': payloadHash,
-      Authorization: `AWS4-HMAC-SHA256 Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeadersParts.join(';')}, Signature=${signature}`,
-    };
-
-    if (sessionToken) {
-      headers['x-amz-security-token'] = sessionToken;
-    }
-
-    const response = await fetch(url.toString(), {
-      method: 'POST',
-      headers,
-      body,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `Falha ao enviar e-mail via SES HTTP: ${response.status} ${response.statusText} - ${errorText}`,
-      );
-    }
-
-    return response.json();
-  }
-
-  private signString(
-    stringToSign: string,
-    dateStamp: string,
-    region: string,
-    service: string,
-    secretAccessKey: string,
-  ) {
-    const kDate = createHmac('sha256', `AWS4${secretAccessKey}`).update(dateStamp).digest();
-    const kRegion = createHmac('sha256', kDate).update(region).digest();
-    const kService = createHmac('sha256', kRegion).update(service).digest();
-    const kSigning = createHmac('sha256', kService).update('aws4_request').digest();
-    return createHmac('sha256', kSigning).update(stringToSign).digest('hex');
-  }
-}
-
 @Injectable()
 export class MailerService {
   private readonly logger = new Logger(MailerService.name);
   private readonly provider: EmailProvider;
-  private readonly sesClient?: SesHttpClient;
-  private transporter?: nodemailer.Transporter;
   private readonly from: string;
   private readonly configurationSet?: string;
 
+  private ses?: SESv2Client;
+  private transporter?: nodemailer.Transporter;
+
   constructor(private readonly config: ConfigService) {
     this.provider = (this.config.get<string>('email.provider') as EmailProvider) ?? 'ses';
-    this.from = this.config.get<string>('email.from')!;
-    this.configurationSet = this.config.get<string>('email.sesConfigurationSet');
+    this.from = (this.config.get<string>('email.from') ?? '').trim();
+    this.configurationSet = this.config.get<string>('email.sesConfigurationSet')?.trim();
 
     if (this.provider === 'ses') {
-      const region = this.config.get<string>('email.sesRegion') ?? 'us-east-1';
-      const accessKeyId = this.config.get<string>('email.sesAccessKeyId');
-      const secretAccessKey = this.config.get<string>('email.sesSecretAccessKey');
-      const sessionToken = this.config.get<string>('email.sesSessionToken');
-      const endpoint = this.config.get<string>('email.sesEndpoint');
+      const region = (this.config.get<string>('email.sesRegion') ?? 'sa-east-1').trim();
+      const accessKeyId = (this.config.get<string>('email.sesAccessKeyId') ?? '').trim();
+      const secretAccessKey = (this.config.get<string>('email.sesSecretAccessKey') ?? '').trim();
+      const sessionToken = (this.config.get<string>('email.sesSessionToken') ?? '').trim() || undefined;
 
       if (!accessKeyId || !secretAccessKey) {
-        throw new Error(
-          'Credenciais do SES ausentes. Configure EMAIL_SES_ACCESS_KEY_ID e EMAIL_SES_SECRET_ACCESS_KEY.',
-        );
+        throw new Error('Credenciais do SES ausentes. Configure EMAIL_SES_ACCESS_KEY_ID e EMAIL_SES_SECRET_ACCESS_KEY.');
       }
 
-      this.sesClient = new SesHttpClient({
+      this.ses = new SESv2Client({
         region,
-        accessKeyId,
-        secretAccessKey,
-        sessionToken,
-        endpoint,
+        credentials: { accessKeyId, secretAccessKey, sessionToken },
       });
 
-      const endpointInfo = endpoint ? `, endpoint: ${endpoint}` : '';
-      this.logger.log(
-        `Transporte de e-mail configurado para SES HTTP (região: ${region}${endpointInfo})`,
-      );
+      this.logger.log(`SES v3 client inicializado (region=${region}, key=...${accessKeyId.slice(-4)})`);
     } else {
       const connectionTimeout = this.config.get<number>('email.connectionTimeoutMs') ?? 10000;
       const socketTimeout = this.config.get<number>('email.socketTimeoutMs') ?? 20000;
@@ -191,95 +80,63 @@ export class MailerService {
     );
   }
 
-  async sendRaw(options: SendOptions) {
-    if (this.provider === 'ses') {
-      return this.sendViaSes(options);
-    }
+  private normalizeAddresses(v?: string | string[]) {
+    if (!v) return undefined;
+    return Array.isArray(v) ? v.map(s => s.trim()) : [v.trim()];
+  }
 
+  async sendRaw(options: SendOptions) {
+    if (this.provider === 'ses') return this.sendViaSes(options);
     return this.sendViaSmtp(options);
   }
 
-  private normalizeAddresses(value?: string | string[]): string[] | undefined {
-    if (!value) {
-      return undefined;
-    }
-
-    return Array.isArray(value) ? value : [value];
-  }
-
   private async sendViaSes(options: SendOptions) {
-    if (!this.sesClient) {
-      throw new Error('Cliente SES não configurado');
-    }
+    if (!this.ses) throw new Error('SES client não configurado');
 
-    const toAddresses = this.normalizeAddresses(options.to) ?? [];
-    if (!toAddresses.length) {
-      throw new Error('Pelo menos um destinatário é obrigatório');
-    }
+    const to = this.normalizeAddresses(options.to);
+    if (!to?.length) throw new Error('Pelo menos um destinatário é obrigatório');
+    const cc = this.normalizeAddresses(options.cc);
+    const bcc = this.normalizeAddresses(options.bcc);
 
-    const ccAddresses = this.normalizeAddresses(options.cc);
-    const bccAddresses = this.normalizeAddresses(options.bcc);
+    const fromEmail = this.from.match(/<(.+?)>/)?.[1] ?? this.from;
 
-    const destination: Record<string, unknown> = {
-      ToAddresses: toAddresses,
-    };
-
-    if (ccAddresses?.length) {
-      destination.CcAddresses = ccAddresses;
-    }
-
-    if (bccAddresses?.length) {
-      destination.BccAddresses = bccAddresses;
-    }
-
-    const payload: Record<string, unknown> = {
-      FromEmailAddress: this.from,
-      Destination: destination,
-    };
-
-    if (this.configurationSet) {
-      payload.ConfigurationSetName = this.configurationSet;
-    }
+    let input: SendEmailCommandInput;
 
     if (options.attachments?.length) {
-      const rawMessage = await this.buildRawMessage({
-        to: toAddresses,
+      const raw = await this.buildRawMessage({
+        to,
         subject: options.subject,
         html: options.html,
-        cc: ccAddresses,
-        bcc: bccAddresses,
+        cc,
+        bcc,
         attachments: options.attachments,
       });
 
-      payload.Content = {
-        Raw: {
-          Data: rawMessage.toString('base64'),
-        },
+      input = {
+        FromEmailAddress: fromEmail,
+        Destination: { ToAddresses: to, CcAddresses: cc, BccAddresses: bcc },
+        Content: { Raw: { Data: raw } },
+        ConfigurationSetName: this.configurationSet,
       };
     } else {
-      payload.Content = {
-        Simple: {
-          Subject: {
-            Data: options.subject,
-            Charset: 'UTF-8',
-          },
-          Body: {
-            Html: {
-              Data: options.html,
-              Charset: 'UTF-8',
+      input = {
+        FromEmailAddress: fromEmail,
+        Destination: { ToAddresses: to, CcAddresses: cc, BccAddresses: bcc },
+        Content: {
+          Simple: {
+            Subject: { Data: options.subject, Charset: 'UTF-8' },
+            Body: {
+              Html: { Data: options.html, Charset: 'UTF-8' },
             },
           },
         },
+        ConfigurationSetName: this.configurationSet,
       };
     }
 
-    const response = await this.sesClient.sendEmail(payload);
-
-    this.logger.log(
-      `E-mail enviado para ${JSON.stringify(options.to)} (${response.MessageId ?? 'sem ID'}) via SES HTTP`,
-    );
-
-    return response;
+    const res = await this.ses.send(new SendEmailCommand(input));
+    this.logger.log(`E-mail enviado para ${JSON.stringify(to)} (${res.MessageId ?? 'sem ID'}) via SES SDK`);
+    return res;
   }
 
   private async buildRawMessage(options: {
@@ -302,9 +159,7 @@ export class MailerService {
 
     const buffer = await new Promise<Buffer>((resolve, reject) => {
       composer.compile().build((err, message) => {
-        if (err) {
-          return reject(err instanceof Error ? err : new Error(String(err)));
-        }
+        if (err) return reject(err instanceof Error ? err : new Error(String(err)));
         resolve(message as Buffer);
       });
     });
@@ -313,14 +168,9 @@ export class MailerService {
   }
 
   private async sendViaSmtp(options: SendOptions) {
-    if (!this.transporter) {
-      throw new Error('Transporte SMTP não configurado');
-    }
+    if (!this.transporter) throw new Error('Transporte SMTP não configurado');
 
-    const info = await this.transporter.sendMail({
-      from: this.from,
-      ...options,
-    });
+    const info = await this.transporter.sendMail({ from: this.from, ...options });
     this.logger.log(`E-mail enviado para ${JSON.stringify(options.to)} (${info.messageId}) via SMTP`);
     return info;
   }

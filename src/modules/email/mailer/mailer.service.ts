@@ -5,7 +5,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
 import MailComposer from 'nodemailer/lib/mail-composer';
-import { SESv2Client, SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-sesv2';
+import {
+  SESv2Client,
+  SendEmailCommand,
+  SendEmailCommandInput,
+} from '@aws-sdk/client-sesv2';
 
 type EmailProvider = 'ses' | 'smtp';
 
@@ -22,25 +26,29 @@ type SendOptions = {
 export class MailerService {
   private readonly logger = new Logger(MailerService.name);
   private readonly provider: EmailProvider;
+  private transporter?: nodemailer.Transporter;
   private readonly from: string;
   private readonly configurationSet?: string;
-
-  private ses?: SESv2Client;
-  private transporter?: nodemailer.Transporter;
+  private readonly ses?: SESv2Client;
+  private readonly forceRaw: boolean;
 
   constructor(private readonly config: ConfigService) {
     this.provider = (this.config.get<string>('email.provider') as EmailProvider) ?? 'ses';
-    this.from = (this.config.get<string>('email.from') ?? '').trim();
-    this.configurationSet = this.config.get<string>('email.sesConfigurationSet')?.trim();
+    this.from = this.config.get<string>('email.from')!;
+    this.configurationSet = this.config.get<string>('email.sesConfigurationSet');
+    this.forceRaw =
+      (this.config.get<string>('EMAIL_SES_FORCE_RAW') ?? 'false').toLowerCase() === 'true';
 
-    if (this.provider === 'ses') {
-      const region = (this.config.get<string>('email.sesRegion') ?? 'sa-east-1').trim();
-      const accessKeyId = (this.config.get<string>('email.sesAccessKeyId') ?? '').trim();
-      const secretAccessKey = (this.config.get<string>('email.sesSecretAccessKey') ?? '').trim();
-      const sessionToken = (this.config.get<string>('email.sesSessionToken') ?? '').trim() || undefined;
+    if (this.provider === 'ses' && process.env.NODE_ENV !== 'development') {
+      const region = this.config.get<string>('email.sesRegion') ?? 'us-east-1';
+      const accessKeyId = this.config.get<string>('email.sesAccessKeyId');
+      const secretAccessKey = this.config.get<string>('email.sesSecretAccessKey');
+      const sessionToken = this.config.get<string>('email.sesSessionToken');
 
       if (!accessKeyId || !secretAccessKey) {
-        throw new Error('Credenciais do SES ausentes. Configure EMAIL_SES_ACCESS_KEY_ID e EMAIL_SES_SECRET_ACCESS_KEY.');
+        throw new Error(
+          'Credenciais do SES ausentes. Configure EMAIL_SES_ACCESS_KEY_ID e EMAIL_SES_SECRET_ACCESS_KEY.',
+        );
       }
 
       this.ses = new SESv2Client({
@@ -48,7 +56,6 @@ export class MailerService {
         credentials: { accessKeyId, secretAccessKey, sessionToken },
       });
 
-      this.logger.log(`SES v3 client inicializado (region=${region}, key=...${accessKeyId.slice(-4)})`);
     } else {
       const connectionTimeout = this.config.get<number>('email.connectionTimeoutMs') ?? 10000;
       const socketTimeout = this.config.get<number>('email.socketTimeoutMs') ?? 20000;
@@ -68,7 +75,7 @@ export class MailerService {
         greetingTimeout,
       });
 
-      this.logger.warn('Utilizando transporte SMTP legado. Considere migrar para SES HTTP em produção.');
+      this.logger.warn('Utilizando transporte SMTP legado.');
     }
 
     this.registerDefaultHelpers();
@@ -80,73 +87,78 @@ export class MailerService {
     );
   }
 
-  private normalizeAddresses(v?: string | string[]) {
-    if (!v) return undefined;
-    return Array.isArray(v) ? v.map(s => s.trim()) : [v.trim()];
+  async sendRaw(options: SendOptions) {
+    if (this.provider === 'ses') {
+      return this.sendViaSes(options);
+    }
+    return this.sendViaSmtp(options);
   }
 
-  async sendRaw(options: SendOptions) {
-    if (this.provider === 'ses') return this.sendViaSes(options);
-    return this.sendViaSmtp(options);
+  private normalizeAddresses(value?: string | string[]): string[] | undefined {
+    if (!value) return undefined;
+    return Array.isArray(value) ? value : [value];
   }
 
   private async sendViaSes(options: SendOptions) {
     if (!this.ses) throw new Error('SES client não configurado');
 
-    const to = this.normalizeAddresses(options.to);
-    if (!to?.length) throw new Error('Pelo menos um destinatário é obrigatório');
+    const to = this.normalizeAddresses(options.to) ?? [];
+    if (!to.length) throw new Error('Pelo menos um destinatário é obrigatório');
+
     const cc = this.normalizeAddresses(options.cc);
     const bcc = this.normalizeAddresses(options.bcc);
 
-    const fromEmail = this.from.match(/<(.+?)>/)?.[1] ?? this.from;
+    const fromHasDisplayName = this.from.includes('<') && this.from.includes('>');
+    const fromEmailOnly = this.from.match(/<(.+?)>/)?.[1] ?? this.from;
+
+    const useRaw = !!(options.attachments?.length || fromHasDisplayName || this.forceRaw);
 
     let input: SendEmailCommandInput;
 
-    if (options.attachments?.length) {
-      const raw = await this.buildRawMessage({
+    if (useRaw) {
+      const rawBuffer = await this.buildRawMessage({
         to,
         subject: options.subject,
         html: options.html,
         cc,
         bcc,
-        attachments: options.attachments,
+        attachments: options.attachments ?? [],
       });
 
       input = {
-        FromEmailAddress: fromEmail,
+        FromEmailAddress: fromEmailOnly,
         Destination: { ToAddresses: to, CcAddresses: cc, BccAddresses: bcc },
-        Content: { Raw: { Data: raw } },
+        Content: { Raw: { Data: rawBuffer } },
         ConfigurationSetName: this.configurationSet,
       };
+
     } else {
       input = {
-        FromEmailAddress: fromEmail,
+        FromEmailAddress: fromEmailOnly,
         Destination: { ToAddresses: to, CcAddresses: cc, BccAddresses: bcc },
         Content: {
           Simple: {
             Subject: { Data: options.subject, Charset: 'UTF-8' },
-            Body: {
-              Html: { Data: options.html, Charset: 'UTF-8' },
-            },
+            Body: { Html: { Data: options.html, Charset: 'UTF-8' } },
           },
         },
         ConfigurationSetName: this.configurationSet,
       };
+
     }
 
     const res = await this.ses.send(new SendEmailCommand(input));
-    this.logger.log(`E-mail enviado para ${JSON.stringify(to)} (${res.MessageId ?? 'sem ID'}) via SES SDK`);
     return res;
   }
 
   private async buildRawMessage(options: {
-    to: string | string[];
+    to: string[];
     subject: string;
     html: string;
-    cc?: string | string[];
-    bcc?: string | string[];
+    cc?: string[];
+    bcc?: string[];
     attachments: { filename: string; content: any; contentType?: string }[];
-  }) {
+  }): Promise<Buffer> {
     const composer = new MailComposer({
       from: this.from,
       to: options.to,
@@ -159,7 +171,7 @@ export class MailerService {
 
     const buffer = await new Promise<Buffer>((resolve, reject) => {
       composer.compile().build((err, message) => {
-        if (err) return reject(err instanceof Error ? err : new Error(String(err)));
+        if (err) return reject(err);
         resolve(message as Buffer);
       });
     });
@@ -170,8 +182,11 @@ export class MailerService {
   private async sendViaSmtp(options: SendOptions) {
     if (!this.transporter) throw new Error('Transporte SMTP não configurado');
 
-    const info = await this.transporter.sendMail({ from: this.from, ...options });
-    this.logger.log(`E-mail enviado para ${JSON.stringify(options.to)} (${info.messageId}) via SMTP`);
+    const info = await this.transporter.sendMail({
+      from: this.from,
+      ...options,
+    });
+
     return info;
   }
 

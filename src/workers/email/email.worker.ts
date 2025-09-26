@@ -20,15 +20,6 @@ async function bootstrap() {
   const logger = new Logger('EmailWorker');
   const config = app.get(ConfigService);
 
-  logger.log('[WORKER-CONFIG]', {
-    provider: config.get('email.provider'),
-    from: config.get('email.from'),
-    region: config.get('email.sesRegion'),
-    keyLen: config.get('email.sesAccessKeyId')?.length,
-    keyTail: config.get('email.sesAccessKeyId')?.slice(-4),
-    secretLen: config.get('email.sesSecretAccessKey')?.length,
-  });
-
   const workerService = app.get(EmailWorkerService);
   const authContext = app.get(WorkerAuthContextService);
 
@@ -63,13 +54,11 @@ async function bootstrap() {
       return authContext.runWithContext(ctx, async () => {
         try {
           await workerService.process(job);
-          this.logger.log(`[JOB-START] ${job.name} (${job.id}) data=${JSON.stringify(job.data)}`);
         } catch (err) {
           logger.error(
             `[FAIL] ${job.name} -> ${job.id}: ${(err as Error).message}`,
             (err as Error).stack,
           );
-          this.logger.warn(`[JOB-RETRY] ${job.name} (${job.id}) attempt=${job.attemptsMade}`);
           throw err;
         }
       });
@@ -78,14 +67,11 @@ async function bootstrap() {
   );
 
   worker.on('failed', (job, err) => {
-    logger.error(`[FAILED EVENT] ${job?.name} -> ${job?.id}`, err.stack);
-    logger.error('[FAILED-CONTEXT]', {
-      provider: config.get('email.provider'),
-      region: config.get('email.sesRegion'),
-      keyTail: config.get('email.sesAccessKeyId')?.slice(-4),
-    });
+    logger.error(
+      `[FAILED EVENT] ${job?.name} -> ${job?.id}: ${(err).message}`,
+      (err).stack,
+    );
   });
-
 
   worker.on('completed', async (job) => {
     if (!job) {

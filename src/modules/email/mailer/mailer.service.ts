@@ -68,7 +68,7 @@ export class MailerService {
         greetingTimeout,
       });
 
-      this.logger.warn('⚠️ Utilizando transporte SMTP legado. Considere migrar para SES em produção.');
+      this.logger.warn('Utilizando transporte SMTP legado. Considere migrar para SES HTTP em produção.');
     }
 
     this.registerDefaultHelpers();

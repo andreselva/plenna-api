@@ -4,7 +4,8 @@ import * as nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
-import MailComposer from 'nodemailer/lib/mail-composer';
+const MailComposer = require('nodemailer/lib/mail-composer');
+
 import {
   SESv2Client,
   SendEmailCommand,
@@ -36,8 +37,10 @@ export class MailerService {
     this.provider = (this.config.get<string>('email.provider') as EmailProvider) ?? 'ses';
     this.from = this.config.get<string>('email.from')!;
     this.configurationSet = this.config.get<string>('email.sesConfigurationSet');
-    this.forceRaw =
-      (this.config.get<string>('EMAIL_SES_FORCE_RAW') ?? 'false').toLowerCase() === 'true';
+
+    // pode vir direto do env
+    const envForceRaw = process.env.EMAIL_SES_FORCE_RAW ?? this.config.get<string>('EMAIL_SES_FORCE_RAW');
+    this.forceRaw = (envForceRaw ?? 'false').toLowerCase() === 'true';
 
     if (this.provider === 'ses' && process.env.NODE_ENV !== 'development') {
       const region = this.config.get<string>('email.sesRegion') ?? 'us-east-1';
@@ -170,7 +173,7 @@ export class MailerService {
     });
 
     const buffer = await new Promise<Buffer>((resolve, reject) => {
-      composer.compile().build((err, message) => {
+      composer.compile().build((err: any, message: any) => {
         if (err) return reject(err);
         resolve(message as Buffer);
       });

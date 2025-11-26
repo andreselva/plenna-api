@@ -48,10 +48,10 @@ export default class CategoriesRepository extends BaseRepository<Category>{
         const query = 'DELETE FROM category WHERE clientId = ? AND id = ?';
         const result = await this.database.execute(query, [this.authContext.getClientId(), id]);
 
-        //Apagar as subcategorias.
-        await this.deleteSubcategoriesByIdCategory(id);
-
         if (result.affectedRows > 0) {
+            //Apagar as subcategorias.
+            await this.deleteSubcategoriesByIdCategory(id);
+
             return { success: true, message: 'Categoria deletada com sucesso.' };
         }
         throw new Error('Falha ao deletar a categoria, possivelmente não foi encontrada.');

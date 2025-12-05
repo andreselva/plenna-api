@@ -38,7 +38,7 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
     }
 
     async getRelatedInvoiceBankAccount(idBankAccount: number) {
-        const query = "SELECT * FROM invoices WHERE clientId = ? AND idBankAccount = ?";
+        const query = "SELECT * FROM invoices WHERE clientId = ? AND idBankAccount = ? AND status <> 'paid'";
         const result = await this.database.select(query, [this.authContext.getClientId(), idBankAccount]);
         if (result && result.length > 0) {
             return result;

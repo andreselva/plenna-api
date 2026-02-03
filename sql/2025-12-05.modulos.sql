@@ -4,7 +4,10 @@ CREATE TABLE modules (
     name VARCHAR(50) NOT NULL,
     location VARCHAR(50),
     description VARCHAR(120),
-    showInSidebar BOOLEAN DEFAULT true
+    showInSidebar BOOLEAN DEFAULT true,
+    group VARCHAR(30),
+    subgroup VARCHAR(30),
+    displayName VARCHAR(80)
 );
 
 UPDATE modules SET showInSidebar = 0 WHERE id IN (3, 10, 11, 12);
@@ -27,27 +30,7 @@ INSERT INTO modules (parentId, name, location, description) VALUES (4, 'invoices
 INSERT INTO modules (name, location, description) VALUES ('reports', '/reports', 'Visualização de relatórios');
 INSERT INTO modules (name, location, description) VALUES ('users', '/users', 'Listagem e gerenciamento de usuários');
 INSERT INTO modules (name, location, description) VALUES ('appointments', '/appointments', 'Listagem e gerenciamento de agendamentos');
-INSERT INTO modules (parentId, name, location, description) VALUES (9, 'financial-summary', '/reports/financial-summary', 'Relatório de resumo financeiro');
-
-CREATE TABLE report_classifications (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    description VARCHAR(200)
-);
-
-INSERT INTO report_classifications (name, description) VALUES ('Inteligência Artificial', 'Relatórios que utilizam IA na geração.'); 
-
-CREATE TABLE reports (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    moduleId BIGINT NOT NULL,
-    classificationId BIGINT NULL,
-    name VARCHAR(60) NOT NULL,
-    description VARCHAR(200),
-    route VARCHAR(100) NOT NULL,
-    active TINYINT(1) DEFAULT 1
-);
-
-INSERT INTO reports (moduleId, classificationId, name, description, route) VALUES (12, 1, 'Resumo financeiro', 'Gera um resumo financeiro do presente, passado e futuro', 'IA');
+INSERT INTO modules (parentId, name, location, description, displayName) VALUES (9, 'financial-summary', '/reports/financial-summary', 'Relatório de resumo financeiro', 'Resumo financeiro');
 
 INSERT INTO client_modules (clientId, userId, moduleId) VALUES (1, 4, 1);
 INSERT INTO client_modules (clientId, userId, moduleId) VALUES (1, 4, 2);
@@ -73,3 +56,17 @@ INSERT INTO client_modules (clientId, userId, moduleId) VALUES (1, 5, 9);
 INSERT INTO client_modules (clientId, userId, moduleId) VALUES (1, 5, 10);
 INSERT INTO client_modules (clientId, userId, moduleId) VALUES (1, 5, 11);
 INSERT INTO client_modules (clientId, userId, moduleId) VALUES (1, 5, 12);
+
+UPDATE modules SET `group` = 'navigation' WHERE (`id` = '1');
+UPDATE modules SET `group` = 'navigation' WHERE (`id` = '2');
+UPDATE modules SET `group` = 'navigation' WHERE (`id` = '4');
+UPDATE modules SET `group` = 'navigation' WHERE (`id` = '5');
+UPDATE modules SET `group` = 'navigation' WHERE (`id` = '6');
+UPDATE modules SET `group` = 'navigation' WHERE (`id` = '7');
+UPDATE modules SET `group` = 'navigation' WHERE (`id` = '8');
+UPDATE modules SET `group` = 'navigation' WHERE (`id` = '9');
+UPDATE modules SET `group` = 'config' WHERE (`id` = '10');
+UPDATE modules SET `group` = 'config' WHERE (`id` = '11');
+UPDATE modules SET `group` = 'reports' WHERE (`id` = '12');
+UPDATE modules SET `group` = 'categories' WHERE (`id` = '3');
+UPDATE modules SET `subgroup` = 'Inteligência Artificial' WHERE (`id` = '12');

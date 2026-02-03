@@ -8,9 +8,12 @@ export default class Module extends EntityModel implements IEntity {
     public name: string;
     public location: string;
     public description: string;
-    public childrenModules: Module[];
+    public showInSidebar: boolean;
+    public group: string;
+    public subgroup: string;
+    public displayName: string;
 
-    public static ignoredProperties: string[] = ['childrenModules'];
+    public static ignoredProperties: string[] = [];
 
     constructor() {
         super();
@@ -37,7 +40,10 @@ export default class Module extends EntityModel implements IEntity {
         module.name = row.name;
         module.location = row.location;
         module.description = row.description;
-        module.childrenModules = [];
+        module.showInSidebar = Boolean(row.showInSidebar);
+        module.group = row.group;
+        module.subgroup = row.subgroup;
+        module.displayName = row.displayName;
         return module;
     }
 

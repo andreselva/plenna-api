@@ -4,4 +4,8 @@ export default interface IModuleRow {
     name: string;
     location: string;
     description: string;
+    showInSidebar: boolean;
+    group: string;
+    subgroup: string;
+    displayName: string;
 }

@@ -3,8 +3,11 @@ CREATE TABLE modules (
     parentId BIGINT DEFAULT 0,
     name VARCHAR(50) NOT NULL,
     location VARCHAR(50),
-    description VARCHAR(120)
+    description VARCHAR(120),
+    showInSidebar BOOLEAN DEFAULT true
 );
+
+UPDATE modules SET showInSidebar = 0 WHERE id IN (3, 10, 11, 12);
 
 CREATE TABLE client_modules (
 	id BIGINT auto_increment PRIMARY KEY,

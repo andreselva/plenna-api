@@ -24,7 +24,7 @@ export class AuthContextService {
      * Retorna o ID do usuário logado.
      */
     getUserId(): number {
-        return this.request.user?.id;
+        return this.request.user?.userId;
     }
 
     /**

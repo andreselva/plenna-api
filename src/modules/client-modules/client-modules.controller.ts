@@ -9,8 +9,12 @@ export class ClientModulesController {
     ) {}
     
     @Get()
-    @Public()
     async getClientModules() {
         return await this.service.getModules();
+    }
+
+    @Get('/navigation')
+    async getClientModulesNavigation() {
+        return await this.service.getModules(true);
     }
 }

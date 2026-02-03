@@ -11,11 +11,6 @@ export class ClientModulesController {
     @Get()
     @Public()
     async getClientModules() {
-        try {
-            const modules = await this.service.getModules();
-            return modules;
-        } catch (err) {
-
-        }
+        return await this.service.getModules();
     }
 }

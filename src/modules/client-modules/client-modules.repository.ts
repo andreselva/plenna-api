@@ -1,5 +1,5 @@
 import { Injectable, Query } from "@nestjs/common";
-import { AuthContextService } from "../Auth/auth-context.service";
+import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import MySQLDatabase from "../Config/Database/MySQLDatabase";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import ClientModules from "src/EntityModels/ClientModules";
@@ -8,7 +8,7 @@ import Module from "src/EntityModels/Module";
 
 @Injectable()
 export default class ClientModulesRepository extends BaseRepository<ClientModules> {
-    constructor(authContext: AuthContextService, database: MySQLDatabase) {
+    constructor(database: MySQLDatabase, authContext: AuthContextService) {
         super(database, authContext)
     }
 

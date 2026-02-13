@@ -16,7 +16,7 @@ export default class ClientModulesRepository extends BaseRepository<ClientModule
         const query = `SELECT * FROM modules m
                         JOIN client_modules cm on cm.moduleId = m.id 
                         WHERE cm.userId = ? AND cm.clientId = ?`;
-        const result = await this.database.select(query, [4, 1]);
+        const result = await this.database.select(query, [this.authContext.getUserId(), this.authContext.getClientId()]);
         return DataMapper.toEntities(result, Module);
     }
 }

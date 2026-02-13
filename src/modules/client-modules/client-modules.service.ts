@@ -12,9 +12,10 @@ export class ClientModulesService {
     constructor(
         private readonly repository: ClientModulesRepository,
         private authContext: AuthContextService,
-        @Inject(REDIS_CONNECTION) private readonly redis: Redis,
-        private readonly logger = new Logger(ClientModulesService.name)
+        @Inject(REDIS_CONNECTION) private readonly redis: Redis
     ) {}
+
+    private readonly logger = new Logger(ClientModulesService.name)
 
     async getModules() {
         this.logger.log("Getting modules.");

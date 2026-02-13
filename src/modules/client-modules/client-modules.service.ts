@@ -119,7 +119,7 @@ export class ClientModulesService {
     private getCacheKey(): string | null {
         const userId = this.authContext.getUserId();
         const clientId = this.authContext.getClientId();
-        if (!userId || !clientId) {
+        if ((userId === null || userId === undefined) || (clientId === null || clientId === undefined)) {
             return null;
         }
         return `client_modules_tree:${clientId}:${userId}`;

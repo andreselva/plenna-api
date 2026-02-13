@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthContextService } from './auth-context.service';
 import { ManagementModule } from 'src/modules/management/management.module';
 import { AuthRateLimitGuard } from 'src/common/guards/auth-rate-limit.guard';
+import { ClientModulesModule } from '../client-modules/client-modules.module';
 
 @Global()
 @Module({
@@ -26,6 +27,7 @@ import { AuthRateLimitGuard } from 'src/common/guards/auth-rate-limit.guard';
     }),
 
     ManagementModule,
+    ClientModulesModule
   ],
   controllers: [AuthController],
   providers: [

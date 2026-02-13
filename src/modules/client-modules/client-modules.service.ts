@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import ClientModulesRepository from './client-modules.repository';
 import { AuthContextService } from '../Auth/auth-context.service';
 import { REDIS_CONNECTION } from '../redis/redis.module';
@@ -12,11 +12,14 @@ export class ClientModulesService {
     constructor(
         private readonly repository: ClientModulesRepository,
         private authContext: AuthContextService,
-        @Inject(REDIS_CONNECTION) private readonly redis: Redis
+        @Inject(REDIS_CONNECTION) private readonly redis: Redis,
+        private readonly logger = new Logger(ClientModulesService.name)
     ) {}
 
     async getModules() {
+        this.logger.log("Getting modules.");
         const cachedModules = await this.getModulesTreeFromCache();
+        this.logger.log(`Return cachedModules: ${cachedModules}`);
         if (cachedModules) {
             return {
                 modules: cachedModules
@@ -24,6 +27,7 @@ export class ClientModulesService {
         }
         const modules = await this.repository.getModulesByUserId();
         const organized = this.organize(modules);
+        this.logger.log(`Variável de ambiente: ${process.env.NODE_ENV}`);
         if (process.env.NODE_ENV !== Environment.DEVELOPMENT) {
             await this.saveModulesTree(organized);
         }
@@ -79,10 +83,12 @@ export class ClientModulesService {
             return null;
         } 
         const cacheKey = this.getCacheKey();
+        this.logger.log(`cacheKey: ${cacheKey}`);
         if (!cacheKey) {
             return null;
         }
         const cached = await this.redis.get(cacheKey);
+        this.logger.log(`Cached modules: ${cached}`);
         if (!cached) {
             return null;
         }

@@ -29,7 +29,7 @@ export class ClientModulesService {
         const modules = await this.repository.getModulesByUserId();
         const organized = this.organize(modules);
         this.logger.log(`Variável de ambiente: ${process.env.NODE_ENV}`);
-        if (process.env.NODE_ENV === Environment.DEVELOPMENT) {
+        if (process.env.NODE_ENV === Environment.PRODUCTION) {
             await this.saveModulesTree(organized);
         }
         return {

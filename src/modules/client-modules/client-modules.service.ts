@@ -20,8 +20,8 @@ export class ClientModulesService {
     async getModules() {
         this.logger.log("Getting modules.");
         const cachedModules = await this.getModulesTreeFromCache();
-        this.logger.log(`Return cachedModules: ${cachedModules}`);
         if (cachedModules) {
+            this.logger.log(`Returned cachedModules: ${{cachedModules}}`);
             return {
                 modules: cachedModules
             };

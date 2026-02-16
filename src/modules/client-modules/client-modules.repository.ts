@@ -5,6 +5,8 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import ClientModules from "src/EntityModels/ClientModules";
 import DataMapper from "src/Shared/mapper/DataMapper";
 import Module from "src/EntityModels/Module";
+import { Roles } from "src/common/decorators/roles.decoratos";
+import { Role } from "src/enum/role.enum";
 
 @Injectable()
 export default class ClientModulesRepository extends BaseRepository<ClientModules> {
@@ -17,6 +19,13 @@ export default class ClientModulesRepository extends BaseRepository<ClientModule
                         JOIN client_modules cm on cm.moduleId = m.id 
                         WHERE cm.userId = ? AND cm.clientId = ?`;
         const result = await this.database.select(query, [this.authContext.getUserId(), this.authContext.getClientId()]);
+        return DataMapper.toEntities(result, Module);
+    }
+
+    @Roles(Role.SUPER_ADMIN)
+    async getModuleTreeForSuperAdmin(): Promise<Module[]> {
+        const query = `SELECT * FROM modules m`;
+        const result = await this.database.select(query);
         return DataMapper.toEntities(result, Module);
     }
 }

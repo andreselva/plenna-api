@@ -12,8 +12,9 @@ export default class Module extends EntityModel implements IEntity {
     public group: string;
     public subgroup: string;
     public displayName: string;
+    public submodules: Module[];
 
-    public static ignoredProperties: string[] = [];
+    public static ignoredProperties: string[] = ['submodules'];
 
     constructor() {
         super();

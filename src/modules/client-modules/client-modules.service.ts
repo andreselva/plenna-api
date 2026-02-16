@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import ClientModulesRepository from './client-modules.repository';
 import { AuthContextService } from '../Auth/auth-context.service';
 import { REDIS_CONNECTION } from '../redis/redis.module';
@@ -6,6 +6,7 @@ import Redis from 'ioredis';
 import { Environment } from '../Config/Database/Environment';
 import UiCatalogDTO from './DTOs/UiCatalogDto';
 import Module from 'src/EntityModels/Module';
+import { Role } from 'src/enum/role.enum';
 
 @Injectable()
 export class ClientModulesService {
@@ -15,20 +16,22 @@ export class ClientModulesService {
         @Inject(REDIS_CONNECTION) private readonly redis: Redis
     ) {}
 
-    private readonly logger = new Logger(ClientModulesService.name)
-
     async getModules() {
-        this.logger.log("Getting modules.");
+        if (this.authContext.getRole() === Role.SUPER_ADMIN) {
+            const modules = await this.repository.getModuleTreeForSuperAdmin();
+            return {
+                modules: this.organize(modules)
+            }
+        }
         const cachedModules = await this.getModulesTreeFromCache();
         if (cachedModules) {
-            this.logger.log(`Returned cachedModules: ${{cachedModules}}`);
             return {
                 modules: cachedModules
             };
         }
+
         const modules = await this.repository.getModulesByUserId();
         const organized = this.organize(modules);
-        this.logger.log(`Variável de ambiente: ${process.env.NODE_ENV}`);
         if (process.env.NODE_ENV === Environment.PRODUCTION) {
             await this.saveModulesTree(organized);
         }
@@ -84,12 +87,10 @@ export class ClientModulesService {
             return null;
         } 
         const cacheKey = this.getCacheKey();
-        this.logger.log(`cacheKey: ${cacheKey}`);
         if (!cacheKey) {
             return null;
         }
         const cached = await this.redis.get(cacheKey);
-        this.logger.log(`Cached modules: ${cached}`);
         if (!cached) {
             return null;
         }

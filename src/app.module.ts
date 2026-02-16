@@ -16,6 +16,7 @@ import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { EmailModule } from './modules/email/email.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { ClientModulesModule } from './modules/client-modules/client-modules.module';
+import { SaasModule } from './modules/saas/saas.module';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { ClientModulesModule } from './modules/client-modules/client-modules.mod
     AppointmentsModule,
     EmailModule,
     RedisModule,
-    ClientModulesModule
+    ClientModulesModule,
+    SaasModule
   ],
   controllers: [
     AppController,

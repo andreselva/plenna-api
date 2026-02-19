@@ -8,4 +8,5 @@ export default interface IModuleRow {
     group: string;
     subgroup: string;
     displayName: string;
+    hasAccess: boolean;
 }

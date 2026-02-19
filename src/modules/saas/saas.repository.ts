@@ -24,14 +24,13 @@ export default class SaasRepository {
 
     async getTenantModules(id: number): Promise<Module[]> {
         const query = `SELECT 
-                            m.*
+                            m.*, (cm.clientId IS NOT NULL) AS hasAccess
                         FROM
                             modules m
-                                JOIN
+                                LEFT JOIN
                             client_modules cm ON cm.moduleId = m.id
                         WHERE
-                            clientId = ?
-                        GROUP BY m.id;`
+                            clientId = ?;`
         const result = await this.database.select(query, [id])
         return DataMapper.toEntities(result, Module)
     }

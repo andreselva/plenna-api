@@ -44,6 +44,7 @@ services:
       - OPENAI_API_KEY=openai
       - USE_FAKE_QUEUE=false
       - REDIS_URL=redis://redis:6379
+      - FRONT_URL=http://localhost:3000/
     depends_on:
       db:
         condition: service_started
@@ -81,7 +82,7 @@ services:
     networks:
       - backend-network
     ports:
-      - "9230:9230"
+      - "9230:9229"
     volumes:
       - ./:/app
       - backend_node_modules:/app/node_modules
@@ -111,7 +112,7 @@ services:
     networks:
       - backend-network
     ports:
-      - "9231:9231"
+      - "9231:9229"
     volumes:
       - ./:/app
       - backend_node_modules:/app/node_modules

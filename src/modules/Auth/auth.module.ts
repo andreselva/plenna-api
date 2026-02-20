@@ -10,6 +10,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthContextService } from './auth-context.service';
 import { ManagementModule } from 'src/modules/management/management.module';
 import { AuthRateLimitGuard } from 'src/common/guards/auth-rate-limit.guard';
+import RequestPasswordResetController from './request-password-reset.controller';
+import ResetPasswordService from './reset-password.service';
+import { RedisModule } from '../redis/redis.module';
+import { EmailModule } from '../email/email.module';
 
 @Global()
 @Module({
@@ -25,16 +29,19 @@ import { AuthRateLimitGuard } from 'src/common/guards/auth-rate-limit.guard';
       }),
     }),
 
-    ManagementModule
+    ManagementModule,
+    RedisModule,
+    EmailModule
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, RequestPasswordResetController],
   providers: [
     AuthService,
     JwtStrategy,
     AuthRepository,
     MySQLDatabase,
     AuthContextService,
-    AuthRateLimitGuard
+    AuthRateLimitGuard,
+    ResetPasswordService
   ],
   exports: [
     PassportModule,  // para que outros módulos possam usar Guards

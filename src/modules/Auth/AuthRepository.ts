@@ -3,6 +3,10 @@ import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import RefreshToken from "src/EntityModels/RefreshToken";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import { AuthContextService } from "./auth-context.service";
+import RequestResetPasswordDTO from "./DTOs/request-reset-password.dto";
+import { ResetUserDTO } from "./reset-password.service";
+import DataMapper from "src/Shared/mapper/DataMapper";
+import User from "src/EntityModels/User";
 
 export interface RefreshTokenMetadata {
     ipAddress?: string | null;
@@ -63,5 +67,11 @@ export default class AuthRepository extends BaseRepository<RefreshToken>{
     async deleteRefreshToken(idUser: number) {
         const query = "DELETE FROM refresh_token WHERE idUser = ?";
         await this.database.execute(query, [idUser]);
+    }
+
+    async getUserByEmailAndUsername(dto: RequestResetPasswordDTO): Promise<User> {
+        const query = `SELECT * FROM user WHERE email = ? AND username = ?`;
+        const result = await this.database.select(query, [dto.email, dto.username]);
+        return DataMapper.toEntities(result, User)[0];
     }
 }

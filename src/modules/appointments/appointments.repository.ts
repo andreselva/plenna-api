@@ -8,17 +8,16 @@ import Invoice from "src/EntityModels/invoice";
 
 @Injectable()
 export default class AppointmentsRepository {
-    constructor(
-        private readonly database: MySQLDatabase,
-        private readonly authContext: AuthContextService
-    ) {}
+  constructor(
+      private readonly database: MySQLDatabase,
+      private readonly authContext: AuthContextService
+  ) {}
 
-    async loadUsers() {
-        const query = "SELECT email FROM user WHERE clientId = ?";
-        const result = await this.database.select(query, [this.authContext.getClientId()]);
-        return DataMapper.toEntities(result, User);
-    }
-
+  async loadUsers() {
+      const query = "SELECT email FROM user WHERE clientId = ?";
+      const result = await this.database.select(query, [this.authContext.getClientId()]);
+      return DataMapper.toEntities(result, User);
+  }
 
   async loadExpenses(clientId: number, start: string, end: string): Promise<Expense[]> {
     const query = `SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ? AND status = 'pending'`;

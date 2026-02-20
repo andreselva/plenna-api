@@ -25,20 +25,20 @@ export class ClientModulesService {
             }
         }
 
-        // if (process.env.NODE_ENV === Environment.PRODUCTION) {
+        if (process.env.NODE_ENV === Environment.PRODUCTION) {
             const cachedModules = await this.redisService.get(redisKey);
             if (cachedModules) {
                 return {
                     modules: cachedModules
                 };
             }
-        // }
+        }
 
         const modules = await this.repository.getModulesByUserId();
         const organized = this.organize(modules);
-        // if (process.env.NODE_ENV === Environment.PRODUCTION) {
-            await this.redisService.set(redisKey, organized);
-        // }
+        if (process.env.NODE_ENV === Environment.PRODUCTION) {
+            await this.redisService.set(redisKey, organized, 259200);//72h, 3 dias
+        }
         return {
             modules: organized
         }

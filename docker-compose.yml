@@ -64,7 +64,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: npm run start:worker:appointments
+    command: npm run start:worker:appointments:debug
     environment:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
@@ -92,20 +92,21 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: npm run start:worker:email
+    command: npm run start:worker:email:debug
     environment:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
       - USE_FAKE_QUEUE=false
-      - EMAIL_HOST=''
-      - EMAIL_PORT=587
+      - EMAIL_HOST=mailhog
+      - EMAIL_PORT=1025
       - EMAIL_SECURE=false
-      - EMAIL_USER=''
-      - EMAIL_PASS=''
+      - EMAIL_USER=
+      - EMAIL_PASS=
       - EMAIL_FROM=Plenna <no-reply@plenna.me>
       - EMAIL_JOB_ATTEMPS=5
       - EMAIL_JOB_BACKOFF_MS=10000
       - EMAIL_WORKER_CONCURRENCY=5
+      - EMAIL_PROVIDER='smtp'
     depends_on:
       redis:
         condition: service_healthy
@@ -117,6 +118,14 @@ services:
       - ./:/app
       - backend_node_modules:/app/node_modules
 
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - backend-network
+      
 networks:
   backend-network:
     driver: bridge
@@ -124,3 +133,4 @@ networks:
 volumes:
   mysql-data:
   backend_node_modules:
+  

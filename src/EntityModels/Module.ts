@@ -12,8 +12,10 @@ export default class Module extends EntityModel implements IEntity {
     public group: string;
     public subgroup: string;
     public displayName: string;
+    public submodules: Module[];
+    public hasAccess: boolean;
 
-    public static ignoredProperties: string[] = [];
+    public static ignoredProperties: string[] = ['submodules', 'hasAccess'];
 
     constructor() {
         super();
@@ -44,6 +46,7 @@ export default class Module extends EntityModel implements IEntity {
         module.group = row.group;
         module.subgroup = row.subgroup;
         module.displayName = row.displayName;
+        module.hasAccess = Boolean(row.hasAccess) ?? null;
         return module;
     }
 

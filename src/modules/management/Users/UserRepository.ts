@@ -31,7 +31,9 @@ export default class UsersRepository extends BaseRepository<User> {
         if (clientId === null) {
             clientId = this.authContext.getClientId();
 
-            if (!clientId) throw new InternalServerErrorException(`ClientId is not defined.`);
+            if (clientId === null || clientId === undefined) {
+                throw new InternalServerErrorException(`ClientId is not defined.`);
+            }
         }
         const query = "SELECT id, username, email, name, role, clientId FROM user WHERE id = ? AND clientId = ?";
         const result = await this.database.select(query, [id, clientId]);

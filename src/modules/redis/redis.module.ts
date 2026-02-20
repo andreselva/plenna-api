@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import IORedis, { Redis, RedisOptions } from 'ioredis';
-
-export const REDIS_CONNECTION = 'REDIS_CONNECTION';
+import RedisService from './redis-service';
+import { REDIS_CONNECTION } from './redis.tokens';
 
 @Module({
   imports: [ConfigModule],
@@ -58,7 +58,8 @@ export const REDIS_CONNECTION = 'REDIS_CONNECTION';
         );
       },
     },
+    RedisService
   ],
-  exports: [REDIS_CONNECTION],
+  exports: [REDIS_CONNECTION, RedisService],
 })
 export class RedisModule {}

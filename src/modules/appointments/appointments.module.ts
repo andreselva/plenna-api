@@ -11,8 +11,9 @@ import { AppointmentsDebugController } from './debug/appointments.debug.controll
 import { UpcomingExpensesService } from './services/upcoming-expenses.service';
 import AppointmentsRepository from './appointments.repository';
 import { EmailModule } from '../email/email.module';
-import { RedisModule, REDIS_CONNECTION } from '../redis/redis.module';
+import { RedisModule } from '../redis/redis.module';
 import type { Redis } from 'ioredis';
+import { REDIS_CONNECTION } from '../redis/redis.tokens';
 
 @Module({
   imports: [EmailModule, RedisModule],

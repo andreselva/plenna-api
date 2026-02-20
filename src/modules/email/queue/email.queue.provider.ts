@@ -1,8 +1,8 @@
 import { Provider } from '@nestjs/common';
 import { Queue, QueueEvents } from 'bullmq';
 import { EMAIL_EVENTS_TOKEN, EMAIL_QUEUE_NAME, EMAIL_QUEUE_TOKEN } from '../email.constants';
-import { REDIS_CONNECTION } from 'src/modules/redis/redis.module';
 import type { Redis } from 'ioredis';
+import { REDIS_CONNECTION } from 'src/modules/redis/redis.tokens';
 
 export const emailQueueProviders: Provider[] = [
   {

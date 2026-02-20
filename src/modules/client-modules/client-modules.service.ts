@@ -37,7 +37,7 @@ export class ClientModulesService {
         const modules = await this.repository.getModulesByUserId();
         const organized = this.organize(modules);
         if (process.env.NODE_ENV === Environment.PRODUCTION) {
-            await this.redisService.set(redisKey, organized, 259200);//72h, 3 dias
+            await this.redisService.set(redisKey, organized, 259200);// 3 dias
         }
         return {
             modules: organized

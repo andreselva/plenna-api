@@ -72,28 +72,23 @@ export class SaasService {
         if (Array.isArray(modules.enabled) && modules.enabled.length > 0) {
             await Promise.all(
                 modules.enabled.map(async (m) => {
-                    const ids = new Set<number>([m.moduleId]);
-                    if (m.hasSubmodules) {
-                        const sm = await this.repository.getSubmodules(m.moduleId);
-                        sm.forEach((s) => ids.add(s.id));
-                    }
+                    const moduleId = m.moduleId;
+                    const arrayIdModule: number[] = [moduleId];
+                    //Deleta antes de salvar, para não duplicar
+                    await this.repository.disableModules(clientId, arrayIdModule);
+                    const clientModule = new ClientModules();
+                    clientModule.clientId = clientId;
+                    clientModule.moduleId = moduleId;
+                    await this.repository.saveClientModule(clientModule);
                     await Promise.all(
-                        [...ids].map(async (moduleId) => {
-                            const clientModule = new ClientModules();
-                            clientModule.clientId = clientId;
-                            clientModule.moduleId = moduleId;
-                            await this.repository.saveClientModule(clientModule);
-                            await Promise.all(
-                                usersAdmin.map(async (user) => {
-                                    const userModules = new UserModules();
-                                    userModules.clientId = clientId;
-                                    userModules.userId = user.id;
-                                    userModules.moduleId = moduleId;
-                                    await this.repository.saveUserAdminModule(userModules);
-                                })
-                            )
+                        usersAdmin.map(async (user) => {
+                            const userModules = new UserModules();
+                            userModules.clientId = clientId;
+                            userModules.userId = user.id;
+                            userModules.moduleId = moduleId;
+                            await this.repository.saveUserAdminModule(userModules);
                         })
-                    );
+                    )
                 })
             );
         }

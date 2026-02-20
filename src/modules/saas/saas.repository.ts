@@ -68,4 +68,9 @@ export default class SaasRepository {
         await this.database.execute(sql, values);
     }
 
+    async saveClient(client: Client) {
+        const { sql, values } = QueryBuilder.buildQuery(client, client.getTableName(), client.getPrimaryKey(), client.getIgnoredProperties());
+        await this.database.execute(sql, values);
+    }
+
 }

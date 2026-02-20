@@ -1,7 +1,7 @@
 ALTER TABLE clients
 ADD COLUMN isSystem TINYINT(1) NOT NULL DEFAULT 0,
 ADD COLUMN status ENUM('active','suspended') NOT NULL DEFAULT 'active',
-ADD COLUMN trialEndsAt DATETIME NULL;
+ADD COLUMN trialEndsAt VARCHAR(20) NULL;
 
 INSERT INTO clients (clientName, clientEmail, isSystem)
 VALUES ('__PLENNA_SAAS__', 'plenna.finance@gmail.com', 1);

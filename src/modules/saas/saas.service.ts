@@ -6,6 +6,8 @@ import ClientModules from 'src/EntityModels/ClientModules';
 import UserModules from 'src/EntityModels/UserModules';
 import RedisService from '../redis/redis-service';
 import { RedisKeys } from '../redis/redis.keys';
+import ClientDTO from '../management/clients/DTOs/client.dto';
+import Client from 'src/EntityModels/Client';
 
 @Injectable()
 export class SaasService {
@@ -99,6 +101,10 @@ export class SaasService {
                 await this.redisService.delete(rk);
             })
         )
+    }
 
+    async saveClient(dto: ClientDTO) {
+        const client = Client.fromDTO(dto);
+        await this.repository.saveClient(client);
     }
 }

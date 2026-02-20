@@ -6,13 +6,11 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { AuthCookieOptions } from './AuthCookieOptions';
 import { AuthRateLimitGuard } from 'src/common/guards/auth-rate-limit.guard';
 import { RefreshTokenMetadata } from './AuthRepository';
-import { ClientModulesService } from '../client-modules/client-modules.service';
 
 @Controller('auth')
 export class AuthController {
     constructor(
         private authService: AuthService,
-        private readonly clientModuleService: ClientModulesService
     ) { }
 
     @Public()
@@ -69,7 +67,6 @@ export class AuthController {
             if (refreshToken) {
                 await this.authService.revokeRefreshToken(refreshToken);
             }
-            this.clientModuleService.deleteModulesTreeFromCache();
             res.clearCookie('access_token', AuthCookieOptions.clearToken());
             res.clearCookie('refresh_token', AuthCookieOptions.clearToken());
             res.clearCookie('csrf_token', AuthCookieOptions.clearCsrfToken());

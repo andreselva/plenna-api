@@ -1,40 +1,44 @@
 import { Inject, Injectable } from '@nestjs/common';
 import ClientModulesRepository from './client-modules.repository';
 import { AuthContextService } from '../Auth/auth-context.service';
-import { REDIS_CONNECTION } from '../redis/redis.module';
-import Redis from 'ioredis';
 import { Environment } from '../Config/Database/Environment';
 import UiCatalogDTO from './DTOs/UiCatalogDto';
 import Module from 'src/EntityModels/Module';
 import { Role } from 'src/enum/role.enum';
+import RedisService from '../redis/redis-service';
+import { RedisKeys } from '../redis/redis.keys';
 
 @Injectable()
 export class ClientModulesService {
     constructor(
         private readonly repository: ClientModulesRepository,
         private authContext: AuthContextService,
-        @Inject(REDIS_CONNECTION) private readonly redis: Redis
+        private readonly redisService: RedisService
     ) {}
 
     async getModules() {
+        const redisKey = RedisKeys.clientUserModuleTree(this.authContext.getClientId(), this.authContext.getUserId());
         if (this.authContext.getRole() === Role.SUPER_ADMIN) {
             const modules = await this.repository.getModuleTreeForSuperAdmin();
             return {
                 modules: this.organize(modules)
             }
         }
-        const cachedModules = await this.getModulesTreeFromCache();
-        if (cachedModules) {
-            return {
-                modules: cachedModules
-            };
-        }
+
+        // if (process.env.NODE_ENV === Environment.PRODUCTION) {
+            const cachedModules = await this.redisService.get(redisKey);
+            if (cachedModules) {
+                return {
+                    modules: cachedModules
+                };
+            }
+        // }
 
         const modules = await this.repository.getModulesByUserId();
         const organized = this.organize(modules);
-        if (process.env.NODE_ENV === Environment.PRODUCTION) {
-            await this.saveModulesTree(organized);
-        }
+        // if (process.env.NODE_ENV === Environment.PRODUCTION) {
+            await this.redisService.set(redisKey, organized);
+        // }
         return {
             modules: organized
         }
@@ -80,49 +84,5 @@ export class ClientModulesService {
             }
         }
         return uiCatalogDto;
-    }
-
-    private async getModulesTreeFromCache(): Promise<Module[] | null> {
-        if (process.env.NODE_ENV === Environment.DEVELOPMENT) {
-            return null;
-        } 
-        const cacheKey = this.getCacheKey();
-        if (!cacheKey) {
-            return null;
-        }
-        const cached = await this.redis.get(cacheKey);
-        if (!cached) {
-            return null;
-        }
-        try {
-            return JSON.parse(cached) as Module[];
-        } catch {
-            return null;
-        }
-    }
-
-    private async saveModulesTree(modulesTree: any) {
-        const cacheKey = this.getCacheKey();
-        if (!cacheKey) {
-            return;
-        }
-        await this.redis.set(cacheKey, JSON.stringify(modulesTree));
-    }
-    
-    async deleteModulesTreeFromCache(): Promise<void> {
-        const cacheKey = this.getCacheKey();
-        if (!cacheKey) {
-            return;
-        }
-        await this.redis.del(cacheKey);
-    }
-
-    private getCacheKey(): string | null {
-        const userId = this.authContext.getUserId();
-        const clientId = this.authContext.getClientId();
-        if ((userId === null || userId === undefined) || (clientId === null || clientId === undefined)) {
-            return null;
-        }
-        return `client_modules_tree:${clientId}:${userId}`;
     }
 }

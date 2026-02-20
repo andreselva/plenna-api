@@ -1,11 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import SaasRepository from './saas.repository';
 import Module from 'src/EntityModels/Module';
+import { EditTenantModulesDTO } from './DTOs/edit-tenant-modules.dto';
+import ClientModules from 'src/EntityModels/ClientModules';
+import UserModules from 'src/EntityModels/UserModules';
+import RedisService from '../redis/redis-service';
+import { RedisKeys } from '../redis/redis.keys';
 
 @Injectable()
 export class SaasService {
     constructor(
-        private readonly repository: SaasRepository
+        private readonly repository: SaasRepository,
+        private readonly redisService: RedisService
     ) {}
 
     async getTenants() {
@@ -46,5 +52,58 @@ export class SaasService {
         });
 
         return rootModules;
+    }
+
+    async saveClientModules(clientId: number, modules: EditTenantModulesDTO) {
+        const usersAdmin = await this.repository.getUsersAdminFromClientId(clientId);
+        if (Array.isArray(modules.disabled) && modules.disabled.length > 0) {
+            await Promise.all(
+                modules.disabled.map(async (m) => {
+                    const ids = new Set<number>([m.moduleId]);
+                    if (m.hasSubmodules) {
+                        const sm = await this.repository.getSubmodules(m.moduleId);
+                        sm.forEach((s) => ids.add(s.id));
+                    }
+                    await this.repository.disableModules(clientId, [...ids]);
+                })
+            );
+        }
+
+        if (Array.isArray(modules.enabled) && modules.enabled.length > 0) {
+            await Promise.all(
+                modules.enabled.map(async (m) => {
+                    const ids = new Set<number>([m.moduleId]);
+                    if (m.hasSubmodules) {
+                        const sm = await this.repository.getSubmodules(m.moduleId);
+                        sm.forEach((s) => ids.add(s.id));
+                    }
+                    await Promise.all(
+                        [...ids].map(async (moduleId) => {
+                            const clientModule = new ClientModules();
+                            clientModule.clientId = clientId;
+                            clientModule.moduleId = moduleId;
+                            await this.repository.saveClientModule(clientModule);
+                            await Promise.all(
+                                usersAdmin.map(async (user) => {
+                                    const userModules = new UserModules();
+                                    userModules.clientId = clientId;
+                                    userModules.userId = user.id;
+                                    userModules.moduleId = moduleId;
+                                    await this.repository.saveUserAdminModule(userModules);
+                                })
+                            )
+                        })
+                    );
+                })
+            );
+        }
+
+        await Promise.all(
+            usersAdmin.map(async (user) => {
+                const rk = RedisKeys.clientUserModuleTree(clientId, user.id);
+                await this.redisService.delete(rk);
+            })
+        )
+
     }
 }

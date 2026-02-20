@@ -5,7 +5,6 @@ import IClientModulesRow from "src/Shared/interfaces/IClientModulesRow";
 export default class ClientModules extends EntityModel implements IEntity {
     public id: number;
     public clientId: number;
-    public userId: number;
     public moduleId: number;
 
     public static ignoredProperties: string[] = [];
@@ -23,16 +22,15 @@ export default class ClientModules extends EntityModel implements IEntity {
     }
 
     /**
-     * Método "fábrica" estático que cria uma instância de BankAccount
+     * Método "fábrica" estático que cria uma instância da entidade
      * a partir de uma linha de dados crua vinda do banco de dados.
      * @param row O objeto de dados vindo da query.
-     * @returns Uma nova instância de BankAccount.
+     * @returns Uma nova instância da entidade.
      */
     static fromRow(row: IClientModulesRow) {
         const clientModule = new ClientModules();
         clientModule.id = row.id;
         clientModule.clientId = row.clientId;
-        clientModule.userId = row.userId;
         clientModule.moduleId = row.moduleId;
         return clientModule;
     }

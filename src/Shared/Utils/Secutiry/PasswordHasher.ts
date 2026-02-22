@@ -1,7 +1,7 @@
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 
 export default class PasswordHasher {
-    private static readonly saltRounds = 10;
+    private static readonly saltRounds = 12;
 
     static async hash(password: string): Promise<string> {
         return await bcrypt.hash(password, this.saltRounds);

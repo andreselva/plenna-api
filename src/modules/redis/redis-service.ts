@@ -30,4 +30,8 @@ export default class RedisService {
         await this.redis.del(key)
     }
 
+    async getdel(key: string) {
+        return await this.redis.getdel(key);
+    }
+
 }

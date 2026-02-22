@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import UsersRepository from './UserRepository';
 import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
 import User from 'src/EntityModels/User';
@@ -6,6 +6,8 @@ import UserPasswordResetDTO from './DTOs/UserPasswordResetDTO';
 import UserDTO from './DTOs/UserDTO';
 import { AuthContextService } from 'src/modules/Auth/auth-context.service';
 import { Role } from 'src/enum/role.enum';
+import PasswordValidator from 'src/Shared/Utils/Secutiry/PasswordValidator';
+import { PASSWORD_ERROR_MESSAGES } from 'src/Shared/Utils/Secutiry/PasswordValidatorMessages';
 
 @Injectable()
 export class UsersService {
@@ -20,7 +22,16 @@ export class UsersService {
 
     async createUser(user: User) {
         const existUser = await this.findByUsername(user.username);
-        if (existUser) throw new ConflictException(`Nome de usuário já existente. Escolha outro nome de usuário.`);
+        if (existUser) {
+            throw new ConflictException(`Nome de usuário já existente. Escolha outro nome de usuário.`);
+        }
+        const result = PasswordValidator.validate(user.password);
+        if (!result.valid) {
+            throw new BadRequestException({
+            message: 'Senha inválida.',
+            errors: result.errors,
+            details: result.errors.map(e => PASSWORD_ERROR_MESSAGES[e])});
+        }
         const senhaHash = await PasswordHasher.hash(user.password);
         user.password = senhaHash;
         return await this.repository.saveUser(user);

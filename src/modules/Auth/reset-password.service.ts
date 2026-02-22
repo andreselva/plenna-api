@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import RequestResetPasswordDTO from "./DTOs/request-reset-password.dto";
 import AuthRepository from "./AuthRepository";
 import TokenHasher from "src/Shared/Utils/Secutiry/TokenHasher";
@@ -7,6 +7,8 @@ import { RedisKeys } from "../redis/redis.keys";
 import { EmailService } from "../email/email.service";
 import ResetPasswordDTO from "./DTOs/reset-password.dto";
 import PasswordHasher from "src/Shared/Utils/Secutiry/PasswordHasher";
+import PasswordValidator from "src/Shared/Utils/Secutiry/PasswordValidator";
+import { PASSWORD_ERROR_MESSAGES } from "src/Shared/Utils/Secutiry/PasswordValidatorMessages";
 
 export interface ResetPasswordSummary {
     name: string;
@@ -53,6 +55,13 @@ export default class ResetPasswordService {
     }
 
     async reset(dto: ResetPasswordDTO) {
+        const result = PasswordValidator.validate(dto.newPassword);
+        if (!result.valid) {
+            throw new BadRequestException({
+            message: 'Senha inválida.',
+            errors: result.errors,
+            details: result.errors.map(e => PASSWORD_ERROR_MESSAGES[e])});
+        }
         const hash = TokenHasher.getTokenHash(dto.token);
         const rk = RedisKeys.passwordResetToken(hash);
         const value = await this.redisService.getdel(rk);

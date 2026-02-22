@@ -14,7 +14,11 @@ export default class TokenHasher {
 
     static getTokenByPasswordReset() {
         const rawToken = randomBytes(32).toString('hex');
-        const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+        const tokenHash = this.getTokenHash(rawToken);
         return { rawToken, tokenHash };
+    }
+
+    static getTokenHash(token: string) {
+       return createHash('sha256').update(token).digest('hex')
     }
 }

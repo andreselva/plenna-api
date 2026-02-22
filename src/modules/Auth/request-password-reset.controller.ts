@@ -3,6 +3,7 @@ import RequestResetPasswordDTO from "./DTOs/request-reset-password.dto";
 import { AuthRateLimitGuard } from "src/common/guards/auth-rate-limit.guard";
 import ResetPasswordService from "./reset-password.service";
 import { Public } from "src/common/decorators/public.decorator";
+import ResetPasswordDTO from "./DTOs/reset-password.dto";
 
 @Controller('reset-password')
 export default class RequestPasswordResetController {
@@ -17,4 +18,10 @@ export default class RequestPasswordResetController {
         return await this.service.process(dto)
     }
 
+    @Public()
+    @Post('/reset')
+    @UseGuards(AuthRateLimitGuard)
+    async resetPassword(@Body() dto: ResetPasswordDTO) {
+        return await this.service.reset(dto);
+    }
 }

@@ -4,7 +4,6 @@ import RefreshToken from "src/EntityModels/RefreshToken";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import { AuthContextService } from "./auth-context.service";
 import RequestResetPasswordDTO from "./DTOs/request-reset-password.dto";
-import { ResetUserDTO } from "./reset-password.service";
 import DataMapper from "src/Shared/mapper/DataMapper";
 import User from "src/EntityModels/User";
 
@@ -69,9 +68,14 @@ export default class AuthRepository extends BaseRepository<RefreshToken>{
         await this.database.execute(query, [idUser]);
     }
 
-    async getUserByEmailAndUsername(dto: RequestResetPasswordDTO): Promise<User> {
-        const query = `SELECT * FROM user WHERE email = ? AND username = ?`;
-        const result = await this.database.select(query, [dto.email, dto.username]);
+    async getUserByEmail(dto: RequestResetPasswordDTO): Promise<User> {
+        const query = `SELECT * FROM user WHERE email = ?`;
+        const result = await this.database.select(query, [dto.email]);
         return DataMapper.toEntities(result, User)[0];
+    }
+
+    async attPasswordUser(newPassword: string, userId: number) {
+        const query = `UPDATE user SET password = ? WHERE id = ?`;
+        await this.database.execute(query, [newPassword, userId]);
     }
 }

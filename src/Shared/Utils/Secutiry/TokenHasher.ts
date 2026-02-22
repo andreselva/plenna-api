@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
 
 export default class TokenHasher {

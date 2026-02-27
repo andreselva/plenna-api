@@ -60,15 +60,21 @@ async function main(): Promise<void> {
 
       case 'dev': {
         const database = process.argv[3];
-        if (!database) {
-          console.error('❌ Informe o banco de dados. Uso: migration.cli.ts dev <database>\n');
-          process.exit(1);
-        }
+
         console.log('\n═══════════════════════════════════════');
-        console.log(`  Migrations — Modo dev (banco: ${database})`);
+        console.log('  Migrations — Modo dev');
         console.log('═══════════════════════════════════════\n');
-        await runner.runPhase('beforeDeploy', { devDatabase: database });
-        await runner.runPhase('execute',      { devDatabase: database });
+
+        await runner.runPhase(
+          'beforeDeploy',
+          database ? { devDatabase: database } : {}
+        );
+
+        await runner.runPhase(
+          'execute',
+          database ? { devDatabase: database } : {}
+        );
+
         console.log('✅ Migrations dev concluídas com sucesso.\n');
         break;
       }

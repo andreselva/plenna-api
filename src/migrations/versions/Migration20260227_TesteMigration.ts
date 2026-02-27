@@ -18,6 +18,10 @@ export class Migration20260227_TesteMigration implements IMigration {
         return []
     }
 
+    getDatabases(): string[] {
+        return ['railway']
+    }
+
     isTransactional(): boolean {
         return false;
     }

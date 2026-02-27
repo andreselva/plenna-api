@@ -28,6 +28,8 @@ export interface IMigration {
    */
   executeBeforeDeploy(): IMigrationStepProcessor[];
 
+  getDatabases(): string[];
+
   /**
    * Se true, todos os steps de execute() são envolvidos em
    * BEGIN / COMMIT com ROLLBACK automático em falha.

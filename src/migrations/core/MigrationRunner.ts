@@ -15,6 +15,13 @@ export interface RunOptions {
   devDatabase?: string;
 }
 
+export interface MigrationStatus {
+  migration: IMigration;
+  database: string;
+  executed: boolean;
+  record?: any;
+}
+
 /**
  * Motor principal de execução de migrations.
  *
@@ -46,54 +53,75 @@ export class MigrationRunner {
   async runPhase(phase: MigrationPhase, options: RunOptions = {}): Promise<void> {
     const phaseLabel = phase === 'beforeDeploy' ? 'before-deploy' : 'execute';
 
-    // Em modo dev, cria um pool e repository apontando para o banco informado
-    const pool       = options.devDatabase ? this.createPool(options.devDatabase) : this.pool;
-    const repository = options.devDatabase ? new MigrationRepository(pool) : this.repository;
+    for (const migration of this.migrations) {
 
-    try {
-      await repository.ensureTable();
-      const executed = await repository.getExecutedVersions();
-      const pending  = this.migrations.filter((m) => !executed.has(m.version));
+      const databases =
+        options.devDatabase
+          ? [options.devDatabase]     // sobrescreve se estiver em modo dev
+          : migration.getDatabases(); // usa bancos definidos na migration
 
-      if (pending.length === 0) {
-        console.log(`[Migrations] Nenhuma migration pendente para fase: ${phaseLabel}`);
-        return;
-      }
+      for (const database of databases) {
 
-      console.log(`[Migrations] ${pending.length} migration(s) pendente(s) — fase: ${phaseLabel}\n`);
+        const pool       = this.createPool(database);
+        const repository = new MigrationRepository(pool);
 
-      for (const migration of pending) {
-        const steps: IMigrationStepProcessor[] =
-          phase === 'beforeDeploy'
-            ? migration.executeBeforeDeploy()
-            : migration.execute();
+        try {
+          await repository.ensureTable();
+          const executed = await repository.getExecutedVersions();
 
-        if (steps.length === 0) {
-          console.log(`  [SKIP] ${migration.version}: ${migration.name} — sem passos para ${phaseLabel}`);
-          continue;
+          if (executed.has(migration.version)) {
+            console.log(`[SKIP] ${migration.version} já executada no banco ${database}`);
+            continue;
+          }
+
+          const steps =
+            phase === 'beforeDeploy'
+              ? migration.executeBeforeDeploy()
+              : migration.execute();
+
+          if (steps.length === 0) {
+            continue;
+          }
+
+          console.log(`\n[DB: ${database}]`);
+          await this.runMigration(migration, steps, phase, pool, repository);
+
+        } finally {
+          await pool.end();
         }
-
-        await this.runMigration(migration, steps, phase, pool, repository);
-      }
-    } finally {
-      // Fecha o pool temporário do modo dev ao terminar
-      if (options.devDatabase) {
-        await pool.end();
       }
     }
   }
 
-  async getStatus(): Promise<{ migration: IMigration; executed: boolean; record?: any }[]> {
-    await this.repository.ensureTable();
-    const executed = await this.repository.getExecutedVersions();
-    const records  = await this.repository.getAll();
-    const recordMap = new Map(records.map((r) => [r.version, r]));
+  async getStatus(): Promise<MigrationStatus[]> {
+    const result: MigrationStatus[] = [];
 
-    return this.migrations.map((m) => ({
-      migration: m,
-      executed:  executed.has(m.version),
-      record:    recordMap.get(m.version),
-    }));
+    for (const migration of this.migrations) {
+      const databases = migration.getDatabases();
+
+      for (const database of databases) {
+        const pool       = this.createPool(database);
+        const repository = new MigrationRepository(pool);
+
+        try {
+          await repository.ensureTable();
+          const executed = await repository.getExecutedVersions();
+          const records  = await repository.getAll();
+
+          result.push({
+            migration,
+            database,
+            executed: executed.has(migration.version),
+            record: records.find(r => r.version === migration.version),
+          });
+
+        } finally {
+          await pool.end();
+        }
+      }
+    }
+
+    return result;
   }
 
   async close(): Promise<void> {
@@ -115,7 +143,7 @@ export class MigrationRunner {
     const checksum = this.computeChecksum(migration);
     let   currentStep = 0;
 
-    console.log(`  [START] ${migration.version}: ${migration.name}`);
+    console.log(`[START] ${migration.version}: ${migration.name}`);
 
     try {
       if (migration.isTransactional()) {

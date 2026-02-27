@@ -1,15 +1,16 @@
+import { Database } from "src/enum/database.enum";
 import { IMigration } from "../core/IMigration";
 import { IMigrationStepProcessor } from "../core/IMigrationStepProcessor";
 import { MigrationSteps } from "../core/MigrationSteps";
 
-export class Migration20260227_TesteMigration implements IMigration {
-    readonly version = '20260227';
+export class Migration20260227_02_TesteMigration implements IMigration {
+    readonly version = '20260227_02';
     readonly name    = 'Migration para teste';
 
     execute(): IMigrationStepProcessor[] {
         return [
             MigrationSteps.RunSQL(
-                `UPDATE clients SET number = 630 WHERE id = 1`
+                `UPDATE clients SET number = 63 WHERE id = 1`
             )
         ]
     }
@@ -18,8 +19,8 @@ export class Migration20260227_TesteMigration implements IMigration {
         return []
     }
 
-    getDatabases(): string[] {
-        return ['railway']
+    getDatabases(): Database[] {
+        return [Database.PLENNA]
     }
 
     isTransactional(): boolean {

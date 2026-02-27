@@ -21,4 +21,10 @@ export interface IMigrationStepProcessor {
    * Nome descritivo para logs.
    */
   readonly label: string;
+
+  /**
+   * Retorna um payload determinístico para checksum.
+   * Se não existir, o runner usa o `label`.
+   */
+  checksumPayload?(): string;
 }

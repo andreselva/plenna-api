@@ -1,97 +1,53 @@
 import { MigrationRunner } from '../core/MigrationRunner';
-import { MIGRATION_REGISTRY } from '../core/MigrationRegistry';
 
 async function main(): Promise<void> {
   const command = process.argv[2];
-  const runner  = new MigrationRunner(MIGRATION_REGISTRY);
+  const runner = new MigrationRunner();
 
   try {
     switch (command) {
-
       case 'run': {
         console.log('Migrations — Fase: execute');
         await runner.runPhase('execute');
-        console.log('Migrations concluídas com sucesso.\n');
         break;
       }
 
       case 'before-deploy': {
-        console.log('\n═══════════════════════════════════════');
-        console.log('  Migrations — Fase: before-deploy');
-        console.log('═══════════════════════════════════════\n');
+        console.log('Migrations — Fase: before-deploy');
         await runner.runPhase('beforeDeploy');
-        console.log('     Before-deploy concluído com sucesso.\n');
         break;
       }
 
       case 'status': {
-        const statuses = await runner.getStatus();
-        const done     = statuses.filter((s) =>  s.executed);
-        const pending  = statuses.filter((s) => !s.executed);
-        const failed   = statuses.filter((s) => s.record && !s.record.success);
+        const status = await runner.getStatus();
 
-        console.log('\n═══════════════════════════════════════');
-        console.log(`  Migrations — Status (${statuses.length} total)`);
+        console.log('═══════════════════════════════════════');
+        console.log(`  Migrations — Status (${status.length} total)`);
         console.log('═══════════════════════════════════════\n');
 
-        console.log(`     Executadas: ${done.length}`);
-        for (const { migration, record } of done) {
-          console.log(`      [${migration.version}] ${migration.name}  (${record?.executed_at ?? ''})`);
-        }
+        const executed = status.filter((s) => s.executed);
+        const pending = status.filter((s) => !s.executed);
 
-        if (failed.length > 0) {
-          console.log(`\n[ERROR] Com falha: ${failed.length}`);
-          for (const { migration, record } of failed) {
-            console.log(`      [${migration.version}] ${migration.name}`);
-            console.log(`           Step que falhou: ${record?.failed_step ?? '?'}`);
-            console.log(`           Erro: ${record?.error_msg ?? '?'}`);
-          }
-        }
+        console.log(`   Executadas: ${executed.length}`);
+        for (const s of executed) console.log(`      [${s.version}] ${s.name} (${s.database})`);
 
-        console.log(`\n  ⏳Pendentes: ${pending.length}`);
-        for (const { migration } of pending) {
-          console.log(`      [${migration.version}] ${migration.name}`);
-        }
+        console.log(`\n Pendentes: ${pending.length}`);
+        for (const s of pending) console.log(`      [${s.version}] ${s.name} (${s.database})`);
         console.log('');
         break;
       }
 
       case 'dev': {
-        const database = process.argv[3];
-
-        console.log('\n═══════════════════════════════════════');
-        console.log('  Migrations — Modo dev');
-        console.log('═══════════════════════════════════════\n');
-
-        await runner.runPhase(
-          'beforeDeploy',
-          database ? { devDatabase: database } : {}
-        );
-
-        await runner.runPhase(
-          'execute',
-          database ? { devDatabase: database } : {}
-        );
-
-        console.log('Migrations dev concluídas com sucesso.\n');
+        console.log(`Migrations — DEV MODE`);
+        await runner.runPhase('beforeDeploy');
+        await runner.runPhase('execute');
         break;
       }
 
       default: {
-        console.log(`
-Uso: ts-node src/migrations/cli/migration.cli.ts <command>
-
-Comandos:
-  run                Executa migrations pendentes (fase execute)
-  before-deploy      Executa a fase before-deploy
-  status             Lista status, incluindo falhas com step e mensagem de erro
-  dev <database>     Executa todas as fases contra um banco específico (uso local)
-
-Exemplos:
-  npm run migration:run
-  npm run migration:dev plenna_dev
-        `);
-        process.exit(1);
+        console.error(`Comando inválido: ${command}`);
+        console.error('Comandos: run | before-deploy | status | dev');
+        process.exitCode = 1;
       }
     }
   } finally {
@@ -100,6 +56,6 @@ Exemplos:
 }
 
 main().catch((err) => {
-  console.error('\n❌ Erro fatal:', err.message ?? err);
+  console.error(err);
   process.exit(1);
 });

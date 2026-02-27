@@ -4,20 +4,18 @@ import { ScriptConstructor } from '../core/IScript';
 
 /**
  * Processor que executa um script TypeScript.
- * Inspirado em RunScript.php.
  *
- * Recebe a referência da classe (não a instância) e a instancia
- * na hora de process(), passando a conexão ativa — garantindo que
- * o script participa da transação quando isTransactional = true.
- *
- * Uso:
- *   MigrationSteps.RunScript(SeedModulosScript)
+ * Uso: MigrationSteps.RunScript(ScriptClass)
  */
 export class RunScript implements IMigrationStepProcessor {
   readonly label: string;
 
   constructor(private readonly scriptClass: ScriptConstructor) {
     this.label = `RunScript(${scriptClass.name})`;
+  }
+
+  checksumPayload(): string {
+    return `script:${this.scriptClass.name}`;
   }
 
   async process(connection: PoolConnection): Promise<void> {

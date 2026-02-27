@@ -1,18 +1,14 @@
+import { Database } from 'src/enum/database.enum';
 import { IMigrationStepProcessor } from './IMigrationStepProcessor';
 
 /**
  * Contrato que toda migration deve implementar.
  *
- * Combina o melhor das duas arquiteturas:
- * - MigrationBase.php: isBeforeDeploy(), isTransactional(), getDatabases()
- * - Plenna v1: fases separadas como métodos distintos (execute / executeBeforeDeploy)
- *   permitindo descrever as duas fases em um único arquivo de migration.
+ * Ex:
+ *   export class Migration20260227_01_AddUserEmailIndex implements IMigration { ... }
+ *   -> version = '20260227_01'
  */
 export interface IMigration {
-  /** Versão única e imutável. Ex: '001', '2025-05-25' */
-  readonly version: string;
-
-  /** Nome descritivo para logs e tabela de controle */
   readonly name: string;
 
   /**
@@ -28,7 +24,7 @@ export interface IMigration {
    */
   executeBeforeDeploy(): IMigrationStepProcessor[];
 
-  getDatabases(): string[];
+  getDatabases(): Database[];
 
   /**
    * Se true, todos os steps de execute() são envolvidos em

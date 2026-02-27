@@ -3,14 +3,14 @@ import { IMigration } from "../core/IMigration";
 import { IMigrationStepProcessor } from "../core/IMigrationStepProcessor";
 import { MigrationSteps } from "../core/MigrationSteps";
 
-export class Migration0002_TesteMigration implements IMigration {
-    readonly version = '0002';
-    readonly name    = 'Migration para teste 2';
+export class Migration20260227_01_TesteMigration implements IMigration {
+    readonly version = '20260227_01';
+    readonly name    = 'Migration para teste';
 
     execute(): IMigrationStepProcessor[] {
         return [
             MigrationSteps.RunSQL(
-                `UPDATE clients SET number = 63 WHERE id = 1`
+                `UPDATE clients SET number = 630 WHERE id = 1`
             )
         ]
     }
@@ -19,10 +19,8 @@ export class Migration0002_TesteMigration implements IMigration {
         return []
     }
 
-    getDatabases(): string[] {
-        return [
-            Database.PLENNA
-        ];
+    getDatabases(): Database[] {
+        return [Database.PLENNA]
     }
 
     isTransactional(): boolean {

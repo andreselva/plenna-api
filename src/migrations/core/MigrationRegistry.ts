@@ -1,3 +1,4 @@
+import { Migration0002_TesteMigration } from '../versions/Migration0002_TesteMigration';
 import { Migration20260227_TesteMigration } from '../versions/Migration20260227_TesteMigration';
 import { IMigration } from './IMigration';
 
@@ -9,4 +10,5 @@ import { IMigration } from './IMigration';
 export const MIGRATION_REGISTRY: IMigration[] = [
   //Ex: new Migration001_InitialTables(),
   new Migration20260227_TesteMigration(),
+  new Migration0002_TesteMigration()
 ];

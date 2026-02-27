@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { MigrationRunner } from '../core/MigrationRunner';
 import { MIGRATION_REGISTRY } from '../core/MigrationRegistry';
 

@@ -35,7 +35,7 @@ export class MigrationRunner {
 
   async runPhase(phase: MigrationPhase, _options: RunOptions = {}): Promise<void> {
     const phaseLabel = phase === 'beforeDeploy' ? 'before-deploy' : 'execute';
-    const databaseMap = this.groupByDatabase(); // ✅ sempre usa getDatabases()
+    const databaseMap = this.groupByDatabase();
 
     for (const [database, migrations] of databaseMap) {
       const pool = this.createPool(database);

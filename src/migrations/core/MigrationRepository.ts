@@ -3,10 +3,7 @@ import { MigrationRepositoryException } from '../exceptions/MigrationRepositoryE
 
 /**
  * Responsável por todas as operações na tabela schema_migrations.
- * Inspirado em MigrationRepository.php.
  *
- * Melhoria em relação à v1: as operações de banco de controle
- * estão isoladas aqui, fora do Runner — responsabilidade única.
  */
 export class MigrationRepository {
   constructor(private readonly pool: mysql.Pool) {}

@@ -2,7 +2,6 @@ import { PoolConnection } from 'mysql2/promise';
 
 /**
  * Interface base para scripts de migration.
- * Inspirado em IMigrationScript.php.
  *
  * Scripts recebem a conexão ativa no construtor — participam
  * da transação aberta pelo Runner quando isTransactional = true.

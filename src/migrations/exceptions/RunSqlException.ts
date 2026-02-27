@@ -1,6 +1,5 @@
 /**
  * Erro lançado por RunSQL quando uma statement falha.
- * Inspirado em RunSqlException.php.
  *
  * Permite o Runner distinguir erros de SQL de outros erros inesperados.
  */

@@ -9,8 +9,6 @@ import { PoolConnection } from 'mysql2/promise';
  * Fábrica estática de steps de migration.
  *
  * É a única classe que o autor de uma migration precisa conhecer.
- * Inspirada no padrão de MigrationEngine.php (runSQL, runScript, clearParametersCache)
- * mas como classe separada para manter responsabilidades distintas.
  *
  * O Runner recebe IMigrationStepProcessor[] e chama process() em cada um —
  * não sabe e não precisa saber qual tipo de step está executando.

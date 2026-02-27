@@ -1,6 +1,15 @@
 #!/bin/sh
 set -eu
 
+# ─────────────────────────────────────────────
+# Migrations — rodam antes de qualquer processo
+# ─────────────────────────────────────────────
+echo ">> [Migrations] Fase: before-deploy..."
+node -r ./register-paths.js dist/migrations/cli/migration.cli.js before-deploy
+
+echo ">> [Migrations] Fase: execute..."
+node -r ./register-paths.js dist/migrations/cli/migration.cli.js run
+
 # Railway define PORT. Use 8001 como padrão local.
 API_PORT="${PORT:-8001}"
 

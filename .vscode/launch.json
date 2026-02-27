@@ -12,6 +12,19 @@
       "sourceMaps": true,
       "localRoot": "${workspaceFolder}",
       "remoteRoot": "/app"
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Debug Migrations",
+      "address": "localhost",
+      "port": 9232,
+      "restart": false,
+      "protocol": "inspector",
+      "sourceMaps": true,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/app",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

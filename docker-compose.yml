@@ -55,6 +55,7 @@ services:
     ports:
       - "8001:8001"
       - "9229:9229"
+      - "9232:9232"
     volumes:
       - ./:/app
       - backend_node_modules:/app/node_modules

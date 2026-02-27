@@ -8,7 +8,7 @@ export type MigrationPhase = 'execute' | 'beforeDeploy';
 
 export interface RunOptions {
   /**
-   * Modo dev: sobrescreve o DB_NAME das variáveis de ambiente.
+   * Modo dev: sobrescreve os databases configurados em cada migration.
    * Permite testar todas as fases contra um banco local específico.
    * Equivalente ao --devDatabase do MigrationExecuter.php.
    */
@@ -25,95 +25,76 @@ export interface MigrationStatus {
 /**
  * Motor principal de execução de migrations.
  *
- * Melhorias em relação à v1:
- *
- * 1. Sem if/else de tipo nos steps — cada step implementa
- *    IMigrationStepProcessor e o Runner só chama step.process(conn).
- *    Inspirado no padrão IMigrationStepProcessor.php.
- *
- * 2. Operações de banco isoladas em MigrationRepository.
- *    Inspirado em MigrationRepository.php.
- *
- * 3. Registra o step que falhou (failed_step) e a mensagem
- *    de erro (error_msg) para facilitar diagnóstico em produção.
  */
 export class MigrationRunner {
-  private readonly pool: mysql.Pool;
-  private readonly repository: MigrationRepository;
-
-  constructor(private readonly migrations: IMigration[]) {
-    this.pool       = this.createPool();
-    this.repository = new MigrationRepository(this.pool);
-  }
+  constructor(private readonly migrations: IMigration[]) {}
 
   async runPhase(phase: MigrationPhase, options: RunOptions = {}): Promise<void> {
     const phaseLabel = phase === 'beforeDeploy' ? 'before-deploy' : 'execute';
 
-    for (const migration of this.migrations) {
+    const databaseMap = this.groupByDatabase(options.devDatabase);
 
-      const databases =
-        options.devDatabase
-          ? [options.devDatabase]
-          : migration.getDatabases();
+    for (const [database, migrations] of databaseMap) {
+      const pool       = this.createPool(database);
+      const repository = new MigrationRepository(pool);
 
-      for (const database of databases) {
+      try {
+        await repository.ensureTable();
+        const executed = await repository.getExecutedVersions();
+        const pending  = migrations.filter((m) => !executed.has(m.version));
 
-        const pool       = this.createPool(database);
-        const repository = new MigrationRepository(pool);
+        if (pending.length === 0) {
+          console.log(`[Migrations] Nenhuma migration pendente em ${database} — fase: ${phaseLabel}`);
+          continue;
+        }
 
-        try {
-          await repository.ensureTable();
-          const executed = await repository.getExecutedVersions();
+        console.log(`[Migrations] ${pending.length} migration(s) pendente(s) em ${database} — fase: ${phaseLabel}\n`);
 
-          if (executed.has(migration.version)) {
-            console.log(`[SKIP] ${migration.version} já executada no banco ${database}`);
-            continue;
-          }
-
-          const steps =
+        for (const migration of pending) {
+          const steps: IMigrationStepProcessor[] =
             phase === 'beforeDeploy'
               ? migration.executeBeforeDeploy()
               : migration.execute();
 
           if (steps.length === 0) {
+            console.log(`  [SKIP] ${migration.version}: ${migration.name} — sem passos para ${phaseLabel}`);
             continue;
           }
 
           console.log(`\n[DB: ${database}]`);
           await this.runMigration(migration, steps, phase, pool, repository);
-
-        } finally {
-          await pool.end();
         }
+
+      } finally {
+        await pool.end();
       }
     }
   }
 
   async getStatus(): Promise<MigrationStatus[]> {
     const result: MigrationStatus[] = [];
+    const databaseMap = this.groupByDatabase();
 
-    for (const migration of this.migrations) {
-      const databases = migration.getDatabases();
+    for (const [database, migrations] of databaseMap) {
+      const pool       = this.createPool(database);
+      const repository = new MigrationRepository(pool);
 
-      for (const database of databases) {
-        const pool       = this.createPool(database);
-        const repository = new MigrationRepository(pool);
+      try {
+        await repository.ensureTable();
+        const executed = await repository.getExecutedVersions();
+        const records  = await repository.getAll();
 
-        try {
-          await repository.ensureTable();
-          const executed = await repository.getExecutedVersions();
-          const records  = await repository.getAll();
-
+        for (const migration of migrations) {
           result.push({
             migration,
             database,
             executed: executed.has(migration.version),
-            record: records.find(r => r.version === migration.version),
+            record:   records.find((r) => r.version === migration.version),
           });
-
-        } finally {
-          await pool.end();
         }
+
+      } finally {
+        await pool.end();
       }
     }
 
@@ -121,7 +102,6 @@ export class MigrationRunner {
   }
 
   async close(): Promise<void> {
-    await this.pool.end();
   }
 
   private async runMigration(
@@ -135,7 +115,7 @@ export class MigrationRunner {
     const checksum = this.computeChecksum(migration);
     let   currentStep = 0;
 
-    console.log(`[START] ${migration.version}: ${migration.name}`);
+    console.log(`  [START] ${migration.version}: ${migration.name}`);
 
     try {
       if (migration.isTransactional()) {
@@ -185,12 +165,27 @@ export class MigrationRunner {
     }
   }
 
-  private createPool(database?: string): mysql.Pool {
+  private groupByDatabase(devDatabase?: string): Map<string, IMigration[]> {
+    const map = new Map<string, IMigration[]>();
+
+    for (const migration of this.migrations) {
+      const databases = devDatabase ? [devDatabase] : migration.getDatabases();
+
+      for (const db of databases) {
+        if (!map.has(db)) map.set(db, []);
+        map.get(db)!.push(migration);
+      }
+    }
+
+    return map;
+  }
+
+  private createPool(database: string): mysql.Pool {
     return mysql.createPool({
       host:               process.env.DB_HOST,
       user:               process.env.DB_USER,
       password:           process.env.DB_PASSWORD,
-      database:           database ?? process.env.DB_NAME,
+      database,
       port:               Number(process.env.DB_PORT ?? 3306),
       multipleStatements: true,
       charset:            'utf8mb4',

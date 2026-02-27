@@ -9,11 +9,9 @@ async function main(): Promise<void> {
     switch (command) {
 
       case 'run': {
-        console.log('\n═══════════════════════════════════════');
-        console.log('  Migrations — Fase: execute');
-        console.log('═══════════════════════════════════════\n');
+        console.log('Migrations — Fase: execute');
         await runner.runPhase('execute');
-        console.log('✅ Migrations concluídas com sucesso.\n');
+        console.log('Migrations concluídas com sucesso.\n');
         break;
       }
 
@@ -22,7 +20,7 @@ async function main(): Promise<void> {
         console.log('  Migrations — Fase: before-deploy');
         console.log('═══════════════════════════════════════\n');
         await runner.runPhase('beforeDeploy');
-        console.log('✅ Before-deploy concluído com sucesso.\n');
+        console.log('     Before-deploy concluído com sucesso.\n');
         break;
       }
 
@@ -36,13 +34,13 @@ async function main(): Promise<void> {
         console.log(`  Migrations — Status (${statuses.length} total)`);
         console.log('═══════════════════════════════════════\n');
 
-        console.log(`  ✅ Executadas: ${done.length}`);
+        console.log(`     Executadas: ${done.length}`);
         for (const { migration, record } of done) {
           console.log(`      [${migration.version}] ${migration.name}  (${record?.executed_at ?? ''})`);
         }
 
         if (failed.length > 0) {
-          console.log(`\n  ❌ Com falha: ${failed.length}`);
+          console.log(`\n[ERROR] Com falha: ${failed.length}`);
           for (const { migration, record } of failed) {
             console.log(`      [${migration.version}] ${migration.name}`);
             console.log(`           Step que falhou: ${record?.failed_step ?? '?'}`);
@@ -50,7 +48,7 @@ async function main(): Promise<void> {
           }
         }
 
-        console.log(`\n  ⏳ Pendentes: ${pending.length}`);
+        console.log(`\n  ⏳Pendentes: ${pending.length}`);
         for (const { migration } of pending) {
           console.log(`      [${migration.version}] ${migration.name}`);
         }
@@ -75,7 +73,7 @@ async function main(): Promise<void> {
           database ? { devDatabase: database } : {}
         );
 
-        console.log('✅ Migrations dev concluídas com sucesso.\n');
+        console.log('Migrations dev concluídas com sucesso.\n');
         break;
       }
 

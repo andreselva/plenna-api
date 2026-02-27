@@ -59,14 +59,34 @@ async function main(): Promise<void> {
         break;
       }
 
+      case 'dev': {
+        const database = process.argv[3];
+        if (!database) {
+          console.error('❌ Informe o banco de dados. Uso: migration.cli.ts dev <database>\n');
+          process.exit(1);
+        }
+        console.log('\n═══════════════════════════════════════');
+        console.log(`  Migrations — Modo dev (banco: ${database})`);
+        console.log('═══════════════════════════════════════\n');
+        await runner.runPhase('beforeDeploy', { devDatabase: database });
+        await runner.runPhase('execute',      { devDatabase: database });
+        console.log('✅ Migrations dev concluídas com sucesso.\n');
+        break;
+      }
+
       default: {
         console.log(`
 Uso: ts-node src/migrations/cli/migration.cli.ts <command>
 
 Comandos:
-  run             Executa migrations pendentes (fase execute)
-  before-deploy   Executa a fase before-deploy
-  status          Lista status, incluindo falhas com step e mensagem de erro
+  run                Executa migrations pendentes (fase execute)
+  before-deploy      Executa a fase before-deploy
+  status             Lista status, incluindo falhas com step e mensagem de erro
+  dev <database>     Executa todas as fases contra um banco específico (uso local)
+
+Exemplos:
+  npm run migration:run
+  npm run migration:dev plenna_dev
         `);
         process.exit(1);
       }

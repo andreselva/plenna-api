@@ -27,7 +27,11 @@
     "postbuild:worker": "npm run copy:email-templates:dist-worker",
     "copy:email-templates": "node scripts/copy-email-templates.js dist/modules/email/mailer/templates dist-worker/modules/email/mailer/templates",
     "copy:email-templates:dist": "node scripts/copy-email-templates.js dist/modules/email/mailer/templates",
-    "copy:email-templates:dist-worker": "node scripts/copy-email-templates.js dist-worker/modules/email/mailer/templates"
+    "copy:email-templates:dist-worker": "node scripts/copy-email-templates.js dist-worker/modules/email/mailer/templates",
+    "migration:run":           "ts-node -r tsconfig-paths/register src/migrations/cli/migration.cli.ts run",
+    "migration:before-deploy": "ts-node -r tsconfig-paths/register src/migrations/cli/migration.cli.ts before-deploy",
+    "migration:status":        "ts-node -r tsconfig-paths/register src/migrations/cli/migration.cli.ts status",
+    "migration:dev":           "ts-node -r tsconfig-paths/register src/migrations/cli/migration.cli.ts dev"
   },
   "dependencies": {
     "@aws-sdk/client-sesv2": "^3.896.0",

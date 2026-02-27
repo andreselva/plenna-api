@@ -6,6 +6,15 @@ import { MigrationRepository } from './MigrationRepository';
 
 export type MigrationPhase = 'execute' | 'beforeDeploy';
 
+export interface RunOptions {
+  /**
+   * Modo dev: sobrescreve o DB_NAME das variáveis de ambiente.
+   * Permite testar todas as fases contra um banco local específico.
+   * Equivalente ao --devDatabase do MigrationExecuter.php.
+   */
+  devDatabase?: string;
+}
+
 /**
  * Motor principal de execução de migrations.
  *
@@ -26,15 +35,7 @@ export class MigrationRunner {
   private readonly repository: MigrationRepository;
 
   constructor(private readonly migrations: IMigration[]) {
-    this.pool = mysql.createPool({
-      host:               process.env.DB_HOST,
-      user:               process.env.DB_USER,
-      password:           process.env.DB_PASSWORD,
-      database:           process.env.DB_NAME,
-      port:               Number(process.env.DB_PORT ?? 3306),
-      multipleStatements: true,
-      charset:            'utf8mb4',
-    });
+    this.pool       = this.createPool();
     this.repository = new MigrationRepository(this.pool);
   }
 
@@ -42,32 +43,43 @@ export class MigrationRunner {
   // API pública
   // ─────────────────────────────────────────────
 
-  async runPhase(phase: MigrationPhase): Promise<void> {
+  async runPhase(phase: MigrationPhase, options: RunOptions = {}): Promise<void> {
     const phaseLabel = phase === 'beforeDeploy' ? 'before-deploy' : 'execute';
 
-    await this.repository.ensureTable();
-    const executed = await this.repository.getExecutedVersions();
-    const pending  = this.migrations.filter((m) => !executed.has(m.version));
+    // Em modo dev, cria um pool e repository apontando para o banco informado
+    const pool       = options.devDatabase ? this.createPool(options.devDatabase) : this.pool;
+    const repository = options.devDatabase ? new MigrationRepository(pool) : this.repository;
 
-    if (pending.length === 0) {
-      console.log(`[Migrations] Nenhuma migration pendente para fase: ${phaseLabel}`);
-      return;
-    }
+    try {
+      await repository.ensureTable();
+      const executed = await repository.getExecutedVersions();
+      const pending  = this.migrations.filter((m) => !executed.has(m.version));
 
-    console.log(`[Migrations] ${pending.length} migration(s) pendente(s) — fase: ${phaseLabel}\n`);
-
-    for (const migration of pending) {
-      const steps: IMigrationStepProcessor[] =
-        phase === 'beforeDeploy'
-          ? migration.executeBeforeDeploy()
-          : migration.execute();
-
-      if (steps.length === 0) {
-        console.log(`  [SKIP] ${migration.version}: ${migration.name} — sem passos para ${phaseLabel}`);
-        continue;
+      if (pending.length === 0) {
+        console.log(`[Migrations] Nenhuma migration pendente para fase: ${phaseLabel}`);
+        return;
       }
 
-      await this.runMigration(migration, steps, phase);
+      console.log(`[Migrations] ${pending.length} migration(s) pendente(s) — fase: ${phaseLabel}\n`);
+
+      for (const migration of pending) {
+        const steps: IMigrationStepProcessor[] =
+          phase === 'beforeDeploy'
+            ? migration.executeBeforeDeploy()
+            : migration.execute();
+
+        if (steps.length === 0) {
+          console.log(`  [SKIP] ${migration.version}: ${migration.name} — sem passos para ${phaseLabel}`);
+          continue;
+        }
+
+        await this.runMigration(migration, steps, phase, pool, repository);
+      }
+    } finally {
+      // Fecha o pool temporário do modo dev ao terminar
+      if (options.devDatabase) {
+        await pool.end();
+      }
     }
   }
 
@@ -93,11 +105,13 @@ export class MigrationRunner {
   // ─────────────────────────────────────────────
 
   private async runMigration(
-    migration: IMigration,
-    steps: IMigrationStepProcessor[],
-    phase: MigrationPhase,
+    migration:  IMigration,
+    steps:      IMigrationStepProcessor[],
+    phase:      MigrationPhase,
+    pool:       mysql.Pool,
+    repository: MigrationRepository,
   ): Promise<void> {
-    const conn     = await this.pool.getConnection();
+    const conn     = await pool.getConnection();
     const checksum = this.computeChecksum(migration);
     let   currentStep = 0;
 
@@ -115,18 +129,13 @@ export class MigrationRunner {
       // ──────────────────────────────────────────────────────────────────
       for (let i = 0; i < steps.length; i++) {
         currentStep = i + 1;
-        const step = steps[i];
+        const step  = steps[i];
         console.log(`    Step ${currentStep}/${steps.length}: ${step.label}`);
         await step.process(conn);
       }
 
       if (phase === 'execute') {
-        await this.repository.registerSuccess(
-          migration.version,
-          migration.name,
-          checksum,
-          conn,
-        );
+        await repository.registerSuccess(migration.version, migration.name, checksum, conn);
       }
 
       if (migration.isTransactional()) {
@@ -145,7 +154,7 @@ export class MigrationRunner {
       console.error(`          Falha no step ${currentStep}: ${errorMessage}\n`);
 
       if (phase === 'execute') {
-        await this.repository.registerFailure(
+        await repository.registerFailure(
           migration.version,
           migration.name,
           checksum,
@@ -161,9 +170,17 @@ export class MigrationRunner {
     }
   }
 
-  // ─────────────────────────────────────────────
-  // Utilitários
-  // ─────────────────────────────────────────────
+  private createPool(database?: string): mysql.Pool {
+    return mysql.createPool({
+      host:               process.env.DB_HOST,
+      user:               process.env.DB_USER,
+      password:           process.env.DB_PASSWORD,
+      database:           database ?? process.env.DB_NAME,
+      port:               Number(process.env.DB_PORT ?? 3306),
+      multipleStatements: true,
+      charset:            'utf8mb4',
+    });
+  }
 
   private computeChecksum(migration: IMigration): string {
     const content = `${migration.version}:${migration.name}`;

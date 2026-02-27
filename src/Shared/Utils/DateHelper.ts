@@ -145,4 +145,8 @@ export default class DateHelper {
     static ymKey(y: number, m: number) {
         return `${y}-${String(m).padStart(2, '0')}`;
     }
+
+    static getCurrentYear(): number {
+        return Number(DateTime.local().toFormat('yyyy'));
+    }
 }

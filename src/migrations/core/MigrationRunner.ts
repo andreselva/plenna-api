@@ -46,10 +46,6 @@ export class MigrationRunner {
     this.repository = new MigrationRepository(this.pool);
   }
 
-  // ─────────────────────────────────────────────
-  // API pública
-  // ─────────────────────────────────────────────
-
   async runPhase(phase: MigrationPhase, options: RunOptions = {}): Promise<void> {
     const phaseLabel = phase === 'beforeDeploy' ? 'before-deploy' : 'execute';
 
@@ -57,8 +53,8 @@ export class MigrationRunner {
 
       const databases =
         options.devDatabase
-          ? [options.devDatabase]     // sobrescreve se estiver em modo dev
-          : migration.getDatabases(); // usa bancos definidos na migration
+          ? [options.devDatabase]
+          : migration.getDatabases();
 
       for (const database of databases) {
 
@@ -128,10 +124,6 @@ export class MigrationRunner {
     await this.pool.end();
   }
 
-  // ─────────────────────────────────────────────
-  // Execução individual
-  // ─────────────────────────────────────────────
-
   private async runMigration(
     migration:  IMigration,
     steps:      IMigrationStepProcessor[],
@@ -150,11 +142,6 @@ export class MigrationRunner {
         await conn.beginTransaction();
       }
 
-      // ── O Runner não sabe o que cada step faz ──────────────────────────
-      // Chama step.process(conn) e o step cuida de si mesmo.
-      // Adicionar um novo tipo de step = criar uma classe nova.
-      // O Runner nunca precisa ser alterado.
-      // ──────────────────────────────────────────────────────────────────
       for (let i = 0; i < steps.length; i++) {
         currentStep = i + 1;
         const step  = steps[i];

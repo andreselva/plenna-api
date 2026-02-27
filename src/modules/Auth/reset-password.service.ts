@@ -9,6 +9,7 @@ import ResetPasswordDTO from "./DTOs/reset-password.dto";
 import PasswordHasher from "src/Shared/Utils/Secutiry/PasswordHasher";
 import PasswordValidator from "src/Shared/Utils/Secutiry/PasswordValidator";
 import { PASSWORD_ERROR_MESSAGES } from "src/Shared/Utils/Secutiry/PasswordValidatorMessages";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 export interface ResetPasswordSummary {
     name: string;
@@ -36,7 +37,7 @@ export default class ResetPasswordService {
                 name: result.name,
                 expireMinutes: 5,
                 resetLink: `${process.env.FRONT_URL}reset-password?token=${rawToken}`,
-                year: 2026
+                year: DateHelper.getCurrentYear()
             } satisfies ResetPasswordSummary
 
             const to = result.email;

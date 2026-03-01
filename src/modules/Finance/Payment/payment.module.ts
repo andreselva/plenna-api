@@ -7,9 +7,10 @@ import { InvoicesModule } from "../Invoices/invoices.module";
 import { ExpensesModule } from "../Expenses/expenses.module";
 import GetPayments from "./UseCases/GetPayments";
 import DeletePayment from "./UseCases/DeletePayment";
+import { RevenueModule } from "../Revenues/revenue.module";
 
 @Module({
-    imports: [forwardRef(() => InvoicesModule), ExpensesModule],
+    imports: [forwardRef(() => InvoicesModule), ExpensesModule, RevenueModule],
     providers: [PaymentService, PaymentRegister, PaymentRepository, GetPayments, DeletePayment],
     controllers: [PaymentController],
     exports: []

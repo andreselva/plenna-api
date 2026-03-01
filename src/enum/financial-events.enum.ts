@@ -1,4 +1,4 @@
-export enum FinancialEvents {
+export enum FinancialEventsEnum {
     EXPENSE_POSTED = 'EXPENSE_POSTED',
     REVENUE_POSTED = 'REVENUE_POSTED',
     TRANSFER_POSTED = 'TRANSFER_POSTED',

@@ -7,6 +7,7 @@ import { ExpensesServices } from "../Expenses/ExpensesServices";
 import GetPayments from "./UseCases/GetPayments";
 import ReversePaymentDataDTO from "./DTOs/ReversePaymentDataDTO";
 import DeletePayment from "./UseCases/DeletePayment";
+import RevenuesService from "../Revenues/RevenuesService";
 
 @Injectable()
 export default class PaymentService {
@@ -15,7 +16,8 @@ export default class PaymentService {
         private readonly invoiceService: InvoicesService,
         private readonly expenseService: ExpensesServices,
         private readonly getPaymentsUC: GetPayments,
-        private readonly deletePaymentUC: DeletePayment
+        private readonly deletePaymentUC: DeletePayment,
+        private readonly revenueService: RevenuesService
     ) { }
 
     async registerPayment(paymentData: PaymentInicialDataDTO) {
@@ -32,6 +34,9 @@ export default class PaymentService {
                     return { payment: savedPayment };
                 case PaymentType.EXPENSE:
                     await this.expenseService.updateStatusExpense(savedPayment.payable_id, savedPayment.payment_date);
+                    return { payment: savedPayment };
+                case PaymentType.REVENUE:
+                    await this.revenueService.updateStatusRevenue(savedPayment.payable_id, savedPayment.payment_date);
                     return { payment: savedPayment };
             }
         } else {

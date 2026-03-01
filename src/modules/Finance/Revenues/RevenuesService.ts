@@ -41,4 +41,11 @@ export default class RevenuesService {
     async updateRevenue(id: string, revenue: RevenueDTO, periodo: PeriodoDTO) {
         return await this.updateRevenueUseCase.execute(Number(id), revenue, periodo);
     }
+
+    async updateStatusRevenue(id: number, paymentDate: string|null) {
+        if (paymentDate === '') {
+            paymentDate = null;
+        }
+        return await this.updateRevenueUseCase.updateRevenueStatus(id, paymentDate);
+    };
 }

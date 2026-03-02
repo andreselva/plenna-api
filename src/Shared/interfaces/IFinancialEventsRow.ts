@@ -7,7 +7,7 @@ export interface IFinancialEventsRow {
     accountId: number;
     type: FinancialEventsEnum;
     amount: number;
-    ocurredAt: string;
+    occurredAt: string;
     createdAt: string;
     sequenceNumber: number;
     referenceType: PaymentType;

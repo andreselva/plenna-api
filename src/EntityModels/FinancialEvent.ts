@@ -10,7 +10,7 @@ export class FinancialEvents extends EntityModel implements IEntity {
     public accountId: number = 0;
     public type: FinancialEventsEnum;
     public amount: number;
-    public ocurredAt: string;
+    public occurredAt: string;
     public createdAt: string;
     public sequenceNumber: number;
     public referenceType: PaymentType;
@@ -25,7 +25,7 @@ export class FinancialEvents extends EntityModel implements IEntity {
         financialEvent.accountId = row.accountId ?? 0;
         financialEvent.type = row.type;
         financialEvent.amount = row.amount;
-        financialEvent.ocurredAt = row.ocurredAt;
+        financialEvent.occurredAt = row.occurredAt;
         financialEvent.sequenceNumber = row.sequenceNumber;
         financialEvent.referenceType = row.referenceType;
         financialEvent.referenceId = row.referenceId;

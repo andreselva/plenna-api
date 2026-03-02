@@ -5,7 +5,6 @@ import { InvoicesService } from "../Invoices/invoices.service";
 import { PaymentType } from "./Types/payment.type";
 import { ExpensesServices } from "../Expenses/ExpensesServices";
 import GetPayments from "./UseCases/GetPayments";
-import ReversePaymentDataDTO from "./DTOs/ReversePaymentDataDTO";
 import DeletePayment from "./UseCases/DeletePayment";
 import RevenuesService from "../Revenues/RevenuesService";
 import { FinancialEventsService, IFinancialEvent } from "src/modules/financial-events/financial-events.service";

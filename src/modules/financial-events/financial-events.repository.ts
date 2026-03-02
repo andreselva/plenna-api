@@ -10,6 +10,14 @@ export class FinancialEventsRepository extends BaseRepository<FinancialEvents>{
         super(database, authContext)
     }
 
+    async saveEvent(financialEvent: FinancialEvents): Promise<FinancialEvents> {
+        const result = await this.save(financialEvent);
+        if (result.affectedRows > 0) {
+            financialEvent.id = result.insertId;
+        }
+        return financialEvent;
+    }
+
     async getMaxSequenceNumber(): Promise<number | null> {
         const query = `SELECT MAX(sequenceNumber) AS maxSequenceNumber
             FROM financial_events

@@ -27,11 +27,18 @@ export default class RedisService {
     }
 
     async delete(key: string) {
-        await this.redis.del(key)
+        await this.redis.del(key);
     }
 
     async getdel(key: string) {
         return await this.redis.getdel(key);
     }
 
+    async incr(key: string): Promise<number> {
+        return await this.redis.incr(key);
+    }
+
+    async incrby(key: string, increment: number): Promise<number> {
+        return await this.redis.incrby(key, increment);
+    }
 }

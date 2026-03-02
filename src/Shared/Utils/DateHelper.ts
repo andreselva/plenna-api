@@ -149,4 +149,8 @@ export default class DateHelper {
     static getCurrentYear(): number {
         return Number(DateTime.local().toFormat('yyyy'));
     }
+
+    static getCurrentDate(): string {
+        return DateTime.local({ zone: "America/Sao_Paulo" }).toFormat("yyyy-MM-dd HH:mm:ss");
+    }
 }

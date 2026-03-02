@@ -8,9 +8,10 @@ import { ExpensesModule } from "../Expenses/expenses.module";
 import GetPayments from "./UseCases/GetPayments";
 import DeletePayment from "./UseCases/DeletePayment";
 import { RevenueModule } from "../Revenues/revenue.module";
+import { FinancialEventsModule } from "src/modules/financial-events/financial-events.module";
 
 @Module({
-    imports: [forwardRef(() => InvoicesModule), ExpensesModule, RevenueModule],
+    imports: [forwardRef(() => InvoicesModule), ExpensesModule, RevenueModule, FinancialEventsModule],
     providers: [PaymentService, PaymentRegister, PaymentRepository, GetPayments, DeletePayment],
     controllers: [PaymentController],
     exports: []

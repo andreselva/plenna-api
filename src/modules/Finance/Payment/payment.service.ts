@@ -8,6 +8,8 @@ import GetPayments from "./UseCases/GetPayments";
 import ReversePaymentDataDTO from "./DTOs/ReversePaymentDataDTO";
 import DeletePayment from "./UseCases/DeletePayment";
 import RevenuesService from "../Revenues/RevenuesService";
+import { FinancialEventsService, IFinancialEvent } from "src/modules/financial-events/financial-events.service";
+import { FinancialEventsEnum } from "src/enum/financial-events.enum";
 
 @Injectable()
 export default class PaymentService {
@@ -17,7 +19,8 @@ export default class PaymentService {
         private readonly expenseService: ExpensesServices,
         private readonly getPaymentsUC: GetPayments,
         private readonly deletePaymentUC: DeletePayment,
-        private readonly revenueService: RevenuesService
+        private readonly revenueService: RevenuesService,
+        private readonly financialEventsService: FinancialEventsService
     ) { }
 
     async registerPayment(paymentData: PaymentInicialDataDTO) {
@@ -27,6 +30,14 @@ export default class PaymentService {
             if (!savedPayment) {
                 throw new Error("Failed to register payment");
             }
+
+            await this.financialEventsService.register({
+                accountId: 0, // LEMBRAR DE ALTERAR DEPOIS
+                amount: paymentData.value,
+                type: FinancialEventsEnum.PAYMENT_POSTED,
+                referenceId: paymentData.payableId,
+                referenceType: paymentData.payableType
+            } satisfies IFinancialEvent)
 
             switch (paymentData.payableType) {
                 case PaymentType.INVOICE:

@@ -14,8 +14,7 @@ export class Migration20260228_01_CriaFinancialEvents implements IMigration {
                     clientId BIGINT NOT NULL,
                     accountId BIGINT NOT NULL,
                     type ENUM(
-                        'EXPENSE_POSTED',
-                        'REVENUE_POSTED',
+                        'PAYMENT_POSTED',
                         'TRANSFER_POSTED',
                         'ADJUSTMENT',
                         'REVERSAL',

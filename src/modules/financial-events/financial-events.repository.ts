@@ -30,7 +30,7 @@ export class FinancialEventsRepository extends BaseRepository<FinancialEvents>{
     async getLastEventHash(): Promise<string | null> {
         const query = `SELECT eventHash as previousHash FROM financial_events WHERE clientId = ? ORDER BY sequenceNumber DESC LIMIT 1`;
         const result = await this.database.select(query, [this.authContext.getClientId()]);
-        return result[0].previousHash ?? null;
+        return result[0]?.previousHash ?? null;
     }
 
 }

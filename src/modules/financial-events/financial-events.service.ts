@@ -56,9 +56,9 @@ export class FinancialEventsService {
   private async getSequenceNumber(): Promise<number> {
     const rk = RedisKeys.sequenceNumber(this.authContext.getClientId());
 
-    const exists = await this.redisService.get<number | string>(rk);
+    const redisValue = await this.redisService.get<number | string>(rk);
 
-    if (exists === null) {
+    if (redisValue === null) {
       const maxFromDb = await this.repository.getMaxSequenceNumber();
       const current = maxFromDb ?? 0;
       await this.redisService.set(rk, current);

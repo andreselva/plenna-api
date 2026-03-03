@@ -39,6 +39,12 @@ export class Migration20260228_01_CriaFinancialEvents implements IMigration {
             ),
             MigrationSteps.RunSQL(
                 `ALTER TABLE revenue ADD COLUMN paymentDate DATETIME DEFAULT NULL;`
+            ),
+            MigrationSteps.RunSQL(
+                `ALTER TABLE expense MODIFY COLUMN status ENUM('paid', 'partial', 'pending', 'cancelled', 'reversed');`
+            ),
+            MigrationSteps.RunSQL(
+                `ALTER TABLE revenue MODIFY COLUMN status ENUM('pending', 'paid', 'partial', 'cancelled', 'reversed');`
             )
         ]
     }

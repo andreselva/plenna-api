@@ -1,11 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import PaymentRegister from "./UseCases/PaymentRegister";
 import PaymentInicialDataDTO from "./DTOs/PaymentInicialDataDTO";
 import { InvoicesService } from "../Invoices/invoices.service";
 import { PaymentType } from "./Types/payment.type";
 import { ExpensesServices } from "../Expenses/ExpensesServices";
 import GetPayments from "./UseCases/GetPayments";
-import DeletePayment from "./UseCases/DeletePayment";
 import RevenuesService from "../Revenues/RevenuesService";
 import { FinancialEventsService, IFinancialEvent } from "src/modules/financial-events/financial-events.service";
 import { FinancialEventsEnum } from "src/enum/financial-events.enum";
@@ -14,12 +13,13 @@ import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export default class PaymentService {
+    private readonly logger = new Logger(PaymentService.name);
+
     constructor(
         private readonly paymentRegisterUC: PaymentRegister,
         private readonly invoiceService: InvoicesService,
         private readonly expenseService: ExpensesServices,
         private readonly getPaymentsUC: GetPayments,
-        private readonly deletePaymentUC: DeletePayment,
         private readonly revenueService: RevenuesService,
         private readonly financialEventsService: FinancialEventsService
     ) { }
@@ -33,41 +33,25 @@ export default class PaymentService {
             }
 
             await this.financialEventsService.register({
-                accountId: 0, // LEMBRAR DE ALTERAR DEPOIS
+                accountId: paymentData.accountId,
                 amount: paymentData.value,
                 type: FinancialEventsEnum.PAYMENT_POSTED,
                 referenceId: paymentData.payableId,
                 referenceType: paymentData.payableType
             } satisfies IFinancialEvent)
 
-            switch (paymentData.payableType) {
-                case PaymentType.INVOICE:
-                    await this.invoiceService.updateInvoiceStatus(savedPayment.payable_id, savedPayment.payment_date);
-                    return { payment: savedPayment };
-                case PaymentType.EXPENSE:
-                    await this.expenseService.updateStatusExpense(savedPayment.payable_id, savedPayment.payment_date);
-                    return { payment: savedPayment };
-                case PaymentType.REVENUE:
-                    await this.revenueService.updateStatusRevenue(savedPayment.payable_id, savedPayment.payment_date);
-                    return { payment: savedPayment };
-            }
+            await this.updateStatus(paymentData.payableType, savedPayment.payable_id, savedPayment.payment_date);
+
         } else {
             throw new Error("Invalid payment data");
         }
     }
 
     async getPaymentsData(entityType: PaymentType, entityId: string) {
-        if (entityType && entityId) {
-            switch (entityType) {
-                case PaymentType.INVOICE:
-                    return await this.getPaymentsUC.execute(entityType, entityId);
-                case PaymentType.EXPENSE:
-                    return await this.getPaymentsUC.execute(entityType, entityId);
-                default:
-                    throw new Error("Invalid entity type");
-            }
-        } else {
-            throw new Error("Entity type and ID are required");
+        try {
+            return await this.getPaymentsUC.execute(entityType, entityId);
+        } catch (error) {
+            this.logger.error(error.message);
         }
     }
 
@@ -91,16 +75,46 @@ export default class PaymentService {
                 })
             }
 
-            switch(paymentDTO.payableType) {
-                case PaymentType.EXPENSE:
-                    return await this.expenseService.updateStatusExpense(dto.entityId, null, true);
-            }
+            await this.updateStatus(paymentDTO.payableType, dto.entityId, null, true);
 
             //FALTA ATUALIZAR O PAGAMENTO COM A DATA DE ESTORNO.
             
 
         } catch (error) {
             throw new Error(`An error ocurred while delete payment: ${error.message}`);
+        }
+    }
+
+    private async updateStatus(type: PaymentType, id: number, paymentDate: string | null, reversed: boolean = false) {
+        try {
+            switch(type) {
+                case PaymentType.INVOICE:
+                    if (reversed) {
+                        //Ajustar depois para setar o status reversed
+                        //this.invoiceService.updateInvoiceStatus(paymentData.payableId, paymentData.paymentDate)
+                        break;
+                    }
+                    await this.invoiceService.updateInvoiceStatus(id, paymentDate);
+                    break;
+                case PaymentType.EXPENSE:
+                    if (reversed) {
+                        await this.expenseService.updateStatusExpense(id, null, true);
+                        break;
+                    }
+                    await this.expenseService.updateStatusExpense(id, paymentDate);
+                    break;
+                case PaymentType.REVENUE:
+                    if (reversed) {
+                        //
+                        break;
+                    }
+                    await this.revenueService.updateStatusRevenue(id, paymentDate);
+                    break;
+                default:
+                    throw new Error(`Nenhum método de atualização de status encontrado para ${type}`);
+            }
+        } catch (error) {
+            this.logger.error(`Erro retornado na atualização de status: ${error.message}`);
         }
     }
 }

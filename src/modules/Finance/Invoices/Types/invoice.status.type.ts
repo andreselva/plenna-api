@@ -1,1 +1,1 @@
-export type InvoiceStatus = 'paid' | 'pending' | 'parcial';
+export type InvoiceStatus = 'paid' | 'pending' | 'parcial' | 'reversed';

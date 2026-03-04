@@ -12,13 +12,21 @@ export default class PaymentInicialDataDTO {
 
     @IsInt({ message: 'Invalid id payment type!' })
     @IsNotEmpty({ message: 'Invalid id payment type.'})
-    public payableId: number;
+    payableId: number;
 
     @IsString({ message: 'Invalid payment type!' })
     @IsNotEmpty({ message: 'Invalid payment type.' })
-    public payableType: PaymentType;
+    payableType: PaymentType;
 
     @IsOptional()
     @IsInt({ message: 'Invalid ID!' })
-    public id: number;
+    id: number;
+
+    @IsInt({ message: 'Invalid account ID!' })
+    accountId: number;
+
+
+    @IsOptional()
+    @IsString({ message: 'Invalid reversed value.' })
+    reversed: string;
 }

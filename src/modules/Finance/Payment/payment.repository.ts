@@ -26,17 +26,11 @@ export class PaymentRepository extends BaseRepository<Payment> {
                             payment_date,
                             payable_id,
                             payable_type,
-                            id as id
+                            id as id,
+                            reversed
                         FROM payment WHERE clientId = ? AND payable_id = ? AND payable_type = ?`;
         const values = [this.authContext.getClientId(), entityId, entityType];
         const results = await this.database.select(query, values);
         return this.extractToEntity(results, Payment);
-    }
-
-    async deletePayment(dto: ReversePaymentDataDTO) {
-        const query = "DELETE FROM payment WHERE clientId = ? AND id = ? AND payable_type = ? AND payable_id = ?";
-        const values = [this.authContext.getClientId(), dto.paymentId, dto.entityType, dto.entityId];
-        await this.database.execute(query, values);
-        return true;
     }
 }

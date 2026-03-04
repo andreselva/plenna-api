@@ -12,6 +12,7 @@ export default class Payment extends EntityModel implements IEntity {
     public payment_date: string = '';
     public payable_id: number = 0;
     public payable_type: PaymentType;
+    public reversed: string;
 
     constructor() {
         super();
@@ -24,6 +25,7 @@ export default class Payment extends EntityModel implements IEntity {
         payment.payable_id = dto.payableId;
         payment.payable_type = dto.payableType;
         payment.id = dto.id ?? 0;
+        payment.reversed = dto.reversed ?? null
         return payment;
    }
 
@@ -34,6 +36,7 @@ export default class Payment extends EntityModel implements IEntity {
         payment.payment_date = DateHelper.toISODate(row.payment_date) as string;
         payment.payable_id = row.payable_id;
         payment.payable_type = row.payable_type
+        payment.reversed = row.reversed;
         return payment;
    }
 

@@ -10,6 +10,7 @@ import RevenuesService from "../Revenues/RevenuesService";
 import { FinancialEventsService, IFinancialEvent } from "src/modules/financial-events/financial-events.service";
 import { FinancialEventsEnum } from "src/enum/financial-events.enum";
 import ReversePaymentDataDTO from "./DTOs/ReversePaymentDataDTO";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export default class PaymentService {
@@ -72,19 +73,32 @@ export default class PaymentService {
 
     async deletePayment(dto: ReversePaymentDataDTO) {
         try {
-            const result = await this.deletePaymentUC.delete(dto);
+            const paymentDTO = new PaymentInicialDataDTO();
+            paymentDTO.payableId = dto.entityId;
+            paymentDTO.payableType = dto.referenceType;
+            paymentDTO.paymentDate = DateHelper.getCurrentDate();
+            paymentDTO.value = -Math.abs(dto.amount);
 
-            if (result) {
-                switch (dto.entityType) {
-                    case PaymentType.INVOICE:
-                        await this.invoiceService.updateInvoiceStatus(dto.entityId, null);
-                        return { isSuccess: true, message: "Payment reversed successfully" };
-                    case PaymentType.EXPENSE:
-                        return this.expenseService.updateStatusExpense(dto.entityId, '');
-                    default:
-                        throw new Error("Invalid entity type for payment reversal");
-                }
+            const savedReversed = await this.paymentRegisterUC.register(paymentDTO);
+
+            if (savedReversed !== null) {
+                await this.financialEventsService.register({
+                    accountId: dto.accountId,
+                    amount: paymentDTO.value,
+                    type: FinancialEventsEnum.REVERSAL,
+                    referenceId: dto.entityId,
+                    referenceType: dto.referenceType
+                })
             }
+
+            switch(paymentDTO.payableType) {
+                case PaymentType.EXPENSE:
+                    return await this.expenseService.updateStatusExpense(dto.entityId, null, true);
+            }
+
+            //FALTA ATUALIZAR O PAGAMENTO COM A DATA DE ESTORNO.
+            
+
         } catch (error) {
             throw new Error(`An error ocurred while delete payment: ${error.message}`);
         }

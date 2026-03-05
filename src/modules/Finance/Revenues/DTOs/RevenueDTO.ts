@@ -1,4 +1,5 @@
 import { IsBoolean, IsDateString, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { RevenueStatus } from "../Types/revenue.status.type";
 
 export class RevenueDTO {
     @IsString({ message: 'Invalid name!'})
@@ -37,10 +38,15 @@ export class RevenueDTO {
     @IsBoolean({ message: 'Invalid argument hasInstallments!' })
     @IsNotEmpty({ message: 'Invalid argument hasInstallments' })
     hasInstallments: boolean;
-
+    
+    @IsString({ message: 'Invalid status!' })
+    @IsNotEmpty({ message: 'Invalid status! Status cannot by empty.' })
+    status: RevenueStatus;
+    
     @IsOptional()
     @IsBoolean({ message: 'Invalid argument updateInstallments!' })
     updateInstallments: boolean;
+
 
     @IsOptional()
     @IsInt({ message: 'Invalid ID!' })

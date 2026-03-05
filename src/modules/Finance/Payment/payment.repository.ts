@@ -33,4 +33,9 @@ export class PaymentRepository extends BaseRepository<Payment> {
         const results = await this.database.select(query, values);
         return this.extractToEntity(results, Payment);
     }
+
+    async updateReverseDate(paymentId: number, reverseDate: string) {
+        const query = `UPDATE payment SET reversed = ? WHERE id = ?`;
+        await this.database.execute(query, [reverseDate, paymentId])
+    }
 }

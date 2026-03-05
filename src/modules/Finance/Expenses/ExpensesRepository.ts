@@ -60,10 +60,10 @@ export class ExpensesRepository extends BaseRepository<Expense> {
         }
     }
 
-    async getPayments(id: number): Promise<number> {
-        const query = "SELECT SUM(value) as totalPayments FROM payment WHERE clientId = ? AND payable_type = 'expense' AND payable_id = ?";
+    async getPayments(id: number): Promise<Expense[]> {
+        const query = "SELECT * FROM payment WHERE clientId = ? AND payable_type = 'expense' AND payable_id = ?";
         const result = await this.database.select(query, [this.authContext.getClientId(), id]);
-        return Number(result[0]?.totalPayments) || 0;
+        return this.extractToEntity(result, Expense);
     }
 
     async getExpenseById(id: number) {

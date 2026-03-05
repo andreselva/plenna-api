@@ -20,8 +20,6 @@ export interface IFinancialEvent {
 
 @Injectable()
 export class FinancialEventsService {
-  private rkPreviousHash = '';
-
   constructor(
     private readonly authContext: AuthContextService,
     private readonly redisService: RedisService,
@@ -32,7 +30,8 @@ export class FinancialEventsService {
     const event = await this.buildEvent(data);
     const saved = await this.repository.saveEvent(event);
     if (saved?.id > 0) {
-      await this.redisService.set(this.rkPreviousHash, saved.eventHash);
+      const rkPreviousHash = RedisKeys.previousHash(this.authContext.getClientId());
+      await this.redisService.set(rkPreviousHash, saved.eventHash);
     }
     return saved;
   }
@@ -68,9 +67,9 @@ export class FinancialEventsService {
   }
 
   private async getPreviousHash(): Promise<string> {
-    this.rkPreviousHash = RedisKeys.previousHash(this.authContext.getClientId());
+    const rkPreviousHash = RedisKeys.previousHash(this.authContext.getClientId());
 
-    const redisValue = await this.redisService.get<string>(this.rkPreviousHash);
+    const redisValue = await this.redisService.get<string>(rkPreviousHash);
     if (redisValue !== null && redisValue !== undefined) {
       return redisValue;
     }

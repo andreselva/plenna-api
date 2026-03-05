@@ -8,7 +8,7 @@ export default class ReversePaymentDataDTO {
 
     @IsInt({ message: 'Invalid reference ID!'})
     @IsNotEmpty({ message: 'Invalid reference ID.' })
-    referenceId: number;
+    paymentId: number;
 
     @IsInt({ message: 'Invalid entity ID!'})
     @IsNotEmpty({ message: 'Invalid entity ID.' })

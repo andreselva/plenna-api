@@ -3,6 +3,7 @@ import EntityModel from "src/EntityModels/entity.model";
 import IEntity from "src/Shared/interfaces/IEntity";
 import IRevenueRow from "src/Shared/interfaces/IRevenueRow";
 import { RevenueDTO } from "src/modules/Finance/Revenues/DTOs/RevenueDTO";
+import { RevenueStatus } from "src/modules/Finance/Revenues/Types/revenue.status.type";
 
 export default class Revenue extends EntityModel implements IEntity {
     public id: number = 0;
@@ -16,6 +17,7 @@ export default class Revenue extends EntityModel implements IEntity {
     public typeOfInstallments: string = 'U';
     public sourceAccountId: number = 0;
     public hasInstallments: boolean = false;
+    public status: RevenueStatus = RevenueStatus.PENDING;
 
     constructor() {
         super();
@@ -38,6 +40,7 @@ export default class Revenue extends EntityModel implements IEntity {
         revenue.sourceAccountId = dto.sourceAccountId ?? 0;
         revenue.hasInstallments = dto.hasInstallments;
         revenue.value = dto.value;
+        revenue.status = dto.status;
         revenue.id = dto.id ?? 0;
         return revenue;
     }
@@ -60,6 +63,7 @@ export default class Revenue extends EntityModel implements IEntity {
         revenue.typeOfInstallments = row.typeOfInstallments;
         revenue. sourceAccountId = row.sourceAccountId;
         revenue.hasInstallments = Boolean(row.hasInstallments);
+        revenue.status = row.status;
         return revenue;
     }
 

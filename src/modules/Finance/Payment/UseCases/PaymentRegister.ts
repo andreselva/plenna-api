@@ -9,8 +9,5 @@ export default class PaymentRegister {
         private readonly paymentRepository: PaymentRepository
     ) { }
 
-    async register(payment: PaymentInicialDataDTO) {
-        const entity = Payment.fromDTO(payment);
-        return await this.paymentRepository.savePayment(entity);
-    }
+
 }

@@ -37,10 +37,10 @@ export class ExpensesServices {
         return await this.updateExpenseUseCase.execute(Number(id), expense, periodo);
     }
 
-    async updateStatusExpense(id: number, paymentDate: string|null, reversed: boolean = false) {
+    async updateStatusExpense(id: number, paymentDate: string|null) {
         if (paymentDate === '') {
             paymentDate = null;
         }
-        return await this.updateExpenseUseCase.updateExpenseStatus(id, paymentDate, reversed);
+        return await this.updateExpenseUseCase.updateExpenseStatus(id, paymentDate);
     }
 }

@@ -1,5 +1,4 @@
 import { Injectable, Logger } from "@nestjs/common";
-import PaymentRegister from "./UseCases/PaymentRegister";
 import PaymentInicialDataDTO from "./DTOs/PaymentInicialDataDTO";
 import { InvoicesService } from "../Invoices/invoices.service";
 import { PaymentType } from "./Types/payment.type";
@@ -10,40 +9,50 @@ import { FinancialEventsService, IFinancialEvent } from "src/modules/financial-e
 import { FinancialEventsEnum } from "src/enum/financial-events.enum";
 import ReversePaymentDataDTO from "./DTOs/ReversePaymentDataDTO";
 import DateHelper from "src/Shared/Utils/DateHelper";
+import Payment from "src/EntityModels/Payment";
+import { PaymentRepository } from "./payment.repository";
 
 @Injectable()
 export default class PaymentService {
     private readonly logger = new Logger(PaymentService.name);
 
     constructor(
-        private readonly paymentRegisterUC: PaymentRegister,
         private readonly invoiceService: InvoicesService,
         private readonly expenseService: ExpensesServices,
         private readonly getPaymentsUC: GetPayments,
         private readonly revenueService: RevenuesService,
-        private readonly financialEventsService: FinancialEventsService
+        private readonly financialEventsService: FinancialEventsService,
+        private readonly repository: PaymentRepository
     ) { }
 
+    private async register(payment: PaymentInicialDataDTO) {
+        const entity = Payment.fromDTO(payment);
+        return await this.repository.savePayment(entity);
+    }
+
     async registerPayment(paymentData: PaymentInicialDataDTO) {
-        if (paymentData && Object.keys(paymentData).length > 0) {
-            const savedPayment = await this.paymentRegisterUC.register(paymentData);
-
-            if (!savedPayment) {
-                throw new Error("Failed to register payment");
+        try {
+            if (paymentData && Object.keys(paymentData).length > 0) {
+                const savedPayment = await this.register(paymentData);
+    
+                if (!savedPayment) {
+                    throw new Error("Failed to register payment");
+                }
+    
+                await this.financialEventsService.register({
+                    accountId: paymentData.accountId,
+                    amount: paymentData.value,
+                    type: FinancialEventsEnum.PAYMENT_POSTED,
+                    referenceId: paymentData.payableId,
+                    referenceType: paymentData.payableType
+                } satisfies IFinancialEvent)
+    
+                await this.updateStatus(paymentData.payableType, savedPayment.payable_id, savedPayment.payment_date);
+            } else {
+                throw new Error("Invalid payment data");
             }
-
-            await this.financialEventsService.register({
-                accountId: paymentData.accountId,
-                amount: paymentData.value,
-                type: FinancialEventsEnum.PAYMENT_POSTED,
-                referenceId: paymentData.payableId,
-                referenceType: paymentData.payableType
-            } satisfies IFinancialEvent)
-
-            await this.updateStatus(paymentData.payableType, savedPayment.payable_id, savedPayment.payment_date);
-
-        } else {
-            throw new Error("Invalid payment data");
+        } catch (error) {
+            this.logger.error(error.message);
         }
     }
 
@@ -63,7 +72,7 @@ export default class PaymentService {
             paymentDTO.paymentDate = DateHelper.getCurrentDate();
             paymentDTO.value = -Math.abs(dto.amount);
 
-            const savedReversed = await this.paymentRegisterUC.register(paymentDTO);
+            const savedReversed = await this.register(paymentDTO);
 
             if (savedReversed !== null) {
                 await this.financialEventsService.register({
@@ -74,40 +83,24 @@ export default class PaymentService {
                     referenceType: dto.referenceType
                 })
             }
-
-            await this.updateStatus(paymentDTO.payableType, dto.entityId, null, true);
-
-            //FALTA ATUALIZAR O PAGAMENTO COM A DATA DE ESTORNO.
-            
-
+            await this.updateStatus(paymentDTO.payableType, dto.entityId, null);
+            await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
+            this.logger.log(`[ESTORNO_PAGAMENTO]: PaymentId ${dto.paymentId} | Value: ${paymentDTO.value}`);
         } catch (error) {
             throw new Error(`An error ocurred while delete payment: ${error.message}`);
         }
     }
 
-    private async updateStatus(type: PaymentType, id: number, paymentDate: string | null, reversed: boolean = false) {
+    private async updateStatus(type: PaymentType, id: number, paymentDate: string | null) {
         try {
             switch(type) {
                 case PaymentType.INVOICE:
-                    if (reversed) {
-                        //Ajustar depois para setar o status reversed
-                        //this.invoiceService.updateInvoiceStatus(paymentData.payableId, paymentData.paymentDate)
-                        break;
-                    }
                     await this.invoiceService.updateInvoiceStatus(id, paymentDate);
                     break;
                 case PaymentType.EXPENSE:
-                    if (reversed) {
-                        await this.expenseService.updateStatusExpense(id, null, true);
-                        break;
-                    }
                     await this.expenseService.updateStatusExpense(id, paymentDate);
                     break;
                 case PaymentType.REVENUE:
-                    if (reversed) {
-                        //
-                        break;
-                    }
                     await this.revenueService.updateStatusRevenue(id, paymentDate);
                     break;
                 default:

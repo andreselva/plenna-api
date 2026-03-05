@@ -47,6 +47,9 @@ export class Migration20260228_01_CriaFinancialEvents implements IMigration {
             ),
             MigrationSteps.RunSQL(
                 `ALTER TABLE payment ADD COLUMN reversed DATETIME DEFAULT NULL;`
+            ),
+            MigrationSteps.RunSQL(
+                `ALTER TABLE invoices MODIFY COLUMN status ENUM('paid', 'pending', 'partial', 'reversed');`
             )
         ]
     }

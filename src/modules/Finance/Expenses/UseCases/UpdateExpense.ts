@@ -83,23 +83,26 @@ export class UpdateExpense {
         throw new Error("Considered ID invalid!");
     }
 
-    public async updateExpenseStatus(id: number, paymentDate: string|null, reversed: boolean) {
-        if (reversed) {
-            await this.repository.updateStatus(id, ExpenseStatus.REVERSED, null);
-            return;
-        }
-        const totalPayments = await this.repository.getPayments(id);
+    public async updateExpenseStatus(id: number, paymentDate: string|null) {
         const expense = await this.repository.getExpenseById(id);
         if (!expense) {
             throw new Error("Expense not found");
         }
+
+        const payments = await this.repository.getPayments(id);
+        const totalPayments = payments.reduce((acc, p) => acc + p.value, 0);
+        if (totalPayments <= 0 && payments.length > 0) {
+            await this.repository.updateStatus(id, ExpenseStatus.REVERSED, null);
+            return;
+        }
+        
         const expenseValue = expense.value;
-        const status = this.defineStatus(totalPayments, expenseValue, reversed);
+        const status = this.defineStatus(totalPayments, expenseValue);
         await this.repository.updateStatus(id, status, paymentDate);
         return { status: status };
     }
 
-    private defineStatus(totalPayments: number, expenseValue: number, reversed: boolean): ExpenseStatus {
+    private defineStatus(totalPayments: number, expenseValue: number): ExpenseStatus {
         if (totalPayments >= expenseValue) {
             return ExpenseStatus.PAID;
         } else if (totalPayments > 0) {

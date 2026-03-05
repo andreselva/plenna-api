@@ -21,6 +21,7 @@ export default class Invoice extends EntityModel implements IEntity {
     public static readonly STATUS_PAID: InvoiceStatus = 'paid';
     public static readonly STATUS_PENDING: InvoiceStatus = 'pending';
     public static readonly STATUS_PARCIAL: InvoiceStatus = 'parcial';
+    public static readonly STATUS_REVERSED: InvoiceStatus = 'reversed';
 
     constructor() {
         super();

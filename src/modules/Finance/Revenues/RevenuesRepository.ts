@@ -5,6 +5,8 @@ import Revenue from "src/EntityModels/Revenue";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import { RevenueStatus } from "./Types/revenue.status.type";
+import Payment from "src/EntityModels/Payment";
+import DataMapper from "src/Shared/mapper/DataMapper";
 
 @Injectable()
 export default class RevenuesRepository extends BaseRepository<Revenue> {
@@ -60,10 +62,10 @@ export default class RevenuesRepository extends BaseRepository<Revenue> {
         return this.extractToEntity(rows, Revenue);
     }
 
-    async getTotalPayments(id: number): Promise<number> {
-        const query = `SELECT sum(value) FROM payment WHERE clientId = ? AND payable_type = 'revenue' AND payable_id = ?`;
+    async getTotalPayments(id: number): Promise<Payment[]> {
+        const query = `SELECT * FROM payment WHERE clientId = ? AND payable_type = 'revenue' AND payable_id = ?`;
         const result = await this.database.select(query, [this.authContext.getClientId(), id]);
-        return Number(result[0]?.totalPayments) || 0;
+        return DataMapper.toEntities(result, Payment);
     }
 
     async updateStatus(id: number, status: RevenueStatus, paymentDate: string|null) {

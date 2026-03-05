@@ -5,6 +5,8 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import { Expense } from "src/EntityModels/Expense";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
+import Payment from "src/EntityModels/Payment";
+import DataMapper from "src/Shared/mapper/DataMapper";
 
 @Injectable()
 export class ExpensesRepository extends BaseRepository<Expense> {
@@ -60,10 +62,10 @@ export class ExpensesRepository extends BaseRepository<Expense> {
         }
     }
 
-    async getPayments(id: number): Promise<Expense[]> {
+    async getPayments(id: number): Promise<Payment[]> {
         const query = "SELECT * FROM payment WHERE clientId = ? AND payable_type = 'expense' AND payable_id = ?";
         const result = await this.database.select(query, [this.authContext.getClientId(), id]);
-        return this.extractToEntity(result, Expense);
+        return DataMapper.toEntities(result, Payment);
     }
 
     async getExpenseById(id: number) {

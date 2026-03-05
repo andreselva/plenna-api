@@ -18,6 +18,9 @@ export default class Revenue extends EntityModel implements IEntity {
     public sourceAccountId: number = 0;
     public hasInstallments: boolean = false;
     public status: RevenueStatus = RevenueStatus.PENDING;
+    public totalPaid: number = 0;
+
+    public static ignoredProperties: string[] = ['totalPaid'];
 
     constructor() {
         super();
@@ -76,6 +79,10 @@ export default class Revenue extends EntityModel implements IEntity {
     }
 
     getIgnoredProperties(): string[] {
-        return [];
+        return Revenue.ignoredProperties;
+    }
+
+    addIgnoredProperty(property: string) {
+        Revenue.ignoredProperties.push(property);
     }
 }

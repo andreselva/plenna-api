@@ -11,6 +11,14 @@ export default class GetRevenues {
 
     async execute(periodo: PeriodoDTO) {
         const revenues = await this.revenuesRepository.getRevenues(periodo);
-        return { revenues: revenues };
+        const promiseArray = revenues.map(async (revenue) => {
+            const payments = await this.revenuesRepository.getTotalPayments(revenue.id);
+            const totalPayments = payments.reduce((acc, p) => acc + p.value, 0);
+            revenue.totalPaid = totalPayments;
+            return revenue;
+        })
+
+        const formattedRevenues = await Promise.all(promiseArray);
+        return { revenues: formattedRevenues };
     }
 }

@@ -20,7 +20,7 @@ export default class Payment extends EntityModel implements IEntity {
 
    static fromDTO(dto: PaymentInicialDataDTO) {
         const payment = new Payment();
-        payment.value = dto.value;
+        payment.value = Number(dto.value);
         payment.payment_date = dto.paymentDate;
         payment.payable_id = dto.payableId;
         payment.payable_type = dto.payableType;
@@ -32,7 +32,7 @@ export default class Payment extends EntityModel implements IEntity {
    static fromRow(row: IPaymentRow) {
         const payment = new Payment();
         payment.id = row.id;
-        payment.value = row.value;
+        payment.value = Number(row.value);
         payment.payment_date = DateHelper.toISODate(row.payment_date) as string;
         payment.payable_id = row.payable_id;
         payment.payable_type = row.payable_type

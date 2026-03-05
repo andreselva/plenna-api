@@ -69,11 +69,18 @@ export class UpdateRevenue {
     }
 
     public async updateRevenueStatus(id: number, paymentDate: string|null) {
-        const totalPayments = await this.repository.getTotalPayments(id);
         const revenue = await this.repository.getRevenueById(id);
         if (!revenue) {
             throw new Error("Expense not found");
         }
+        
+        const payments = await this.repository.getTotalPayments(id);
+        const totalPayments = payments.reduce((acc, p) => acc + p.value, 0); 
+        if (totalPayments <= 0 && payments.length > 0) {
+            await this.repository.updateStatus(id, RevenueStatus.REVERSAL, null);
+            return;
+        }
+
         const revenueValue = revenue.value;
         const status = this.defineStatus(totalPayments, revenueValue);
         await this.repository.updateStatus(id, status, paymentDate);

@@ -12,14 +12,19 @@ export default class UpdateStatusInvoice {
 
     async update(invoiceId: number, paymentDate: string|null) {
         try {
-            const totalPayments = await this.repository.getPayments(invoiceId);
             const invoice = await this.repository.getById(invoiceId);
-            const invoiceValue = await this.repository.getTotalInvoiceValue(invoiceId);
-
+            
             if (invoice) {
-                const status = this.defineStatus(totalPayments, invoiceValue);
-                invoice.status = status;
-                invoice.paymentDate = paymentDate;
+                const payments = await this.repository.getPayments(invoiceId);
+                const totalPayments = payments.reduce((acc, p) => acc + p.value, 0);
+                if (totalPayments <= 0 && payments.length > 0) {
+                    invoice.status = Invoice.STATUS_REVERSED;
+                } else {
+                    const invoiceValue = await this.repository.getTotalInvoiceValue(invoiceId);
+                    const status = this.defineStatus(totalPayments, invoiceValue);
+                    invoice.status = status;
+                    invoice.paymentDate = paymentDate;
+                }
                 await this.repository.save(invoice);
                 return await this.repository.updateStatusExpenseByIdInvoice(invoice.id, this.defineStatusExpenses(invoice.status));
             } else {
@@ -48,6 +53,8 @@ export default class UpdateStatusInvoice {
                 return ExpenseStatus.PARTIAL;
             case Invoice.STATUS_PENDING:
                 return ExpenseStatus.PENDING;
+            case Invoice.STATUS_REVERSED:
+                return ExpenseStatus.REVERSED;
             default:
                 return ExpenseStatus.PENDING;
         }

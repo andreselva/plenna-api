@@ -1,18 +1,15 @@
 import { forwardRef, Module } from "@nestjs/common";
 import PaymentController from "./payment.controller";
 import PaymentService from "./payment.service";
-import PaymentRegister from "./UseCases/PaymentRegister";
 import { PaymentRepository } from "./payment.repository";
 import { InvoicesModule } from "../Invoices/invoices.module";
 import { ExpensesModule } from "../Expenses/expenses.module";
-import GetPayments from "./UseCases/GetPayments";
-import DeletePayment from "./UseCases/DeletePayment";
 import { RevenueModule } from "../Revenues/revenue.module";
 import { FinancialEventsModule } from "src/modules/financial-events/financial-events.module";
 
 @Module({
     imports: [forwardRef(() => InvoicesModule), ExpensesModule, RevenueModule, FinancialEventsModule],
-    providers: [PaymentService, PaymentRegister, PaymentRepository, GetPayments, DeletePayment],
+    providers: [PaymentService, PaymentRepository],
     controllers: [PaymentController],
     exports: []
 

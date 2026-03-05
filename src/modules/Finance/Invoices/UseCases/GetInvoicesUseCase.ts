@@ -52,7 +52,8 @@ export default class GetInvoicesUseCase {
         try {
             for (const invoice of invoices) {
                 const expenses = await this.repository.getRelatedExpenses(invoice.id);
-                const totalPaiments = await this.repository.getPayments(invoice.id);
+                const payments = await this.repository.getPayments(invoice.id);
+                const totalPayments = payments.reduce((acc, p) => acc + p.value, 0);
     
                 if (expenses && expenses.length > 0) {
                     const totalValue = expenses.reduce((acc, expense) => Number(acc) + Number(expense.value), 0);
@@ -63,8 +64,8 @@ export default class GetInvoicesUseCase {
                     invoice.value = 0;
                 }
     
-                if (totalPaiments > 0) {
-                    invoice.totalPaid = totalPaiments;
+                if (totalPayments > 0) {
+                    invoice.totalPaid = totalPayments;
                 } else {
                     invoice.totalPaid = 0;
                 }

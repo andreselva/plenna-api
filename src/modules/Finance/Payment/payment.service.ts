@@ -3,7 +3,6 @@ import PaymentInicialDataDTO from "./DTOs/PaymentInicialDataDTO";
 import { InvoicesService } from "../Invoices/invoices.service";
 import { PaymentType } from "./Types/payment.type";
 import { ExpensesServices } from "../Expenses/ExpensesServices";
-import GetPayments from "./UseCases/GetPayments";
 import RevenuesService from "../Revenues/RevenuesService";
 import { FinancialEventsService, IFinancialEvent } from "src/modules/financial-events/financial-events.service";
 import { FinancialEventsEnum } from "src/enum/financial-events.enum";
@@ -19,7 +18,6 @@ export default class PaymentService {
     constructor(
         private readonly invoiceService: InvoicesService,
         private readonly expenseService: ExpensesServices,
-        private readonly getPaymentsUC: GetPayments,
         private readonly revenueService: RevenuesService,
         private readonly financialEventsService: FinancialEventsService,
         private readonly repository: PaymentRepository
@@ -58,7 +56,17 @@ export default class PaymentService {
 
     async getPaymentsData(entityType: PaymentType, entityId: string) {
         try {
-            return await this.getPaymentsUC.execute(entityType, entityId);
+            if (entityType && entityId) {
+                const payments = await this.repository.getPaymentsByEntity(entityType, entityId);
+
+                if (!payments || payments.length === 0) {
+                    return { "payments": [] };
+                }
+
+                return { payments: payments };
+            } else {
+                throw new Error("Entity type and ID are required");
+            }
         } catch (error) {
             this.logger.error(error.message);
         }
@@ -85,7 +93,7 @@ export default class PaymentService {
             }
             await this.updateStatus(paymentDTO.payableType, dto.entityId, null);
             await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
-            this.logger.log(`[ESTORNO_PAGAMENTO]: PaymentId ${dto.paymentId} | Value: ${paymentDTO.value}`);
+            this.logger.log(`[ESTORNO_REGISTRADO]: PaymentId ${dto.paymentId} | Value: ${paymentDTO.value}`);
         } catch (error) {
             throw new Error(`An error ocurred while delete payment: ${error.message}`);
         }

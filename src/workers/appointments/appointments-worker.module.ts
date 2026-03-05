@@ -6,6 +6,7 @@ import { RedisModule } from 'src/modules/redis/redis.module';
 import { AppointmentsModule } from 'src/modules/appointments/appointments.module';
 import { WorkerAuthModule } from '../worker-auth.module';
 import { AppointmentsWorkerService } from './appointments-worker.service';
+import { WorkerFactory } from '../worker.factory';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { AppointmentsWorkerService } from './appointments-worker.service';
     RedisModule,
     AppointmentsModule,
   ],
-  providers: [AppointmentsWorkerService],
+  providers: [AppointmentsWorkerService, WorkerFactory],
 })
 export class AppointmentsWorkerModule {}

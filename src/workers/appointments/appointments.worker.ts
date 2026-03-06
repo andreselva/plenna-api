@@ -1,15 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
-import { Worker } from 'bullmq';
 
 import { AppointmentsWorkerModule } from './appointments-worker.module';
 import { APPOINTMENTS_QUEUE_NAME } from 'src/modules/appointments/appointments.constants';
 import { AppointmentJobData } from 'src/modules/appointments/types/appointment-job-data.type';
-
-// usamos diretamente a implementação do worker (tem runWithContext)
 import { WorkerAuthContextService } from '../worker-auth-context.service';
 import { AppointmentsWorkerService } from './appointments-worker.service';
-import { createRedisConnectionOptions } from '../redis-connection';
+import { WorkerFactory } from '../worker.factory';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppointmentsWorkerModule, {
@@ -19,14 +16,12 @@ async function bootstrap() {
   const logger = new Logger('AppointmentsWorker');
 
   const appointmentsWorker = app.get(AppointmentsWorkerService);
-
-  // Pega a nossa implementação que disponibiliza runWithContext
   const authContext = app.get(WorkerAuthContextService);
+  const workerFactory = app.get(WorkerFactory);
 
-  const connection = createRedisConnectionOptions();
   const concurrency = Number(process.env.APPOINTMENTS_WORKER_CONCURRENCY ?? 5);
 
-  const worker = new Worker<AppointmentJobData>(
+  const worker = workerFactory.create<AppointmentJobData>(
     APPOINTMENTS_QUEUE_NAME,
     async (job) => {
       const ctx = {
@@ -39,7 +34,9 @@ async function bootstrap() {
           : null,
       };
 
-      logger.log(`Executando ${job.name} (${job.id})${job.repeatJobKey ? ` (repeat:${job.repeatJobKey})` : ''}`,);
+      logger.log(
+        `Executando ${job.name} (${job.id})${job.repeatJobKey ? ` (repeat:${job.repeatJobKey})` : ''}`,
+      );
 
       return authContext.runWithContext(ctx, async () => {
         try {
@@ -53,7 +50,7 @@ async function bootstrap() {
         }
       });
     },
-    { connection, concurrency },
+    { concurrency },
   );
 
   worker.on('failed', (job, err) => {
@@ -71,7 +68,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((e) => {
-   
   console.error(e);
   process.exit(1);
 });

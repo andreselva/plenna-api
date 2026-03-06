@@ -1,14 +1,12 @@
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { Worker } from 'bullmq';
-
 import { EmailWorkerModule } from './email-worker.module';
 import { WorkerAuthContextService } from '../worker-auth-context.service';
 import { EmailWorkerService } from './email-worker.service';
 import { EMAIL_QUEUE_NAME } from 'src/modules/email/email.constants';
 import { SendMailPayload, SendTemplatePayload } from 'src/modules/email/email.types';
-import { createRedisConnectionOptions } from '../redis-connection';
+import { WorkerFactory } from '../worker.factory';
 
 type EmailJobData = SendMailPayload | (SendTemplatePayload & { clientId?: number | null });
 
@@ -22,8 +20,7 @@ async function bootstrap() {
 
   const workerService = app.get(EmailWorkerService);
   const authContext = app.get(WorkerAuthContextService);
-
-  const connection = createRedisConnectionOptions();
+  const workerFactory = app.get(WorkerFactory);
 
   const parsePositiveInteger = (value: string | number | undefined, fallback: number) => {
     const parsed = Number(value);
@@ -35,7 +32,7 @@ async function bootstrap() {
   const rawLockRenewTime = parsePositiveInteger(config.get('email.lockRenewTimeMs'), 30000);
   const lockRenewTime = Math.max(5000, Math.min(rawLockRenewTime, Math.floor(lockDuration / 2)));
 
-  const worker = new Worker<EmailJobData>(
+  const worker = workerFactory.create<EmailJobData>(
     EMAIL_QUEUE_NAME,
     async (job) => {
       const payload = (job.data ?? {}) as { clientId?: number | null };
@@ -63,20 +60,18 @@ async function bootstrap() {
         }
       });
     },
-    { connection, concurrency, lockDuration, lockRenewTime },
+    { concurrency, lockDuration, lockRenewTime },
   );
 
   worker.on('failed', (job, err) => {
     logger.error(
-      `[FAILED EVENT] ${job?.name} -> ${job?.id}: ${(err).message}`,
-      (err).stack,
+      `[FAILED EVENT] ${job?.name} -> ${job?.id}: ${(err as Error).message}`,
+      (err as Error).stack,
     );
   });
 
   worker.on('completed', async (job) => {
-    if (!job) {
-      return;
-    }
+    if (!job) return;
 
     logger.log(`[DONE] ${job.name} -> ${job.id}`);
 
@@ -96,7 +91,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((err) => {
-   
   console.error(err);
   process.exit(1);
 });

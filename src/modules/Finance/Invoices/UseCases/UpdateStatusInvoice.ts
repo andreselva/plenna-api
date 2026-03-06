@@ -26,7 +26,8 @@ export default class UpdateStatusInvoice {
                     invoice.paymentDate = paymentDate;
                 }
                 await this.repository.save(invoice);
-                return await this.repository.updateStatusExpenseByIdInvoice(invoice.id, this.defineStatusExpenses(invoice.status));
+                await this.repository.updateStatusExpenseByIdInvoice(invoice.id, this.defineStatusExpenses(invoice.status));
+                return { status: invoice.status };
             } else {
                 throw new Error("Invoice not found");
             }

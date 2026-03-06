@@ -77,8 +77,8 @@ export class UpdateRevenue {
         const payments = await this.repository.getTotalPayments(id);
         const totalPayments = payments.reduce((acc, p) => acc + p.value, 0); 
         if (totalPayments <= 0 && payments.length > 0) {
-            await this.repository.updateStatus(id, RevenueStatus.REVERSAL, null);
-            return;
+            await this.repository.updateStatus(id, RevenueStatus.REVERSED, null);
+            return { status: RevenueStatus.REVERSED };
         }
 
         const revenueValue = revenue.value;

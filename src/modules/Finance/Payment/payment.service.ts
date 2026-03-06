@@ -73,44 +73,41 @@ export default class PaymentService {
     }
 
     async deletePayment(dto: ReversePaymentDataDTO) {
-        try {
-            const paymentDTO = new PaymentInicialDataDTO();
-            paymentDTO.payableId = dto.entityId;
-            paymentDTO.payableType = dto.referenceType;
-            paymentDTO.paymentDate = DateHelper.getCurrentDate();
-            paymentDTO.value = -Math.abs(dto.amount);
-
-            const savedReversed = await this.register(paymentDTO);
-
-            if (savedReversed !== null) {
-                await this.financialEventsService.register({
-                    accountId: dto.accountId,
-                    amount: paymentDTO.value,
-                    type: FinancialEventsEnum.REVERSAL,
-                    referenceId: dto.entityId,
-                    referenceType: dto.referenceType
-                })
-            }
-            await this.updateStatus(paymentDTO.payableType, dto.entityId, null);
-            await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
-            this.logger.log(`[ESTORNO_REGISTRADO]: PaymentId ${dto.paymentId} | Value: ${paymentDTO.value}`);
-        } catch (error) {
-            throw new Error(`An error ocurred while delete payment: ${error.message}`);
+        const payment = await this.repository.verifyReversePayment(dto.paymentId);
+        if (payment.reversed !== null) {
+            throw new Error(`Já existe um estorno para esse pagamento.`);
         }
+
+        const paymentDTO = new PaymentInicialDataDTO();
+        paymentDTO.payableId = dto.entityId;
+        paymentDTO.payableType = dto.referenceType;
+        paymentDTO.paymentDate = DateHelper.getCurrentDate();
+        paymentDTO.value = -Math.abs(dto.amount);
+
+        const savedReversed = await this.register(paymentDTO);
+
+        if (savedReversed !== null) {
+            await this.financialEventsService.register({
+                accountId: dto.accountId,
+                amount: paymentDTO.value,
+                type: FinancialEventsEnum.REVERSAL,
+                referenceId: dto.entityId,
+                referenceType: dto.referenceType
+            })
+        }
+        await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
+        return await this.updateStatus(paymentDTO.payableType, dto.entityId, null);
     }
 
     private async updateStatus(type: PaymentType, id: number, paymentDate: string | null) {
         try {
             switch(type) {
                 case PaymentType.INVOICE:
-                    await this.invoiceService.updateInvoiceStatus(id, paymentDate);
-                    break;
+                    return this.invoiceService.updateInvoiceStatus(id, paymentDate);
                 case PaymentType.EXPENSE:
-                    await this.expenseService.updateStatusExpense(id, paymentDate);
-                    break;
+                    return await this.expenseService.updateStatusExpense(id, paymentDate);
                 case PaymentType.REVENUE:
-                    await this.revenueService.updateStatusRevenue(id, paymentDate);
-                    break;
+                    return this.revenueService.updateStatusRevenue(id, paymentDate);
                 default:
                     throw new Error(`Nenhum método de atualização de status encontrado para ${type}`);
             }

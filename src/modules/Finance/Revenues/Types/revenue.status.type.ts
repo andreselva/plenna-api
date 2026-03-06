@@ -3,5 +3,5 @@ export enum RevenueStatus {
     PAID = 'paid',
     PARTIAL = 'partial',
     CANCELED = 'cancelled',
-    REVERSAL = 'reversed'
+    REVERSED = 'reversed'
 }

@@ -38,4 +38,10 @@ export class PaymentRepository extends BaseRepository<Payment> {
         const query = `UPDATE payment SET reversed = ? WHERE id = ?`;
         await this.database.execute(query, [reverseDate, paymentId])
     }
+
+    async verifyReversePayment(id: number): Promise<Payment> {
+        const query = `SELECT * FROM payment WHERE id = ? AND clientId = ?`;
+        const result = await this.database.select(query, [id, this.authContext.getClientId()]);
+        return this.extractToEntity(result, Payment)[0];
+    }
 }

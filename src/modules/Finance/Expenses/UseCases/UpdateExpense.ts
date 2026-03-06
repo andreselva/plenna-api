@@ -93,7 +93,7 @@ export class UpdateExpense {
         const totalPayments = payments.reduce((acc, p) => acc + p.value, 0);
         if (totalPayments <= 0 && payments.length > 0) {
             await this.repository.updateStatus(id, ExpenseStatus.REVERSED, null);
-            return;
+            return { status: ExpenseStatus.REVERSED };
         }
         
         const expenseValue = expense.value;

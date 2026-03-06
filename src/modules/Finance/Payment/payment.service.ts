@@ -95,6 +95,8 @@ export default class PaymentService {
                 referenceType: dto.referenceType
             })
         }
+
+        //Se o tipo de pagamento for invoice, é necessário buscar as despesas para registrar os eventos.
         await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
         return await this.updateStatus(paymentDTO.payableType, dto.entityId, null);
     }

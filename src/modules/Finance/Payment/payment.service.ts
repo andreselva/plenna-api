@@ -55,21 +55,16 @@ export default class PaymentService {
     }
 
     async getPaymentsData(entityType: PaymentType, entityId: string) {
-        try {
-            if (entityType && entityId) {
-                const payments = await this.repository.getPaymentsByEntity(entityType, entityId);
+        if (entityType && entityId) {
+            const payments = await this.repository.getPaymentsByEntity(entityType, entityId);
 
-                if (!payments || payments.length === 0) {
-                    return { "payments": [] };
-                }
-
-                return { payments: payments };
-            } else {
-                throw new Error("Entity type and ID are required");
+            if (!payments || payments.length === 0) {
+                return { "payments": [] };
             }
-        } catch (error) {
-            this.logger.error(error.message);
+
+            return { payments: payments };
         }
+        throw new Error("Entity type and ID are required");
     }
 
     async deletePayment(dto: ReversePaymentDataDTO) {

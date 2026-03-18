@@ -77,27 +77,28 @@ export default class PaymentService {
             throw new Error(`Já existe um estorno para esse pagamento.`);
         }
 
-        const paymentDTO = new PaymentInicialDataDTO();
-        paymentDTO.payableId = dto.entityId;
-        paymentDTO.payableType = dto.referenceType;
-        paymentDTO.paymentDate = DateHelper.getCurrentDate();
-        paymentDTO.value = -Math.abs(dto.amount);
-
-        const savedReversed = await this.register(paymentDTO);
-
-        if (savedReversed !== null) {
-            await this.financialEventsService.register({
-                accountId: dto.accountId,
-                amount: paymentDTO.value,
-                type: FinancialEventsEnum.REVERSAL,
-                referenceId: dto.entityId,
-                referenceType: dto.referenceType
-            })
-        }
-
-        //Se o tipo de pagamento for invoice, é necessário buscar as despesas para registrar os eventos.
-        await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
-        return await this.updateStatus(paymentDTO.payableType, dto.entityId, null);
+        return this.database.transaction(async () => {
+            const paymentDTO = new PaymentInicialDataDTO();
+            paymentDTO.payableId = dto.entityId;
+            paymentDTO.payableType = dto.referenceType;
+            paymentDTO.paymentDate = DateHelper.getCurrentDate();
+            paymentDTO.value = -Math.abs(dto.amount);
+    
+            const savedReversed = await this.register(paymentDTO);
+    
+            if (savedReversed !== null) {
+                await this.financialEventsService.register({
+                    accountId: dto.accountId,
+                    amount: paymentDTO.value,
+                    type: FinancialEventsEnum.REVERSAL,
+                    referenceId: dto.entityId,
+                    referenceType: dto.referenceType
+                })
+            }
+    
+            await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
+            return await this.updateStatus(paymentDTO.payableType, dto.entityId, null);
+        })
     }
 
     private async updateStatus(type: PaymentType, id: number, paymentDate: string | null) {

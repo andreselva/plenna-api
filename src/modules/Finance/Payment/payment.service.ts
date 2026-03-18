@@ -31,44 +31,44 @@ export default class PaymentService {
     }
 
     async registerPayment(paymentData: PaymentInicialDataDTO) {
-        try {
-            if (paymentData && Object.keys(paymentData).length > 0) {
-                return this.database.transaction(async () => {
-                    const savedPayment = await this.register(paymentData);
-        
-                    if (!savedPayment) {
-                        throw new Error("Failed to register payment");
-                    }
-        
-                    await this.financialEventsService.register({
-                        accountId: paymentData.accountId,
-                        amount: paymentData.value,
-                        type: FinancialEventsEnum.PAYMENT_POSTED,
-                        referenceId: paymentData.payableId,
-                        referenceType: paymentData.payableType
-                    } satisfies IFinancialEvent)
-        
-                    await this.updateStatus(paymentData.payableType, savedPayment.payable_id, savedPayment.payment_date);
-                })
-            } else {
-                throw new Error("Invalid payment data");
-            }
-        } catch (error) {
-            this.logger.error(error.message);
+        if (!paymentData || Object.keys(paymentData).length === 0) {
+            throw new Error("Invalid payment data");
         }
+
+        return this.database.transaction(async () => {
+            const savedPayment = await this.register(paymentData);
+
+            if (!savedPayment) {
+                throw new Error("Failed to register payment");
+            }
+
+            await this.financialEventsService.register({
+                accountId: paymentData.accountId,
+                amount: paymentData.value,
+                type: FinancialEventsEnum.PAYMENT_POSTED,
+                referenceId: paymentData.payableId,
+                referenceType: paymentData.payableType
+            } satisfies IFinancialEvent)
+
+            await this.updateStatus(
+                paymentData.payableType, 
+                savedPayment.payable_id, 
+                savedPayment.payment_date
+            );
+        })
     }
 
     async getPaymentsData(entityType: PaymentType, entityId: string) {
-        if (entityType && entityId) {
-            const payments = await this.repository.getPaymentsByEntity(entityType, entityId);
-
-            if (!payments || payments.length === 0) {
-                return { "payments": [] };
-            }
-
-            return { payments: payments };
+        if (!entityType || !entityId) {
+            throw new Error("Entity type and ID are required");
         }
-        throw new Error("Entity type and ID are required");
+
+        const payments = await this.repository.getPaymentsByEntity(entityType, entityId);
+        if (!payments || payments.length === 0) {
+            return { "payments": [] };
+        }
+
+        return { payments: payments };
     }
 
     async deletePayment(dto: ReversePaymentDataDTO) {

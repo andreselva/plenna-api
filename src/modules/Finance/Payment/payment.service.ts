@@ -10,6 +10,7 @@ import ReversePaymentDataDTO from "./DTOs/ReversePaymentDataDTO";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import Payment from "src/EntityModels/Payment";
 import { PaymentRepository } from "./payment.repository";
+import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 
 @Injectable()
 export default class PaymentService {
@@ -20,7 +21,8 @@ export default class PaymentService {
         private readonly expenseService: ExpensesServices,
         private readonly revenueService: RevenuesService,
         private readonly financialEventsService: FinancialEventsService,
-        private readonly repository: PaymentRepository
+        private readonly repository: PaymentRepository,
+        private readonly database: MySQLDatabase
     ) { }
 
     private async register(payment: PaymentInicialDataDTO) {
@@ -31,21 +33,23 @@ export default class PaymentService {
     async registerPayment(paymentData: PaymentInicialDataDTO) {
         try {
             if (paymentData && Object.keys(paymentData).length > 0) {
-                const savedPayment = await this.register(paymentData);
-    
-                if (!savedPayment) {
-                    throw new Error("Failed to register payment");
-                }
-    
-                await this.financialEventsService.register({
-                    accountId: paymentData.accountId,
-                    amount: paymentData.value,
-                    type: FinancialEventsEnum.PAYMENT_POSTED,
-                    referenceId: paymentData.payableId,
-                    referenceType: paymentData.payableType
-                } satisfies IFinancialEvent)
-    
-                await this.updateStatus(paymentData.payableType, savedPayment.payable_id, savedPayment.payment_date);
+                return this.database.transaction(async () => {
+                    const savedPayment = await this.register(paymentData);
+        
+                    if (!savedPayment) {
+                        throw new Error("Failed to register payment");
+                    }
+        
+                    await this.financialEventsService.register({
+                        accountId: paymentData.accountId,
+                        amount: paymentData.value,
+                        type: FinancialEventsEnum.PAYMENT_POSTED,
+                        referenceId: paymentData.payableId,
+                        referenceType: paymentData.payableType
+                    } satisfies IFinancialEvent)
+        
+                    await this.updateStatus(paymentData.payableType, savedPayment.payable_id, savedPayment.payment_date);
+                })
             } else {
                 throw new Error("Invalid payment data");
             }

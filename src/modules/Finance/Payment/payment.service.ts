@@ -105,19 +105,15 @@ export default class PaymentService {
     }
 
     private async updateStatus(type: PaymentType, id: number, paymentDate: string | null) {
-        try {
-            switch(type) {
-                case PaymentType.INVOICE:
-                    return this.invoiceService.updateInvoiceStatus(id, paymentDate);
-                case PaymentType.EXPENSE:
-                    return await this.expenseService.updateStatusExpense(id, paymentDate);
-                case PaymentType.REVENUE:
-                    return this.revenueService.updateStatusRevenue(id, paymentDate);
-                default:
-                    throw new Error(`Nenhum método de atualização de status encontrado para ${type}`);
-            }
-        } catch (error) {
-            this.logger.error(`Erro retornado na atualização de status: ${error.message}`);
+        switch(type) {
+            case PaymentType.INVOICE:
+                return this.invoiceService.updateInvoiceStatus(id, paymentDate);
+            case PaymentType.EXPENSE:
+                return await this.expenseService.updateStatusExpense(id, paymentDate);
+            case PaymentType.REVENUE:
+                return this.revenueService.updateStatusRevenue(id, paymentDate);
+            default:
+                throw new Error(`Nenhum método de atualização de status encontrado para ${type}`);
         }
     }
 }

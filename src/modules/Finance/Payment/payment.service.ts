@@ -85,15 +85,11 @@ export default class PaymentService {
             paymentDTO.payableId = dto.entityId;
             paymentDTO.payableType = dto.referenceType;
             paymentDTO.paymentDate = DateHelper.getCurrentDate();
-            paymentDTO.value = dto.amount;
+            paymentDTO.value = -Math.abs(dto.amount);
             
             const savedReversed = await this.register(paymentDTO);
 
             if (savedReversed !== null) {
-                if (paymentDTO.payableType === PaymentType.REVENUE) {
-                    dto.amount = -Math.abs(dto.amount);
-                }
-
                 await this.financialEventsService.register({
                     accountId: dto.accountId,
                     amount: dto.amount,

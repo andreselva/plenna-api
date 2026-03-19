@@ -14,8 +14,6 @@ import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 
 @Injectable()
 export default class PaymentService {
-    private readonly logger = new Logger(PaymentService.name);
-
     constructor(
         private readonly invoiceService: InvoicesService,
         private readonly expenseService: ExpensesServices,

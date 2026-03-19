@@ -83,11 +83,26 @@ export default class PaymentService {
             paymentDTO.payableId = dto.entityId;
             paymentDTO.payableType = dto.referenceType;
             paymentDTO.paymentDate = DateHelper.getCurrentDate();
+
+            //O estorno fica salvo negativo na tabela de pagamentos sempre.
             paymentDTO.value = -Math.abs(dto.amount);
             
             const savedReversed = await this.register(paymentDTO);
 
             if (savedReversed !== null) {
+                /**
+                 * Para o registro dos eventos, o estorno deve condizer com o tipo do pagamento.
+                 * 
+                 * Para casos onde o dinheiro sai, como despesas e faturas, o estorno deve ser positivo, pois esta voltando ao caixa.
+                 * Para casos onde o dinheiro entra, como receitas, o estorno deve ser negativo, pois está saindo do caixa.
+                 * 
+                 */
+                if ([PaymentType.EXPENSE, PaymentType.INVOICE].includes(dto.referenceType)) {
+                    dto.amount = +Math.abs(dto.amount);
+                } else if (dto.referenceType === PaymentType.REVENUE) {
+                    dto.amount = -Math.abs(dto.amount);
+                }
+
                 await this.financialEventsService.register({
                     accountId: dto.accountId,
                     amount: dto.amount,

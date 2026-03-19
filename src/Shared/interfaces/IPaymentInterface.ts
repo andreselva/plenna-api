@@ -7,4 +7,5 @@ export default interface IPaymentRow {
     payable_id: number;
     payable_type: PaymentType;
     reversed: string;
+    clientId: number;
 }

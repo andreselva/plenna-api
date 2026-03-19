@@ -27,6 +27,7 @@ export class PaymentRepository extends BaseRepository<Payment> {
                             payable_id,
                             payable_type,
                             id as id,
+                            clientId,
                             reversed
                         FROM payment WHERE clientId = ? AND payable_id = ? AND payable_type = ?`;
         const values = [this.authContext.getClientId(), entityId, entityType];

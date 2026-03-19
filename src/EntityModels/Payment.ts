@@ -37,6 +37,7 @@ export default class Payment extends EntityModel implements IEntity {
         payment.payable_id = row.payable_id;
         payment.payable_type = row.payable_type
         payment.reversed = row.reversed;
+        payment.clientId = row.clientId;
         return payment;
    }
 

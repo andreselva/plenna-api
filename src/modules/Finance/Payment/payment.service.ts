@@ -35,11 +35,14 @@ export default class PaymentService {
             throw new Error("Invalid payment data");
         }
 
-        return this.database.transaction(async () => {
+        return this.database.transaction(async () => {   
             const savedPayment = await this.register(paymentData);
-
             if (!savedPayment) {
                 throw new Error("Failed to register payment");
+            };
+            
+            if ([PaymentType.EXPENSE, PaymentType.INVOICE].includes(paymentData.payableType)) {
+                paymentData.value = -Math.abs(paymentData.value);
             }
 
             await this.financialEventsService.register({
@@ -82,14 +85,18 @@ export default class PaymentService {
             paymentDTO.payableId = dto.entityId;
             paymentDTO.payableType = dto.referenceType;
             paymentDTO.paymentDate = DateHelper.getCurrentDate();
-            paymentDTO.value = -Math.abs(dto.amount);
-    
+            paymentDTO.value = dto.amount;
+            
             const savedReversed = await this.register(paymentDTO);
-    
+
             if (savedReversed !== null) {
+                if (paymentDTO.payableType === PaymentType.REVENUE) {
+                    dto.amount = -Math.abs(dto.amount);
+                }
+
                 await this.financialEventsService.register({
                     accountId: dto.accountId,
-                    amount: paymentDTO.value,
+                    amount: dto.amount,
                     type: FinancialEventsEnum.REVERSAL,
                     referenceId: dto.entityId,
                     referenceType: dto.referenceType

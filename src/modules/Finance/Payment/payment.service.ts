@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import PaymentInicialDataDTO from "./DTOs/PaymentInicialDataDTO";
 import { InvoicesService } from "../Invoices/invoices.service";
 import { PaymentType } from "./Types/payment.type";

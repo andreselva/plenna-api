@@ -30,10 +30,10 @@ export default class Module extends EntityModel implements IEntity {
     }
 
     /**
-     * Método "fábrica" estático que cria uma instância de BankAccount
+     * Método "fábrica" estático que cria uma instância de Module
      * a partir de uma linha de dados crua vinda do banco de dados.
      * @param row O objeto de dados vindo da query.
-     * @returns Uma nova instância de BankAccount.
+     * @returns Uma nova instância de Module.
      */
     static fromRow(row: IModuleRow) {
         const module = new Module();

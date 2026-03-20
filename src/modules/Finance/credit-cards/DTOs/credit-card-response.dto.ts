@@ -1,4 +1,4 @@
-export default class BankAccountResponseDTO {
+export default class CreditCardResponseDTO {
     id: number;
     name: string;
     generateInvoice: boolean;

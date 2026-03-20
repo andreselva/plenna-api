@@ -23,7 +23,7 @@ export default class UserModules extends EntityModel implements IEntity {
     }
 
     /**
-     * Método "fábrica" estático que cria uma instância de BankAccount
+     * Método "fábrica" estático que cria uma instância de UserModules
      * a partir de uma linha de dados crua vinda do banco de dados.
      * @param row O objeto de dados vindo da query.
      * @returns Uma nova instância de UserModules

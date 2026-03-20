@@ -1,28 +1,28 @@
 import { Injectable } from "@nestjs/common";
+import CreditCard from "src/EntityModels/CreditCard";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
-import BankAccount from "src/EntityModels/BankAccount";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 @Injectable()
-export default class BankAccountsRepository extends BaseRepository<BankAccount>{
+export default class CreditCardsRepository extends BaseRepository<CreditCard>{
     constructor(database: MySQLDatabase, authContext: AuthContextService) { 
         super(database, authContext)
     }
 
-    async getBankAccounts(): Promise<BankAccount[]> {
+    async getCreditCards(): Promise<CreditCard[]> {
         const query = "SELECT * FROM bank_account WHERE clientId = ?";
         const rows = await this.database.select(query, [this.authContext.getClientId()]);
-        return this.extractToEntity(rows, BankAccount);
+        return this.extractToEntity(rows, CreditCard);
     }
 
-    async saveBankAccount(bankAccount: BankAccount): Promise<BankAccount> {
-        bankAccount.clientId = this.authContext.getClientId();
-        const result = await this.save(bankAccount);
-        if (result.affectedRows > 0 && bankAccount.id === 0) {
-            bankAccount.id = result.insertId;
+    async saveCreditCard(entity: CreditCard): Promise<CreditCard> {
+        entity.clientId = this.authContext.getClientId();
+        const result = await this.save(entity);
+        if (result.affectedRows > 0 && entity.id === 0) {
+            entity.id = result.insertId;
         }
-        return bankAccount;
+        return entity;
     }
 
     async deleteBankAccount(id: number) {

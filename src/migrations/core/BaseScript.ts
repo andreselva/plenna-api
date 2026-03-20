@@ -1,6 +1,5 @@
 import { PoolConnection, RowDataPacket, ResultSetHeader } from "mysql2/promise";
 import { IScript } from "./IScript";
-import EntityModel from "src/EntityModels/entity.model";
 
 export abstract class BaseScript implements IScript {
   protected readonly connection: PoolConnection;

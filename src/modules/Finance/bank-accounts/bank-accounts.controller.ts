@@ -1,7 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { BankAccountDTO } from './DTOs/bank-account.dto';
 import { Exception } from 'handlebars';
 import { BankAccountsService } from './bank-accounts.service';
+import { HelperFunctions } from 'src/Shared/Utils/HelperFunctions';
 
 @Controller('bank-accounts')
 export class BankAccountsController {
@@ -11,21 +12,25 @@ export class BankAccountsController {
 
     @Get()
     async getBankAccounts() {
-        return []
+        return await this.service.list();
     }
 
-    async createBankAccount(dto: BankAccountDTO) {
+    @Post()
+    async createBankAccount(@Body() dto: BankAccountDTO) {
+        return await this.service.saveBankAccount(dto);
+    }
+    
+    @Delete(':id')
+    async deleteBankAccount(@Param('id') id: string) {
         return 'ok'
     }
 
-    async deleteBankAccount(dto: BankAccountDTO) {
-        return 'ok'
-    }
-
-    async updateBankAccount(dto: BankAccountDTO) {
-        if (dto.id === null || dto.id === undefined || dto.id <= 0) {
-            throw new Exception(`Invalid id to update bank account`);
+    @Put(':id')
+    async updateBankAccount(@Param('id') id: string, @Body() dto: BankAccountDTO) {
+        if (!HelperFunctions.isNullable(Number(id), true, true) && Number(id) > 0) {
+            dto.id = Number(id);
+            return await this.service.saveBankAccount(dto);
         }
-        return 'ok';
+        throw new Exception(`Invalid id to update bank account`);
     }
 }

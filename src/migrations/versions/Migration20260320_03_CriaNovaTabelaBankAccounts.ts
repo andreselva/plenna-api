@@ -10,7 +10,7 @@ export class Migration20260320_03_CriaNovaTabelaBankAccounts implements IMigrati
         return [
             MigrationSteps.RunSQL(
                 `CREATE TABLE IF NOT EXISTS bank_accounts (
-                    id BIGINT PRIMARY KEY,
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
                     clientId BIGINT NOT NULL,
                     name VARCHAR(150) NOT NULL,
                     type ENUM('CHECKING', 'SAVINGS', 'DIGITAL_WALLET', 'INVESTMENT'),

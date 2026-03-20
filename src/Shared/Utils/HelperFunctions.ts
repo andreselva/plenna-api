@@ -27,4 +27,35 @@ export class HelperFunctions {
 
         return result
     }
+
+    static cleanNullables(obj: any) {
+        Object.keys(obj).forEach(key => {
+            if (obj[key] === null || obj[key] === undefined) {
+                delete obj[key];
+            }
+        })
+        return obj;
+    }
+
+    static isNullable(value: any, considerEmptyValues: boolean = false, considerZeroValues: boolean = false) {
+        if (value === null || value === undefined){
+            return true;
+        }
+
+        if (considerEmptyValues) {
+            if (typeof value === 'string' && value.trim() === '') {
+                return true;
+            }
+        }
+
+        if (considerZeroValues) {
+            if (value === 0) return true;
+        }
+
+        if (typeof value === 'number' && isNaN(value)) {
+            return true;
+        }
+        
+        return false;
+    }
 }

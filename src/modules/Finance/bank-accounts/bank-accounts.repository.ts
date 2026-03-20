@@ -9,4 +9,10 @@ export class BankAccountsRepository extends BaseRepository<BankAccount> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
         super(database, authContext);
     }
+
+    async listBankAccounts() {
+        const query = `SELECT * FROM bank_accounts WHERE clientId = ?`;
+        const result = await this.database.select(query, [this.authContext.getClientId()]);
+        return this.extractToEntity(result, BankAccount);
+    }
 }

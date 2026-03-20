@@ -10,14 +10,14 @@ export default class CreditCardsService {
     ) {}
 
     async getCreditCards() {
-        const bankAccounts = await this.repository.getCreditCards();
-        return { bankAccounts: bankAccounts };
+        const creditCards = await this.repository.getCreditCards();
+        return { creditCards: creditCards };
     }
 
     async createCreditCard(bankAccount: CreditCardDTO) {
         const entity = CreditCard.fromDTO(bankAccount);
-        const createdBankAccount = await this.repository.saveCreditCard(entity);
-        return { bankAccount: createdBankAccount };
+        const createdCreditCard = await this.repository.saveCreditCard(entity);
+        return { creditCard: createdCreditCard };
     }
 
     async deleteCreditCard(id: string) {
@@ -27,10 +27,10 @@ export default class CreditCardsService {
         return await this.repository.deleteBankAccount(Number(id));
     }
 
-    async updateCreditCard(id: string, bankAccount: CreditCardDTO) {
-        bankAccount.id = Number(id);
-        const entity = CreditCard.fromDTO(bankAccount);
-        const updatedBankAccount = await this.repository.saveCreditCard(entity);
-        return { bankAccount: updatedBankAccount };
+    async updateCreditCard(id: string, creditCard: CreditCardDTO) {
+        creditCard.id = Number(id);
+        const entity = CreditCard.fromDTO(creditCard);
+        const updatedCreditCard = await this.repository.saveCreditCard(entity);
+        return { creditCard: updatedCreditCard };
     }
 }

@@ -1,0 +1,6 @@
+export enum BankAccountTypeEnum {
+    CHECKING = 'CHECKING', //CONTA CORRENTE
+    SAVINGS = 'SAVINGS', //POUPANÇA
+    DIGITAL_WALLET = 'DIGITAL_WALLET',
+    INVESTMENT = 'INVESTMENT' 
+}

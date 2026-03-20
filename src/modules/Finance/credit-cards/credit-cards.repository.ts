@@ -11,7 +11,7 @@ export default class CreditCardsRepository extends BaseRepository<CreditCard>{
     }
 
     async getCreditCards(): Promise<CreditCard[]> {
-        const query = "SELECT * FROM bank_account WHERE clientId = ?";
+        const query = "SELECT * FROM credit_cards WHERE clientId = ?";
         const rows = await this.database.select(query, [this.authContext.getClientId()]);
         return this.extractToEntity(rows, CreditCard);
     }
@@ -26,7 +26,7 @@ export default class CreditCardsRepository extends BaseRepository<CreditCard>{
     }
 
     async deleteBankAccount(id: number) {
-        const query = "DELETE FROM bank_account WHERE clientId = ? AND id = ?";
+        const query = "DELETE FROM credit_cards WHERE clientId = ? AND id = ?";
         const result = await this.database.execute(query, [this.authContext.getClientId(), id]);
 
         if (result.affectedRows > 0) {

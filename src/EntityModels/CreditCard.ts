@@ -8,7 +8,6 @@ export default class CreditCard extends EntityModel implements IEntity {
     clientId: number;
     name: string = '';
     generateInvoice: boolean = false;
-    icon: string = '';
     dueDate: string = '';
     closingDate: string = '';
 
@@ -26,7 +25,6 @@ export default class CreditCard extends EntityModel implements IEntity {
         const creditCard = new CreditCard();
         creditCard.name = dto.name;
         creditCard.generateInvoice = dto.generateInvoice;
-        creditCard.icon = dto.icon ?? '';
         creditCard.dueDate = dto.dueDate;
         creditCard.closingDate = dto.closingDate;
         creditCard.id = dto.id ?? 0;
@@ -43,7 +41,6 @@ export default class CreditCard extends EntityModel implements IEntity {
         const creditCard = new CreditCard();
         creditCard.id = row.id;
         creditCard.name = row.name;
-        creditCard.icon = row.icon;
         creditCard.generateInvoice = Boolean(row.generateInvoice);
         creditCard.dueDate = row.dueDate;
         creditCard.closingDate = row.closingDate;
@@ -51,7 +48,7 @@ export default class CreditCard extends EntityModel implements IEntity {
     }
 
     public getTableName(): string {
-        return 'bank_account';
+        return 'credit_cards';
     }
 
     public getPrimaryKey(): string {

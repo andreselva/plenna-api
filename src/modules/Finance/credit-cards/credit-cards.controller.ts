@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put }
 import BankAccountsService from "./credit-cards.service";
 import CreditCardDTO from "./DTOs/credit-card.dto";
 
-@Controller("bank-accounts")
+@Controller("credit-cards")
 export default class CreditCardsController {
     constructor(
         private readonly service: BankAccountsService,

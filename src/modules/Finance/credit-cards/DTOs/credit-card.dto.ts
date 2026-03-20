@@ -18,10 +18,6 @@ export default class CreditCardDTO {
     closingDate: string;
 
     @IsOptional()
-    @IsString({ message: 'Invalid icon!' })
-    icon: string;
-
-    @IsOptional()
     @IsInt({ message: 'Invalid ID!' })
     id: number;
 }

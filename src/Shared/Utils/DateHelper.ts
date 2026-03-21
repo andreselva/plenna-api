@@ -10,9 +10,13 @@ export default class DateHelper {
         let luxonDateTime: DateTime;
 
         if (typeof date === 'string') {
-            luxonDateTime = DateTime.fromISO(date);
+            const normalizedDate = date.includes(' ')
+                ? date.replace(' ', 'T')
+                : date;
+
+            luxonDateTime = DateTime.fromISO(normalizedDate, { zone: "America/Sao_Paulo" });
         } else {
-            luxonDateTime = DateTime.fromJSDate(date);
+            luxonDateTime = DateTime.fromJSDate(date, { zone: "America/Sao_Paulo" });
         }
 
         if (luxonDateTime.isValid) {
@@ -22,14 +26,8 @@ export default class DateHelper {
         return null;
     }
 
-    /**
-     * Extrai e formata o mês e o ano de uma string de data.
-     * Recebe uma data no formato 'YYYY-MM-DD' e retorna 'MM/YYYY'.
-     * Retorna null se a data de entrada for inválida.
-     * @param isoDate A string da data no formato 'YYYY-MM-DD'.
-     */
     static toMonthYear(isoDate: string): string | null {
-        const luxonDateTime = DateTime.fromISO(isoDate);
+        const luxonDateTime = DateTime.fromISO(isoDate, { zone: "America/Sao_Paulo" });
 
         if (luxonDateTime.isValid) {
             return luxonDateTime.toFormat('MM/yyyy');
@@ -38,13 +36,8 @@ export default class DateHelper {
         return null;
     }
 
-    /**
-     * Converte uma string de data do formato 'YYYY-MM-DD' para 'DD/MM/YYYY'.
-     * Retorna null se a data de entrada for inválida.
-     * @param isoDate A string da data no formato 'YYYY-MM-DD'.
-     */
     static toBrazilianDate(isoDate: string): string | null {
-        const luxonDateTime = DateTime.fromISO(isoDate);
+        const luxonDateTime = DateTime.fromISO(isoDate, { zone: "America/Sao_Paulo" });
 
         if (luxonDateTime.isValid) {
             return luxonDateTime.toFormat('dd/MM/yyyy');
@@ -67,13 +60,6 @@ export default class DateHelper {
         ]);
     }
     
-    /**
-     * Retorna o dígito do mês da data enviada
-     * 
-     * @param date string - A data desejada para extrair o mês.
-     * @param twoDigits - boolean - Define se retorna o mês com apenas 1 dígito ou 2 (Ex: 1 ou 01)
-     * @returns 
-     */
     static getMonthOfDate(date: string, twoDigits = false) {
         const dt = DateTime.fromISO(date, { zone: "America/Sao_Paulo" });
         if (twoDigits) {
@@ -82,14 +68,6 @@ export default class DateHelper {
         return dt.month;
     }
 
-    /**
-     * A função retorna uma data inicial e uma data final com base na quantidade de meses passados por parâmetro
-     * Será considerado sempre a data atual para o cálculo.
-     * 
-     * @param quantity A quantidade de meses em que as datas devem ser calculadas.
-     * @param plus Para definir se soma os meses ou se subtrai.
-     * @returns 
-     */
     static getFirstAndLastDateByNumberOfMonths(quantity: number, plus: boolean = true): { initialDate: string, endDate: string} {
         if (plus) {
             return {
@@ -104,16 +82,9 @@ export default class DateHelper {
         }
     }
 
-    /**
-     * Retorna os meses existentes em um intervalo de datas.
-     * 
-     * @param initialDate - string - A data inicial 
-     * @param endDate - string - A data final
-     * @returns 
-     */
     static listMonthsBetween(initialDate: string, endDate: string) {
-        const start = DateTime.fromISO(initialDate).startOf("month");
-        const end = DateTime.fromISO(endDate).startOf("month");
+        const start = DateTime.fromISO(initialDate, { zone: "America/Sao_Paulo" }).startOf("month");
+        const end = DateTime.fromISO(endDate, { zone: "America/Sao_Paulo" }).startOf("month");
 
         if (start.equals(end)) {
             return [{ y: start.year, m: start.month }];
@@ -129,16 +100,12 @@ export default class DateHelper {
         return months;
     }
 
-    /**
-     * Retorna o objeto com o ano-mes e mes.
-     * 
-     * @param date - string - A data para extrair os dados.
-     * @returns 
-     */
     static getYearAndMonth(date: string) {
+        const dt = DateTime.fromISO(date, { zone: "America/Sao_Paulo" });
+
         return {
-            yearAndMonth: DateTime.fromISO(date).toFormat("yyyy-MM"),
-            month: DateTime.fromISO(date).month
+            yearAndMonth: dt.toFormat("yyyy-MM"),
+            month: dt.month
         };
     }
 
@@ -147,10 +114,14 @@ export default class DateHelper {
     }
 
     static getCurrentYear(): number {
-        return Number(DateTime.local().toFormat('yyyy'));
+        return Number(DateTime.local().setZone("America/Sao_Paulo").toFormat('yyyy'));
     }
 
     static getCurrentDate(): string {
         return DateTime.local({ zone: "America/Sao_Paulo" }).toFormat("yyyy-MM-dd HH:mm:ss");
+    }
+
+    static getCurrentISODate(): string {
+        return DateTime.local({ zone: "America/Sao_Paulo" }).toFormat("yyyy-MM-dd");
     }
 }

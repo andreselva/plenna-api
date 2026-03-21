@@ -23,6 +23,7 @@ export default class PaymentInicialDataDTO {
     id: number;
 
     @IsInt({ message: 'Invalid account ID!' })
+    @IsNotEmpty({ message: 'accountId cannot be empty' })
     accountId: number;
 
 

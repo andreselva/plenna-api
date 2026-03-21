@@ -18,7 +18,8 @@ export class Migration20260228_01_CriaFinancialEvents implements IMigration {
                         'TRANSFER_POSTED',
                         'ADJUSTMENT',
                         'REVERSAL',
-                        'OPENING_BALANCE'
+                        'OPENING_BALANCE',
+                        'REVENUE_RECEIVED'
                     ) NOT NULL,
                     amount DECIMAL(15,2) NOT NULL,
                     occurredAt DATETIME NOT NULL,
@@ -47,6 +48,9 @@ export class Migration20260228_01_CriaFinancialEvents implements IMigration {
             ),
             MigrationSteps.RunSQL(
                 `ALTER TABLE payment ADD COLUMN reversed DATETIME DEFAULT NULL;`
+            ),
+            MigrationSteps.RunSQL(
+                `ALTER TABLE payment ADD COLUMN accountId BIGINT DEFAULT 0;`
             ),
             MigrationSteps.RunSQL(
                 `ALTER TABLE invoices MODIFY COLUMN status ENUM('paid', 'pending', 'partial', 'reversed');`

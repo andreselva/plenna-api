@@ -11,5 +11,7 @@ export default interface IRevenueRow {
     typeOfInstallments: string;
     sourceAccountId: number;
     hasInstallments: number
-    status: RevenueStatus
+    status: RevenueStatus;
+    clientId: number;
+    idBankAccount: number;
 }

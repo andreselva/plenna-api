@@ -1,9 +1,9 @@
-import DateHelper from "src/Shared/Utils/DateHelper";
-import EntityModel from "src/EntityModels/entity.model";
-import IEntity from "src/Shared/interfaces/IEntity";
-import IRevenueRow from "src/Shared/interfaces/IRevenueRow";
-import { RevenueDTO } from "src/modules/Finance/Revenues/DTOs/RevenueDTO";
-import { RevenueStatus } from "src/modules/Finance/Revenues/Types/revenue.status.type";
+import DateHelper from 'src/Shared/Utils/DateHelper';
+import EntityModel from 'src/EntityModels/entity.model';
+import IEntity from 'src/Shared/interfaces/IEntity';
+import IRevenueRow from 'src/Shared/interfaces/IRevenueRow';
+import { RevenueDTO } from 'src/modules/Finance/Revenues/DTOs/RevenueDTO';
+import { RevenueStatus } from 'src/modules/Finance/Revenues/Types/revenue.status.type';
 
 export default class Revenue extends EntityModel implements IEntity {
     public id: number = 0;
@@ -13,6 +13,7 @@ export default class Revenue extends EntityModel implements IEntity {
     public value: number = 0;
     public invoiceDueDate: string = '';
     public idCategory: number = 0;
+    public idBankAccount: number = 0;
     public installments: number = 0;
     public typeOfInstallments: string = 'U';
     public sourceAccountId: number = 0;
@@ -38,6 +39,7 @@ export default class Revenue extends EntityModel implements IEntity {
         revenue.description = dto.description;
         revenue.invoiceDueDate = dto.invoiceDueDate;
         revenue.idCategory = dto.idCategory ?? 0;
+        revenue.idBankAccount = dto.idBankAccount ?? 0;
         revenue.installments = dto.installments ?? 0;
         revenue.typeOfInstallments = dto.typeOfInstallments;
         revenue.sourceAccountId = dto.sourceAccountId ?? 0;
@@ -48,12 +50,6 @@ export default class Revenue extends EntityModel implements IEntity {
         return revenue;
     }
 
-     /**
-     * Método "fábrica" estático que cria uma instância de Revenue
-     * a partir de uma linha de dados crua vinda do banco de dados.
-     * @param row O objeto de dados vindo da query.
-     * @returns Uma nova instância de Revenue.
-     */
     static fromRow(row: IRevenueRow) {
         const revenue = new Revenue();
         revenue.id = row.id;
@@ -62,11 +58,13 @@ export default class Revenue extends EntityModel implements IEntity {
         revenue.value = row.value;
         revenue.invoiceDueDate = DateHelper.toISODate(row.invoiceDueDate) as string;
         revenue.idCategory = row.idCategory;
+        revenue.idBankAccount = row.idBankAccount ?? 0;
         revenue.installments = row.installments;
         revenue.typeOfInstallments = row.typeOfInstallments;
-        revenue. sourceAccountId = row.sourceAccountId;
+        revenue.sourceAccountId = row.sourceAccountId;
         revenue.hasInstallments = Boolean(row.hasInstallments);
         revenue.status = row.status;
+        revenue.clientId = row.clientId ?? 0;
         return revenue;
     }
 

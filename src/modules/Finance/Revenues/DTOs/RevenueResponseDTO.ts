@@ -1,4 +1,3 @@
-
 export class RevenueResponseDTO {
     constructor(
         public readonly id: number,
@@ -7,6 +6,7 @@ export class RevenueResponseDTO {
         public readonly value: number,
         public readonly invoiceDueDate: string,
         public readonly idCategory: number,
+        public readonly idBankAccount: number,
         public readonly installments: number,
         public readonly typeOfInstallments: string,
         public readonly sourceAccountId: number,

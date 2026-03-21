@@ -11,6 +11,7 @@ import DateHelper from "src/Shared/Utils/DateHelper";
 import Payment from "src/EntityModels/Payment";
 import { PaymentRepository } from "./payment.repository";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
+import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
 
 @Injectable()
 export default class PaymentService {
@@ -29,9 +30,7 @@ export default class PaymentService {
     }
 
     async registerPayment(paymentData: PaymentInicialDataDTO) {
-        if (!paymentData || Object.keys(paymentData).length === 0) {
-            throw new Error("Invalid payment data");
-        }
+        this.validate(paymentData);
 
         return this.database.transaction(async () => {   
             const savedPayment = await this.register(paymentData);
@@ -78,17 +77,17 @@ export default class PaymentService {
             throw new Error(`Já existe um estorno para esse pagamento.`);
         }
 
+        const paymentDTO = new PaymentInicialDataDTO();
+        paymentDTO.payableId = dto.entityId;
+        paymentDTO.payableType = dto.referenceType;
+        paymentDTO.paymentDate = DateHelper.getCurrentDate();
+        //O estorno sempre fica negativo na tabela de pagamentos.
+        paymentDTO.value = -Math.abs(dto.amount);
+    
+        this.validate(paymentDTO);
+
         return this.database.transaction(async () => {
-            const paymentDTO = new PaymentInicialDataDTO();
-            paymentDTO.payableId = dto.entityId;
-            paymentDTO.payableType = dto.referenceType;
-            paymentDTO.paymentDate = DateHelper.getCurrentDate();
-
-            //O estorno fica salvo negativo na tabela de pagamentos sempre.
-            paymentDTO.value = -Math.abs(dto.amount);
-            
             const savedReversed = await this.register(paymentDTO);
-
             if (savedReversed !== null) {
                 /**
                  * Para o registro dos eventos, o estorno deve condizer com o tipo do pagamento.
@@ -127,6 +126,16 @@ export default class PaymentService {
                 return this.revenueService.updateStatusRevenue(id, paymentDate);
             default:
                 throw new Error(`Nenhum método de atualização de status encontrado para ${type}`);
+        }
+    }
+
+    private validate(paymentData: PaymentInicialDataDTO) {
+        if (!paymentData || Object.keys(paymentData).length === 0) {
+            throw new Error("Invalid payment data");
+        }
+
+        if (HelperFunctions.isNullable(paymentData.accountId, true, true)) {
+            throw new Error(`O pagamento/recebimento deve ter uma conta bancária vinculada.`);
         }
     }
 }

@@ -38,6 +38,10 @@ export class ExpenseDTO {
   idCreditCard: number;
 
   @IsOptional()
+  @IsInt({ message: 'O ID da conta bancária deve ser um número inteiro.' })
+  idBankAccount: number;
+
+  @IsOptional()
   @IsInt({ message: 'O número de parcelas deve ser um inteiro.' })
   installments: number;
 
@@ -83,6 +87,6 @@ export class ExpenseDTO {
   paymentDate: string;
 
   @IsOptional()
-  @IsInt({ message: 'Invalid subcategory ID.'})
+  @IsInt({ message: 'Invalid subcategory ID.' })
   idSubcategory: number;
 }

@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { FinancialEventsEnum } from 'src/enum/financial-events.enum';
-import { PaymentType } from '../Payment/Types/payment.type';
 import { FinancialEvents } from 'src/EntityModels/FinancialEvent';
 import DateHelper from 'src/Shared/Utils/DateHelper';
-import { AuthContextService } from '../../Auth/auth-context.service';
-import { RedisKeys } from '../../redis/redis.keys';
-import RedisService from '../../redis/redis-service';
 import { FinancialEventsRepository } from './financial-events.repository';
 import { HelperFunctions } from 'src/Shared/Utils/HelperFunctions';
 import { HasherHelper } from 'src/Shared/Utils/HasherHelper';
+import { AuthContextService } from 'src/modules/Auth/auth-context.service';
+import RedisService from 'src/modules/redis/redis-service';
+import { PaymentType } from '../../Payment/Types/payment.type';
+import { RedisKeys } from 'src/modules/redis/redis.keys';
 
 export interface IFinancialEvent {
   accountId: number;

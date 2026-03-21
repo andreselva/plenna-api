@@ -4,13 +4,13 @@ import { InvoicesService } from "../Invoices/invoices.service";
 import { PaymentType } from "./Types/payment.type";
 import { ExpensesServices } from "../Expenses/ExpensesServices";
 import RevenuesService from "../Revenues/RevenuesService";
-import { FinancialEventsService, IFinancialEvent } from "src/modules/Finance/financial-events/financial-events.service";
 import { FinancialEventsEnum } from "src/enum/financial-events.enum";
 import ReversePaymentDataDTO from "./DTOs/ReversePaymentDataDTO";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import Payment from "src/EntityModels/Payment";
 import { PaymentRepository } from "./payment.repository";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
+import { FinancialEventsService, IFinancialEvent } from "../core/financial-events/financial-events.service";
 
 @Injectable()
 export default class PaymentService {
@@ -45,7 +45,7 @@ export default class PaymentService {
                 paymentData.value = -Math.abs(paymentData.value);
             }
 
-            await this.financialEventsService.register({
+            const event = await this.financialEventsService.register({
                 accountId: paymentData.accountId,
                 amount: paymentData.value,
                 type: paymentData.payableType === PaymentType.REVENUE ? FinancialEventsEnum.REVENUE_RECEIVED : FinancialEventsEnum.PAYMENT_POSTED,

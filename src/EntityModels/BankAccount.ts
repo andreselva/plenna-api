@@ -2,7 +2,7 @@ import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
 import { BankAccountTypeEnum } from "src/enum/bank-account-type.enum";
 import { IBankAccountRow } from "src/Shared/interfaces/IBankAccountRow";
-import { BankAccountDTO } from "src/modules/Finance/bank-accounts/DTOs/bank-account.dto";
+import { BankAccountDTO } from "src/modules/Finance/core/bank-accounts/DTOs/bank-account.dto";
 import DateHelper from "src/Shared/Utils/DateHelper";
 
 export class BankAccount extends EntityModel implements IEntity {

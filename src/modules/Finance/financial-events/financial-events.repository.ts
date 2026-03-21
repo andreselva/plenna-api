@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { FinancialEvents } from "src/EntityModels/FinancialEvent";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
-import MySQLDatabase from "../Config/Database/MySQLDatabase";
-import { AuthContextService } from "../Auth/auth-context.service";
+import MySQLDatabase from "../../Config/Database/MySQLDatabase";
+import { AuthContextService } from "../../Auth/auth-context.service";
 
 @Injectable()
 export class FinancialEventsRepository extends BaseRepository<FinancialEvents>{

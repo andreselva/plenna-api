@@ -4,7 +4,7 @@ import { InvoicesService } from "../Invoices/invoices.service";
 import { PaymentType } from "./Types/payment.type";
 import { ExpensesServices } from "../Expenses/ExpensesServices";
 import RevenuesService from "../Revenues/RevenuesService";
-import { FinancialEventsService, IFinancialEvent } from "src/modules/financial-events/financial-events.service";
+import { FinancialEventsService, IFinancialEvent } from "src/modules/Finance/financial-events/financial-events.service";
 import { FinancialEventsEnum } from "src/enum/financial-events.enum";
 import ReversePaymentDataDTO from "./DTOs/ReversePaymentDataDTO";
 import DateHelper from "src/Shared/Utils/DateHelper";

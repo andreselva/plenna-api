@@ -13,6 +13,7 @@ import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { FinancialEventsService, IFinancialEvent } from "../core/financial-events/financial-events.service";
 import { LedgerEngine } from "../core/ledger/ledger.engine";
 import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
+import { FinancialEvents } from "src/EntityModels/FinancialEvent";
 
 @Injectable()
 export default class PaymentService {
@@ -26,7 +27,7 @@ export default class PaymentService {
         private readonly database: MySQLDatabase
     ) {}
 
-    private async register(payment: PaymentInicialDataDTO) {
+    private async register(payment: PaymentInicialDataDTO): Promise<Payment> {
         const entity = Payment.fromDTO(payment);
         return await this.repository.savePayment(entity);
     }
@@ -90,7 +91,7 @@ export default class PaymentService {
         });
     }
 
-    async getPaymentsData(entityType: PaymentType, entityId: string) {
+    async getPaymentsData(entityType: PaymentType, entityId: string): Promise<{ payments: Payment[] }> {
         if (!entityType || !entityId) {
             throw new Error("Entity type and ID are required");
         }
@@ -99,7 +100,7 @@ export default class PaymentService {
         return { payments: payments ?? [] };
     }
 
-    private async createEvent(data: IFinancialEvent) {
+    private async createEvent(data: IFinancialEvent): Promise<FinancialEvents> {
         return this.financialEventsService.register(data);
     }
 

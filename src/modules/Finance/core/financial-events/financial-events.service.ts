@@ -26,7 +26,7 @@ export class FinancialEventsService {
     private readonly repository: FinancialEventsRepository
   ) {}
 
-  async register(data: IFinancialEvent) {
+  async register(data: IFinancialEvent): Promise<FinancialEvents> {
     const event = await this.buildEvent(data);
     const saved = await this.repository.saveEvent(event);
     if (saved?.id > 0) {
@@ -88,7 +88,7 @@ export class FinancialEventsService {
     return HasherHelper.sha256(canonical);
   }
 
-  private generatePayloadForHash(event: FinancialEvents) {
+  private generatePayloadForHash(event: FinancialEvents): object {
     return {
       clientId: event.clientId,
       accountId: event.accountId,

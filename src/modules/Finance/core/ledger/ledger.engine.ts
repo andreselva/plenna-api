@@ -16,7 +16,7 @@ export class LedgerEngine {
     private readonly repository: LedgerRepository
  ) {}
  
- async process(event: FinancialEvents) {
+ async process(event: FinancialEvents): Promise<void> {
   this.validate(event);
   
   try {
@@ -41,14 +41,14 @@ export class LedgerEngine {
   )
  }
 
- private async saveEventProcessing(event: FinancialEvents) {
+ private async saveEventProcessing(event: FinancialEvents): Promise<void> {
   const ledgerEventProcessing = new LedgerEventProcessing();
   ledgerEventProcessing.eventId = event.id;
   ledgerEventProcessing.processedAt = DateHelper.getCurrentDate();
   await this.repository.saveLedgerEventProcessing(ledgerEventProcessing);
  }
 
- private validate(event: FinancialEvents) {
+ private validate(event: FinancialEvents): void {
   if (HelperFunctions.isNullable(event.accountId, true, true)) {
    throw Error(`invalid account id`);
   }

@@ -2,8 +2,9 @@ import EntityModel from "./entity.model";
 import IPaymentInterface from "src/Shared/interfaces/IPaymentInterface";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import PaymentInicialDataDTO from "src/modules/Finance/Payment/DTOs/PaymentInicialDataDTO";
+import IEntity from "src/Shared/interfaces/IEntity";
 
-export default class Payment extends EntityModel {
+export default class Payment extends EntityModel implements IEntity {
     public id: number = 0;
     public payable_id: number = 0;
     public payable_type: string = '';

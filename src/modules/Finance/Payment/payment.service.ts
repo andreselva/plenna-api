@@ -11,6 +11,7 @@ import Payment from "src/EntityModels/Payment";
 import { PaymentRepository } from "./payment.repository";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { FinancialEventsService, IFinancialEvent } from "../core/financial-events/financial-events.service";
+import { LedgerEngine } from "../core/ledger/ledger.engine";
 
 @Injectable()
 export default class PaymentService {
@@ -19,6 +20,7 @@ export default class PaymentService {
         private readonly expenseService: ExpensesServices,
         private readonly revenueService: RevenuesService,
         private readonly financialEventsService: FinancialEventsService,
+        private readonly ledgerEngine: LedgerEngine,
         private readonly repository: PaymentRepository,
         private readonly database: MySQLDatabase
     ) { }
@@ -36,11 +38,7 @@ export default class PaymentService {
         paymentData.paymentDate = DateHelper.toISODate(paymentData.paymentDate) ?? paymentData.paymentDate;
 
         return this.database.transaction(async () => {   
-            const savedPayment = await this.register(paymentData);
-            if (!savedPayment) {
-                throw new Error("Failed to register payment");
-            }
-            
+            const savedPayment = await this.register(paymentData);            
             if ([PaymentType.EXPENSE, PaymentType.INVOICE].includes(paymentData.payableType)) {
                 paymentData.value = -Math.abs(paymentData.value);
             }
@@ -53,6 +51,7 @@ export default class PaymentService {
                 referenceType: paymentData.payableType
             } satisfies IFinancialEvent);
 
+            await this.ledgerEngine.process(event);
             await this.updateStatus(
                 paymentData.payableType, 
                 savedPayment.payable_id, 

@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import ReversePaymentDataDTO from "./DTOs/ReversePaymentDataDTO";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";

@@ -13,7 +13,7 @@ export class Migration20260320_03_CriaNovaTabelaBankAccounts implements IMigrati
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
                     clientId BIGINT NOT NULL,
                     name VARCHAR(150) NOT NULL,
-                    type ENUM('CHECKING', 'SAVINGS', 'DIGITAL_WALLET', 'INVESTMENT'),
+                    type ENUM('CHECKING', 'SAVINGS', 'DIGITAL_WALLET', 'INVESTMENT', 'PHYSICAL_WALLET'),
                     bankCode INTEGER,
                     agency VARCHAR(20),
                     accountNumber VARCHAR(30),

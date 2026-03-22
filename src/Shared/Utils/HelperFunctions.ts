@@ -58,4 +58,8 @@ export class HelperFunctions {
         
         return false;
     }
+
+    static isDuplicateKeyError(error: any): boolean {
+        return error?.code === 'ER_DUP_ENTRY';
+    }
 }

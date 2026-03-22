@@ -7,6 +7,8 @@ import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
 import { PaymentType } from "../../Payment/Types/payment.type";
 import { LedgerEventProcessing } from "src/EntityModels/LedgerEventProcessing";
 import DateHelper from "src/Shared/Utils/DateHelper";
+import { EventAlreadyProcessedException } from "./exceptions/EventAlreadyProcessedException";
+import { InvalidQuantityLedgerEntriesException } from "./exceptions/InvalidQuantityLedgerEntriesException";
 
 @Injectable()
 export class LedgerEngine {
@@ -16,10 +18,20 @@ export class LedgerEngine {
  
  async process(event: FinancialEvents) {
   this.validate(event);
+  
+  try {
+    await this.saveEventProcessing(event);
+  } catch (e) {
+    if (HelperFunctions.isDuplicateKeyError(e)) {
+      throw new EventAlreadyProcessedException(event.id);
+    }
+    throw e;
+  }
+
   const builder = new LedgerBuilder(this.repository);
   const entries: LedgerEntry[] = await builder.build(event);
-  if (entries.length <= 1) {
-    throw new Error(`invalid entries for the ledger.`)
+  if (entries.length % 2 !== 0) {
+   throw new InvalidQuantityLedgerEntriesException(event.id);
   }
 
   await Promise.all(
@@ -27,7 +39,6 @@ export class LedgerEngine {
         await this.repository.save(e);
     })
   )
-  await this.saveEventProcessing(event);
  }
 
  async saveEventProcessing(event: FinancialEvents) {

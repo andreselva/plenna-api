@@ -6,6 +6,7 @@ import { LedgerEntryTypeEnum } from "src/enum/ledger-entry-type.enum";
 export class LedgerEntry extends EntityModel implements IEntity {
  static ERROR_DUPLICATE_EVENT: string = 'EVENT_ALREADY_EXISTS';
  static ERROR_INVALID_QTY_ENTRIES: string = 'INVALID_QUANTITY_ENTRIES';
+ static ERROR_INVALID_EVENT_TYPE_AMOUNT: string = 'INVALID_EVENT_TYPE_AMOUNT'
 
  public id: number;
  public clientId: number;

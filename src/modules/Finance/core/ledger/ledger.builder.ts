@@ -6,6 +6,9 @@ import DateHelper from "src/Shared/Utils/DateHelper";
 import { LedgerRepository } from "./ledger.repository";
 import { BankAccount } from "src/EntityModels/BankAccount";
 import { BankAccountTypeEnum } from "src/enum/bank-account-type.enum";
+import { FinancialEventsEnum } from "src/enum/financial-events.enum";
+import { InvalidEventTypeException } from "./exceptions/InvalidEventTypeException";
+import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
 
 export class LedgerBuilder {
  private repository: LedgerRepository;
@@ -15,45 +18,33 @@ export class LedgerBuilder {
  }
 
  async build(event: FinancialEvents): Promise<LedgerEntry[]> {
-  const origin = this.buildOrigin(event);
-  const destination = await this.buildDestination(event);
-  return [origin, destination];
- }
+  const account = await this.repository.getBankAccountById(event.accountId);
+  const metadata = this.buildMetadata(event);
+  const { originAmount, destinationAmount } = this.defineAmounts(event);
 
- private buildOrigin(event: FinancialEvents): LedgerEntry {
   const originEntry = new LedgerEntry();
   originEntry.eventId = event.id;
   originEntry.entityId = event.referenceId;
   originEntry.entityType = event.referenceType;
   originEntry.type = this.defineTypeOrigin(event.referenceType);
-
-  if (originEntry.type === LedgerEntryTypeEnum.R) {
-    event.amount = -Math.abs(event.amount);
-  } else {
-    event.amount = Math.abs(event.amount);
-  }
-
-  originEntry.amount = event.amount;
+  originEntry.amount = originAmount;
   originEntry.accountId = originEntry.type === LedgerEntryTypeEnum.T ? event.referenceId : event.accountId;
-  originEntry.metadata = this.buildMetadata(event);
+  originEntry.metadata = metadata;
   originEntry.liquidity = originEntry.type === LedgerEntryTypeEnum.T;
   originEntry.createdAt = DateHelper.getCurrentDate();
-  return originEntry;
- }
-
- private async buildDestination(event: FinancialEvents): Promise<LedgerEntry> {
+ 
   const destinationEntry = new LedgerEntry();
-  const account = await this.repository.getBankAccountById(event.accountId);
   destinationEntry.eventId = event.id;
   destinationEntry.entityId = event.referenceId;
   destinationEntry.entityType = event.referenceType;
-  destinationEntry.amount = event.amount > 0 ? -Math.abs(event.amount) : Math.abs(event.amount);
+  destinationEntry.amount = destinationAmount;
   destinationEntry.type = this.defineTypeDestination(account);
   destinationEntry.accountId = event.accountId;
-  destinationEntry.metadata = this.buildMetadata(event);
+  destinationEntry.metadata = metadata;
   destinationEntry.liquidity = true;
   destinationEntry.createdAt = DateHelper.getCurrentDate();
-  return destinationEntry;
+ 
+  return [originEntry, destinationEntry]
  }
 
  private defineTypeOrigin(referenceType: PaymentType): LedgerEntryTypeEnum {
@@ -77,12 +68,41 @@ export class LedgerBuilder {
   return types[account.type];
  }
 
+ private defineAmounts(event: FinancialEvents): { originAmount: number, destinationAmount: number } {
+  if (HelperFunctions.isNullable(event.amount, true, true)) {
+    return { originAmount: 0, destinationAmount: 0 }
+  }
+  
+  switch (event.type) {
+    case FinancialEventsEnum.OPENING_BALANCE:
+      return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
+
+    case FinancialEventsEnum.PAYMENT_POSTED:
+      return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
+
+    case FinancialEventsEnum.REVENUE_RECEIVED:
+    case FinancialEventsEnum.TRANSFER_POSTED:
+      return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
+
+    case FinancialEventsEnum.REVERSAL:
+      if ([PaymentType.EXPENSE, PaymentType.INVOICE].includes(event.referenceType)) {
+       return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
+      } else if (event.referenceType === PaymentType.REVENUE) {
+       return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
+      }
+      
+    default:
+      throw new InvalidEventTypeException(event.id);
+  }
+ }
+
  private buildMetadata(event: FinancialEvents): object {
   return {
    event: {
     sequenceNumber: event.sequenceNumber,
     createdAt: event.createdAt,
-    hash: event.eventHash
+    hash: event.eventHash,
+    eventType: event.type
    },
    system: {
     createdAt: DateHelper.getCurrentDate(),

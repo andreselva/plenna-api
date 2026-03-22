@@ -41,7 +41,7 @@ export class LedgerEngine {
   )
  }
 
- async saveEventProcessing(event: FinancialEvents) {
+ private async saveEventProcessing(event: FinancialEvents) {
   const ledgerEventProcessing = new LedgerEventProcessing();
   ledgerEventProcessing.eventId = event.id;
   ledgerEventProcessing.processedAt = DateHelper.getCurrentDate();

@@ -16,7 +16,6 @@ export class Migration20260228_01_CriaFinancialEvents implements IMigration {
                     type ENUM(
                         'PAYMENT_POSTED',
                         'TRANSFER_POSTED',
-                        'ADJUSTMENT',
                         'REVERSAL',
                         'OPENING_BALANCE',
                         'REVENUE_RECEIVED'

@@ -12,6 +12,7 @@ import { PaymentRepository } from "./payment.repository";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { FinancialEventsService, IFinancialEvent } from "../core/financial-events/financial-events.service";
 import { LedgerEngine } from "../core/ledger/ledger.engine";
+import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
 
 @Injectable()
 export default class PaymentService {
@@ -23,41 +24,69 @@ export default class PaymentService {
         private readonly ledgerEngine: LedgerEngine,
         private readonly repository: PaymentRepository,
         private readonly database: MySQLDatabase
-    ) { }
+    ) {}
 
     private async register(payment: PaymentInicialDataDTO) {
         const entity = Payment.fromDTO(payment);
         return await this.repository.savePayment(entity);
     }
-
-    async registerPayment(paymentData: PaymentInicialDataDTO) {
-        if (!paymentData || Object.keys(paymentData).length === 0) {
+    async registerPayment(dto: PaymentInicialDataDTO) {
+        if (!dto || Object.keys(dto).length === 0) {
             throw new Error("Invalid payment data");
         }
 
-        paymentData.paymentDate = DateHelper.toISODate(paymentData.paymentDate) ?? paymentData.paymentDate;
-
-        return this.database.transaction(async () => {   
-            const savedPayment = await this.register(paymentData);            
-            if ([PaymentType.EXPENSE, PaymentType.INVOICE].includes(paymentData.payableType)) {
-                paymentData.value = -Math.abs(paymentData.value);
-            }
-
-            const event = await this.financialEventsService.register({
-                accountId: paymentData.accountId,
-                amount: paymentData.value,
-                type: paymentData.payableType === PaymentType.REVENUE ? FinancialEventsEnum.REVENUE_RECEIVED : FinancialEventsEnum.PAYMENT_POSTED,
-                referenceId: paymentData.payableId,
-                referenceType: paymentData.payableType
-            } satisfies IFinancialEvent);
+        const normalizedDate = DateHelper.toISODate(dto.paymentDate) ?? dto.paymentDate;
+        
+        return this.database.transaction(async () => {
+            const payment = await this.repository.savePayment(
+                Payment.fromDTO({ ...dto, paymentDate: normalizedDate, value: dto.value })
+            );
+            
+            const normalizedAmount = this.normalizeAmount(dto.value, dto.payableType);
+            const event = await this.createEvent({
+                accountId: dto.accountId,
+                amount: normalizedAmount,
+                type: this.resolveEventType(dto.payableType),
+                referenceId: dto.payableId,
+                referenceType: dto.payableType
+            });
 
             await this.ledgerEngine.process(event);
-            
-            await this.updateStatus(
-                paymentData.payableType, 
-                savedPayment.payable_id, 
-                savedPayment.payment_date
-            );
+
+            return this.updateStatus(dto.payableType, payment.payable_id, payment.payment_date);
+        });
+    }
+
+    async deletePayment(dto: ReversePaymentDataDTO) {
+        const original = await this.repository.verifyReversePayment(dto.paymentId);
+
+        if (!HelperFunctions.isNullable(original.reversed, true, true)) {
+            throw new Error("Já existe um estorno para esse pagamento.");
+        }
+
+        return this.database.transaction(async () => {
+            const amount = this.normalizeReversalAmount(dto.amount, dto.referenceType);
+            const paymentDTO = new PaymentInicialDataDTO();
+            paymentDTO.payableId = dto.entityId;
+            paymentDTO.payableType = dto.referenceType;
+            paymentDTO.paymentDate = DateHelper.getCurrentISODate();
+
+            paymentDTO.value = amount;
+            paymentDTO.accountId = dto.accountId;
+
+            await this.register(paymentDTO);
+
+            const event = await this.createEvent({
+                accountId: dto.accountId,
+                amount,
+                type: FinancialEventsEnum.REVERSAL,
+                referenceId: dto.entityId,
+                referenceType: dto.referenceType
+            });
+
+            await this.ledgerEngine.process(event);
+            await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
+            return this.updateStatus(dto.referenceType, dto.entityId, null);
         });
     }
 
@@ -67,56 +96,29 @@ export default class PaymentService {
         }
 
         const payments = await this.repository.getPaymentsByEntity(entityType, entityId);
-        if (!payments || payments.length === 0) {
-            return { payments: [] };
-        }
-
-        return { payments: payments };
+        return { payments: payments ?? [] };
     }
 
-    async deletePayment(dto: ReversePaymentDataDTO) {
-        const payment = await this.repository.verifyReversePayment(dto.paymentId);
-        if (payment.reversed !== null) {
-            throw new Error(`Já existe um estorno para esse pagamento.`);
+    private async createEvent(data: IFinancialEvent) {
+        return this.financialEventsService.register(data);
+    }
+
+    private normalizeAmount(value: number, type: PaymentType): number {
+        if ([PaymentType.EXPENSE, PaymentType.INVOICE].includes(type)) {
+            return -Math.abs(value);
         }
+        return Math.abs(value);
+    }
 
-        return this.database.transaction(async () => {
-            const paymentDTO = new PaymentInicialDataDTO();
-            paymentDTO.payableId = dto.entityId;
-            paymentDTO.payableType = dto.referenceType;
-            paymentDTO.paymentDate = DateHelper.getCurrentISODate();
+    private normalizeReversalAmount(value: number, type: PaymentType): number {
+        if ([PaymentType.EXPENSE, PaymentType.INVOICE].includes(type)) {
+            return Math.abs(value);
+        }
+        return -Math.abs(value);
+    }
 
-            // O estorno fica salvo negativo na tabela de pagamentos sempre.
-            paymentDTO.value = -Math.abs(dto.amount);
-            paymentDTO.accountId = dto.accountId;
-
-            const savedReversed = await this.register(paymentDTO);
-
-            if (savedReversed !== null) {
-                /**
-                 * Para o registro dos eventos, o estorno deve condizer com o tipo do pagamento.
-                 * 
-                 * Para casos onde o dinheiro sai, como despesas e faturas, o estorno deve ser positivo, pois está voltando ao caixa.
-                 * Para casos onde o dinheiro entra, como receitas, o estorno deve ser negativo, pois está saindo do caixa.
-                 */
-                if ([PaymentType.EXPENSE, PaymentType.INVOICE].includes(dto.referenceType)) {
-                    dto.amount = +Math.abs(dto.amount);
-                } else if (dto.referenceType === PaymentType.REVENUE) {
-                    dto.amount = -Math.abs(dto.amount);
-                }
-
-                await this.financialEventsService.register({
-                    accountId: dto.accountId,
-                    amount: dto.amount,
-                    type: FinancialEventsEnum.REVERSAL,
-                    referenceId: dto.entityId,
-                    referenceType: dto.referenceType
-                } satisfies IFinancialEvent);
-
-                await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
-                return await this.updateStatus(dto.referenceType, dto.entityId, null);
-            }
-        });
+    private resolveEventType(type: PaymentType): FinancialEventsEnum {
+        return type === PaymentType.REVENUE ? FinancialEventsEnum.REVENUE_RECEIVED : FinancialEventsEnum.PAYMENT_POSTED;
     }
 
     private async updateStatus(type: PaymentType, id: number, paymentDate: string | null) {
@@ -124,7 +126,7 @@ export default class PaymentService {
             case PaymentType.INVOICE:
                 return this.invoiceService.updateInvoiceStatus(id, paymentDate);
             case PaymentType.EXPENSE:
-                return await this.expenseService.updateStatusExpense(id, paymentDate);
+                return this.expenseService.updateStatusExpense(id, paymentDate);
             case PaymentType.REVENUE:
                 return this.revenueService.updateStatusRevenue(id, paymentDate);
             default:

@@ -13,6 +13,7 @@ export default class Payment extends EntityModel implements IEntity {
     public clientId: number = 0;
     public accountId: number = 0;
     public reversed: string;
+    public reversal: boolean = false;
 
     constructor() {
         super();
@@ -29,6 +30,7 @@ export default class Payment extends EntityModel implements IEntity {
         payment.payment_date = DateHelper.toISODate(dto.paymentDate) ?? dto.paymentDate;
         payment.accountId = dto.accountId;
         payment.reversed = dto.reversed ?? null;
+        payment.reversal = dto.reversal ?? false;
         return payment;
     }
 

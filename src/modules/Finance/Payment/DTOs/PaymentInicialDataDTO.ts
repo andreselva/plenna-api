@@ -1,4 +1,4 @@
-import { IsDateString, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsDateString, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { PaymentType } from "../Types/payment.type";
 
 export default class PaymentInicialDataDTO {
@@ -30,4 +30,8 @@ export default class PaymentInicialDataDTO {
     @IsOptional()
     @IsString({ message: 'Invalid reversed value.' })
     reversed: string;
+
+    @IsOptional()
+    @IsBoolean({ message: 'invalid reversal '})
+    reversal: boolean;
 }

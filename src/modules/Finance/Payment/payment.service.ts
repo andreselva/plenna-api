@@ -71,6 +71,7 @@ export default class PaymentService {
             paymentDTO.paymentDate = DateHelper.getCurrentISODate();
             paymentDTO.value = dto.amount < 0 ? dto.amount : -Math.abs(dto.amount);
             paymentDTO.accountId = dto.accountId;
+            paymentDTO.reversal = true;
             
             await this.register(paymentDTO);
             

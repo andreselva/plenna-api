@@ -5,15 +5,16 @@ import { CreateExpense } from "./UseCases/CreateExpense";
 import { DeleteExpense } from "./UseCases/DeleteExpense";
 import { UpdateExpense } from "./UseCases/UpdateExpense";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 
 @Injectable()
-@Dependencies(GetExpenses, CreateExpense, DeleteExpense, UpdateExpense)
 export class ExpensesServices {
     constructor(
         private readonly getExpensesUseCase: GetExpenses,
         private readonly createExpenseUseCase: CreateExpense,
         private readonly deleteExpenseUseCase: DeleteExpense,
         private readonly updateExpenseUseCase: UpdateExpense,
+        private readonly database: MySQLDatabase
     ) { }
 
     async getExpenses(periodo: PeriodoDTO) {
@@ -30,7 +31,10 @@ export class ExpensesServices {
 
     async deleteExpense(id: string, deleteInstallments: string, sourceAccountId: string, periodo: PeriodoDTO) {
         const deleteAnotherInstallments = deleteInstallments === 'false' ? false : true;
-        return await this.deleteExpenseUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId), periodo);
+        return this.database.transaction(async () => {
+            await this.deleteExpenseUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId));
+            return { expenses: await this.getExpensesUseCase.execute(periodo) }
+        });
     }
 
     async updateExpense(id: string, expense: ExpenseDTO, periodo: PeriodoDTO) {

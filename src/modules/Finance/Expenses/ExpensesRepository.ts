@@ -15,7 +15,7 @@ export class ExpensesRepository extends BaseRepository<Expense> {
     }
     
     async getExpenses(periodo: PeriodoDTO): Promise<Expense[]> {
-        const query = "SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ?";
+        const query = "SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ? AND status NOT IN ('archived', 'cancelled');";
         const rows = await this.database.select(query, [this.authContext.getClientId(), periodo.start, periodo.end]);
         return this.extractToEntity(rows, Expense);
     }
@@ -30,16 +30,8 @@ export class ExpensesRepository extends BaseRepository<Expense> {
     }
 
     async deleteExpense(id: number) {
-        const query = "DELETE FROM expense WHERE clientId = ? AND id = ?";
-        const result = await this.database.execute(query, [this.authContext.getClientId(), id]);
-
-        if (result.affectedRows > 0) {
-            return {
-                isSuccess: true,
-                message: 'Expense deleted successfully',
-            };
-        }
-        throw new Error('Failed to delete expense');
+        const query = `UPDATE expense SET status = ? WHERE id = ? AND clientId = ?`;
+        await this.database.execute(query, [ExpenseStatus.CANCELLED, id, this.authContext.getClientId()]);
     }
 
     async searchForRelatedInstallments(consideredId: number, expenseId: number = 0): Promise<Expense[]> {
@@ -72,5 +64,10 @@ export class ExpensesRepository extends BaseRepository<Expense> {
         const query = "SELECT * FROM expense WHERE clientId = ? AND id = ?";
         const result = await this.database.select(query, [this.authContext.getClientId(), id]);
         return this.extractToEntity(result, Expense)[0] ?? null;
+    }
+
+    async archive(id: number) {
+        const query = `UPDATE expense SET status = ? WHERE id = ? AND clientId = ?`;
+        await this.database.execute(query, [ExpenseStatus.ARCHIVED, id, this.authContext.getClientId()]);
     }
 }

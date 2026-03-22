@@ -5,16 +5,12 @@ import { RevenueDTO } from "./DTOs/RevenueDTO";
 import { DeleteRevenue } from "./UseCases/DeleteRevenue";
 import { UpdateRevenue } from "./UseCases/UpdateRevenue";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
+import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 
 @Injectable()
-@Dependencies(
-    GetRevenues,
-    CreateRevenue,
-    DeleteRevenue,
-    UpdateRevenue,
-)
 export default class RevenuesService {
     constructor(
+        private readonly database: MySQLDatabase,
         private readonly getRevenuesUseCase: GetRevenues,
         private readonly createRevenueUseCase: CreateRevenue,
         private readonly deleteRevenueUseCase: DeleteRevenue,
@@ -35,7 +31,10 @@ export default class RevenuesService {
 
     async deleteRevenue(id: string, deleteInstallments: string, sourceAccountId: string, periodo: PeriodoDTO) {
         const deleteAnotherInstallments = deleteInstallments === 'false' ? false : true;
-        return await this.deleteRevenueUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId), periodo);
+        return this.database.transaction(async () => {
+            await this.deleteRevenueUseCase.execute(Number(id), deleteAnotherInstallments, Number(sourceAccountId));
+            return await this.getRevenuesUseCase.execute(periodo);
+        })
     }
 
     async updateRevenue(id: string, revenue: RevenueDTO, periodo: PeriodoDTO) {

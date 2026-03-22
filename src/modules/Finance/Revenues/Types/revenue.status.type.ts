@@ -2,6 +2,8 @@ export enum RevenueStatus {
     PENDING = 'pending',
     PAID = 'paid',
     PARTIAL = 'partial',
-    CANCELED = 'cancelled',
-    REVERSED = 'reversed'
+    CANCELLED = 'cancelled',
+    REVERSED = 'reversed',
+    DELETED = 'deleted',
+    ARCHIVED = 'archived'
 }

@@ -56,6 +56,12 @@ export class Migration20260228_01_CriaFinancialEvents implements IMigration {
             ),
             MigrationSteps.RunSQL(
                 `ALTER TABLE payment ADD COLUMN reversal BOOLEAN DEFAULT false;`
+            ),
+            MigrationSteps.RunSQL(
+                `ALTER TABLE revenue MODIFY COLUMN status ENUM('paid','partial','pending','cancelled','reversed', 'archived');`
+            ),
+            MigrationSteps.RunSQL(
+                `ALTER TABLE expense MODIFY COLUMN status ENUM('paid','partial','pending','cancelled','reversed', 'archived');`
             )
         ]
     }

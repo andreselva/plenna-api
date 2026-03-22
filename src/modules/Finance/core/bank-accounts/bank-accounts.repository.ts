@@ -3,6 +3,7 @@ import { BankAccount } from "src/EntityModels/BankAccount";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export class BankAccountsRepository extends BaseRepository<BankAccount> {
@@ -17,7 +18,7 @@ export class BankAccountsRepository extends BaseRepository<BankAccount> {
     }
 
     async inactiveBankAccount(id: number) {
-        const query = `UPDATE bank_accounts SET isActive = false WHERE id = ? AND clientId = ?`;
-        return await this.database.execute(query, [id, this.authContext.getClientId()]);
+        const query = `UPDATE bank_accounts SET isActive = false, updatedAt = ?, deletedAt = ? WHERE id = ? AND clientId = ?`;
+        return await this.database.execute(query, [DateHelper.getCurrentDate(), DateHelper.getCurrentDate(), id, this.authContext.getClientId()]);
     }
 }

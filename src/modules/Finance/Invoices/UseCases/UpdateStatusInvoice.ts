@@ -19,6 +19,7 @@ export default class UpdateStatusInvoice {
                 const totalPayments = payments.reduce((acc, p) => acc + p.value, 0);
                 if (totalPayments <= 0 && payments.length > 0) {
                     invoice.status = Invoice.STATUS_REVERSED;
+                    invoice.paymentDate = paymentDate;
                 } else {
                     const invoiceValue = await this.repository.getTotalInvoiceValue(invoiceId);
                     const status = this.defineStatus(totalPayments, invoiceValue);

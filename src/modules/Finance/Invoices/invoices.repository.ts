@@ -58,7 +58,7 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
     }
 
     async getSettingsInvoice(idBankAccount: number) {
-        const query = "SELECT closingDate, dueDate, id as idAccount, name as nameAccount FROM bank_account WHERE clientId = ? AND id = ? LIMIT 1";
+        const query = "SELECT closingDate, dueDate, id as idAccount, name as nameAccount FROM credit_cards WHERE clientId = ? AND id = ? LIMIT 1";
         const result = await this.database.select(query, [this.authContext.getClientId(), idBankAccount]);
         return result[0];
     }

@@ -65,17 +65,16 @@ export default class PaymentService {
         }
 
         return this.database.transaction(async () => {
-            const amount = this.normalizeReversalAmount(dto.amount, dto.referenceType);
             const paymentDTO = new PaymentInicialDataDTO();
             paymentDTO.payableId = dto.entityId;
             paymentDTO.payableType = dto.referenceType;
             paymentDTO.paymentDate = DateHelper.getCurrentISODate();
-
-            paymentDTO.value = amount;
+            paymentDTO.value = dto.amount < 0 ? dto.amount : -Math.abs(dto.amount);
             paymentDTO.accountId = dto.accountId;
-
+            
             await this.register(paymentDTO);
-
+            
+            const amount = this.normalizeReversalAmount(dto.amount, dto.referenceType);
             const event = await this.createEvent({
                 accountId: dto.accountId,
                 amount,

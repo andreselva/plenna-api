@@ -20,6 +20,8 @@ export class BankAccount extends EntityModel implements IEntity {
     public updatedAt: string;
     public deletedAt: string;
 
+    public static ignoredProperties: string[] = [];
+
     static fromRow(i: IBankAccountRow): BankAccount {
         const ba = new BankAccount();
         ba.id = i.id;
@@ -63,6 +65,10 @@ export class BankAccount extends EntityModel implements IEntity {
     }
 
     getIgnoredProperties(): string[] {
-        return [];
+        return BankAccount.ignoredProperties;
+    }
+
+    addIgnoredProperties(props: string[]): void {
+        BankAccount.ignoredProperties.push(...props);
     }
 }

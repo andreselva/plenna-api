@@ -20,7 +20,7 @@ export class BankAccountsController {
         return await this.service.saveBankAccount(dto);
     }
     
-    @Put(':id')
+    @Delete(':id')
     async inactive(@Param('id') id: string) {
         return await this.service.inactive(Number(id));
     }
@@ -29,7 +29,7 @@ export class BankAccountsController {
     async updateBankAccount(@Param('id') id: string, @Body() dto: BankAccountDTO) {
         if (!HelperFunctions.isNullable(Number(id), true, true) && Number(id) > 0) {
             dto.id = Number(id);
-            return await this.service.saveBankAccount(dto);
+            return await this.service.updateBankAccount(dto);
         }
         throw new Exception(`Invalid id to update bank account`);
     }

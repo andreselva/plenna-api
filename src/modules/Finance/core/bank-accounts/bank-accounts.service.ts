@@ -42,6 +42,12 @@ export class BankAccountsService {
         })
     }
 
+    async updateBankAccount(dto: BankAccountDTO) {
+        const entity = BankAccount.fromDTO(dto);
+        entity.addIgnoredProperties(['initialBalance', 'currentBalance']);
+        return await this.repository.save(entity, true);
+    }
+
     async inactive(id: number) {
         return await this.repository.inactiveBankAccount(id);
     }

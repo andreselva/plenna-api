@@ -14,13 +14,13 @@ export class LedgerBuilder {
     this.repository = repository;
  }
 
- async build(event: FinancialEvents) {
+ async build(event: FinancialEvents): Promise<LedgerEntry[]> {
   const origin = this.buildOrigin(event);
   const destination = await this.buildDestination(event);
-  return [origin, destination] as LedgerEntry[];
+  return [origin, destination];
  }
 
- private buildOrigin(event: FinancialEvents) {
+ private buildOrigin(event: FinancialEvents): LedgerEntry {
   const originEntry = new LedgerEntry();
   originEntry.eventId = event.id;
   originEntry.entityId = event.referenceId;
@@ -41,7 +41,7 @@ export class LedgerBuilder {
   return originEntry;
  }
 
- private async buildDestination(event: FinancialEvents) {
+ private async buildDestination(event: FinancialEvents): Promise<LedgerEntry> {
   const destinationEntry = new LedgerEntry();
   const account = await this.repository.getBankAccountById(event.accountId);
   destinationEntry.eventId = event.id;
@@ -56,7 +56,7 @@ export class LedgerBuilder {
   return destinationEntry;
  }
 
- private defineTypeOrigin(referenceType: PaymentType) {
+ private defineTypeOrigin(referenceType: PaymentType): LedgerEntryTypeEnum {
   const types = {
     [PaymentType.EXPENSE]: LedgerEntryTypeEnum.E,
     [PaymentType.REVENUE]: LedgerEntryTypeEnum.R,
@@ -66,7 +66,7 @@ export class LedgerBuilder {
   return types[referenceType];
  }
 
- private defineTypeDestination(account: BankAccount) {
+ private defineTypeDestination(account: BankAccount): LedgerEntryTypeEnum {
   const types = {
     [BankAccountTypeEnum.CHECKING]: LedgerEntryTypeEnum.C,
     [BankAccountTypeEnum.DIGITAL_WALLET]: LedgerEntryTypeEnum.D_WALLET,
@@ -77,7 +77,7 @@ export class LedgerBuilder {
   return types[account.type];
  }
 
- private buildMetadata(event: FinancialEvents) {
+ private buildMetadata(event: FinancialEvents): object {
   return {
    event: {
     sequenceNumber: event.sequenceNumber,

@@ -27,6 +27,7 @@ export class LedgerEngine {
         await this.repository.save(e);
     })
   )
+  await this.saveEventProcessing(event);
  }
 
  async saveEventProcessing(event: FinancialEvents) {

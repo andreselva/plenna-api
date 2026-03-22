@@ -52,6 +52,7 @@ export default class PaymentService {
             } satisfies IFinancialEvent);
 
             await this.ledgerEngine.process(event);
+            
             await this.updateStatus(
                 paymentData.payableType, 
                 savedPayment.payable_id, 

@@ -20,9 +20,9 @@ export class BankAccountsController {
         return await this.service.saveBankAccount(dto);
     }
     
-    @Delete(':id')
-    async deleteBankAccount(@Param('id') id: string) {
-        return 'ok'
+    @Put(':id')
+    async inactive(@Param('id') id: string) {
+        return await this.service.inactive(Number(id));
     }
 
     @Put(':id')

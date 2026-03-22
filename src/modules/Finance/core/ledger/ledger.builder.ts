@@ -52,7 +52,8 @@ export class LedgerBuilder {
     [PaymentType.EXPENSE]: LedgerEntryTypeEnum.E,
     [PaymentType.REVENUE]: LedgerEntryTypeEnum.R,
     [PaymentType.TRANSFER]: LedgerEntryTypeEnum.T,
-    [PaymentType.INVOICE]: LedgerEntryTypeEnum.INVOICE
+    [PaymentType.INVOICE]: LedgerEntryTypeEnum.INVOICE,
+    [PaymentType.ACCOUNT_OPENING]: LedgerEntryTypeEnum.ACCOUNT_OPENING
   }
   return types[referenceType];
  }

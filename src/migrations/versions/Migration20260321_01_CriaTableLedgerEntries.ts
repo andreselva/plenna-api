@@ -21,7 +21,7 @@ export class Migration20260321_01_CriaTableLedgerEntries implements IMigration {
                         'REVENUE',
                         'EXPENSE',
                         'INVOICE',
-                        'BANK',
+                        'ACCOUNT_OPENING',
                         'PHYSICAL_WALLET',
                         'DIGITAL_WALLET',
                         'INVESTMENT',

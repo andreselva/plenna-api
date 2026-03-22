@@ -5,8 +5,8 @@ export enum LedgerEntryTypeEnum {
     C = 'CHECKING',
     S = 'SAVINGS',
     INVOICE = 'INVOICE',
-    BANK = 'BANK',
     P_WALLET = 'PHYSICAL_WALLET',
     D_WALLET = 'DIGITAL_WALLET',
-    INVESTMENT = 'INVESTMENT'
+    INVESTMENT = 'INVESTMENT',
+    ACCOUNT_OPENING = 'ACCOUNT_OPENING'
 }

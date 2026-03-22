@@ -11,8 +11,13 @@ export class BankAccountsRepository extends BaseRepository<BankAccount> {
     }
 
     async listBankAccounts() {
-        const query = `SELECT * FROM bank_accounts WHERE clientId = ?`;
+        const query = `SELECT * FROM bank_accounts WHERE clientId = ? AND isActive = true`;
         const result = await this.database.select(query, [this.authContext.getClientId()]);
         return this.extractToEntity(result, BankAccount);
+    }
+
+    async inactiveBankAccount(id: number) {
+        const query = `UPDATE bank_accounts SET isActive = false WHERE id = ? AND clientId = ?`;
+        return await this.database.execute(query, [id, this.authContext.getClientId()]);
     }
 }

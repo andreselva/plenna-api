@@ -35,10 +35,10 @@ export default class Category extends EntityModel implements IEntity {
     }
 
      /**
-     * Método "fábrica" estático que cria uma instância de BankAccount
+     * Método "fábrica" estático que cria uma instância de Category
      * a partir de uma linha de dados crua vinda do banco de dados.
      * @param row O objeto de dados vindo da query.
-     * @returns Uma nova instância de BankAccount.
+     * @returns Uma nova instância de Category.
      */
     static fromRow(row: ICategoryRow) {
         const category = new Category();

@@ -1,64 +1,74 @@
 import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
-import IBankAccountRow from "src/Shared/interfaces/IBankAccountRow";
-import BankAccountDTO from "src/modules/Finance/BankAccounts/DTOs/BankAccountDTO";
+import { BankAccountTypeEnum } from "src/enum/bank-account-type.enum";
+import { IBankAccountRow } from "src/Shared/interfaces/IBankAccountRow";
+import { BankAccountDTO } from "src/modules/Finance/core/bank-accounts/DTOs/bank-account.dto";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
-export default class BankAccount extends EntityModel implements IEntity {
-    id: number = 0;
-    clientId: number;
-    name: string = '';
-    generateInvoice: boolean = false;
-    icon: string = '';
-    dueDate: string = '';
-    closingDate: string = '';
+export class BankAccount extends EntityModel implements IEntity {
+    public id: number = 0;
+    public clientId: number;
+    public name: string;
+    public type: BankAccountTypeEnum = BankAccountTypeEnum.CHECKING;
+    public bankCode: number = 0;
+    public agency: string = '';
+    public accountNumber: string = '';
+    public initialBalance: number;
+    public currentBalance: number;
+    public isActive: boolean;
+    public createdAt: string;
+    public updatedAt: string;
+    public deletedAt: string;
 
-    constructor() {
-        super();
+    public static ignoredProperties: string[] = [];
+
+    static fromRow(i: IBankAccountRow): BankAccount {
+        const ba = new BankAccount();
+        ba.id = i.id;
+        ba.clientId = i.clientId;
+        ba.name = i.name;
+        ba.type = i.type;
+        ba.bankCode = i.bankCode;
+        ba.agency = i.agency;
+        ba.accountNumber = i.accountNumber;
+        ba.initialBalance = i.initialBalance;
+        ba.currentBalance = i.currentBalance;
+        ba.isActive = Boolean(i.isActive);
+        return ba;
     }
 
-    public static fromEntity(entity: BankAccount) {
-        const newBankAccount = new BankAccount();
-        Object.assign(newBankAccount, entity);
-        return newBankAccount;
+    static fromDTO(dto: BankAccountDTO) {
+        const ba = new BankAccount();
+        ba.id = dto.id;
+        ba.name = dto.name;
+        ba.type = dto.type;
+        ba.bankCode = dto.bankCode ?? '';
+        ba.agency = dto.agency ?? '';
+        ba.accountNumber = dto.accountNumber ?? '';
+        ba.initialBalance = dto.initialBalance;
+        ba.isActive = dto.isActive;
+        if (!(ba.id > 0)) {
+            ba.createdAt = DateHelper.getCurrentDate();
+            ba.currentBalance = ba.initialBalance;
+        } else {
+            ba.updatedAt = DateHelper.getCurrentDate();
+        }
+        return ba;
     }
 
-    public static fromDTO(dto: BankAccountDTO) {
-        const bankAccount = new BankAccount();
-        bankAccount.name = dto.name;
-        bankAccount.generateInvoice = dto.generateInvoice;
-        bankAccount.icon = dto.icon ?? '';
-        bankAccount.dueDate = dto.dueDate;
-        bankAccount.closingDate = dto.closingDate;
-        bankAccount.id = dto.id ?? 0;
-        return bankAccount;
+    getTableName(): string {
+        return 'bank_accounts';
     }
 
-     /**
-     * Método "fábrica" estático que cria uma instância de BankAccount
-     * a partir de uma linha de dados crua vinda do banco de dados.
-     * @param row O objeto de dados vindo da query.
-     * @returns Uma nova instância de BankAccount.
-     */
-    public static fromRow(row: IBankAccountRow): BankAccount {
-        const account = new BankAccount();
-        account.id = row.id;
-        account.name = row.name;
-        account.icon = row.icon;
-        account.generateInvoice = Boolean(row.generateInvoice);
-        account.dueDate = row.dueDate;
-        account.closingDate = row.closingDate;
-        return account;
-    }
-
-    public getTableName(): string {
-        return 'bank_account';
-    }
-
-    public getPrimaryKey(): string {
+    getPrimaryKey(): string {
         return 'id';
     }
 
-    public getIgnoredProperties(): string[] {
-        return [];
+    getIgnoredProperties(): string[] {
+        return BankAccount.ignoredProperties;
+    }
+
+    addIgnoredProperties(props: string[]): void {
+        BankAccount.ignoredProperties.push(...props);
     }
 }

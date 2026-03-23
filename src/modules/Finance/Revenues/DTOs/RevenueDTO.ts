@@ -1,7 +1,8 @@
-import { IsBoolean, IsDateString, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { IsBoolean, IsDateString, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { RevenueStatus } from '../Types/revenue.status.type';
 
 export class RevenueDTO {
-    @IsString({ message: 'Invalid name!'})
+    @IsString({ message: 'Invalid name!' })
     @IsNotEmpty({ message: 'Name is empty.' })
     name: string;
 
@@ -23,20 +24,28 @@ export class RevenueDTO {
     idCategory: number;
 
     @IsOptional()
+    @IsInt({ message: 'Invalid bank account ID!' })
+    idBankAccount: number;
+
+    @IsOptional()
     @IsInt({ message: 'Invalid installments!' })
     installments: number;
 
-    @IsString({ message: 'Invalid type of installments! '})
+    @IsString({ message: 'Invalid type of installments! ' })
     @IsNotEmpty({ message: 'Invalid type of installments.' })
     typeOfInstallments: string;
 
     @IsOptional()
-    @IsInt({ message: 'Invalid source account ID! '})
+    @IsInt({ message: 'Invalid source account ID! ' })
     sourceAccountId: number;
 
     @IsBoolean({ message: 'Invalid argument hasInstallments!' })
     @IsNotEmpty({ message: 'Invalid argument hasInstallments' })
     hasInstallments: boolean;
+
+    @IsString({ message: 'Invalid status!' })
+    @IsNotEmpty({ message: 'Invalid status! Status cannot by empty.' })
+    status: RevenueStatus;
 
     @IsOptional()
     @IsBoolean({ message: 'Invalid argument updateInstallments!' })

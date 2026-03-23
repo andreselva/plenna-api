@@ -9,6 +9,7 @@ import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import Invoice from "src/EntityModels/invoice";
 import { ExpenseStatus } from "../Expenses/Types/expense.status.type";
+import Payment from "src/EntityModels/Payment";
 
 @Injectable()
 export default class InvoicesRepository extends BaseRepository<Invoice>{
@@ -57,7 +58,7 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
     }
 
     async getSettingsInvoice(idBankAccount: number) {
-        const query = "SELECT closingDate, dueDate, id as idAccount, name as nameAccount FROM bank_account WHERE clientId = ? AND id = ? LIMIT 1";
+        const query = "SELECT closingDate, dueDate, id as idAccount, name as nameAccount FROM credit_cards WHERE clientId = ? AND id = ? LIMIT 1";
         const result = await this.database.select(query, [this.authContext.getClientId(), idBankAccount]);
         return result[0];
     }
@@ -68,10 +69,10 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
         return DataMapper.toEntities(result, Expense);
     }
 
-    async getPayments(idInvoice: number): Promise<number> {
+    async getPayments(idInvoice: number): Promise<Payment[]> {
         const query = "SELECT SUM(value) as value FROM payment WHERE clientId = ? AND payable_id = ? AND payable_type = ?";
         const result = await this.database.select(query, [this.authContext.getClientId(), idInvoice, PaymentType.INVOICE]);
-        return Number(result[0].value) ?? 0;
+        return DataMapper.toEntities(result, Payment);
     }
 
     async getById(id: number): Promise<Invoice> {

@@ -1,4 +1,3 @@
-
 import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
 import IClientRow from "src/Shared/interfaces/IClientRow";

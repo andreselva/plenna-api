@@ -7,6 +7,7 @@ import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import GetRevenues from "./GetRevenues";
 import Revenue from "src/EntityModels/Revenue";
 import { InstallmentUpdater } from "../../InstallmentsServices/InstallmentsUpdater";
+import { RevenueStatus } from "../Types/revenue.status.type";
 
 @Injectable()
 export class UpdateRevenue {
@@ -65,5 +66,34 @@ export class UpdateRevenue {
             return await this.repository.searchForRelatedInstallments(revenue.id);
         }
         throw new Error("Considered ID invalid!");
+    }
+
+    public async updateRevenueStatus(id: number, paymentDate: string|null) {
+        const revenue = await this.repository.getRevenueById(id);
+        if (!revenue) {
+            throw new Error("Expense not found");
+        }
+        
+        const payments = await this.repository.getTotalPayments(id);
+        const totalPayments = payments.reduce((acc, p) => acc + p.value, 0); 
+        if (totalPayments <= 0 && payments.length > 0) {
+            await this.repository.updateStatus(id, RevenueStatus.REVERSED, null);
+            return { status: RevenueStatus.REVERSED };
+        }
+
+        const revenueValue = revenue.value;
+        const status = this.defineStatus(totalPayments, revenueValue);
+        await this.repository.updateStatus(id, status, paymentDate);
+        return { status: status };
+    }
+
+    private defineStatus(totalPayments: number, expenseValue: number): RevenueStatus {
+        if (totalPayments >= expenseValue) {
+            return RevenueStatus.PAID;
+        } else if (totalPayments > 0) {
+            return RevenueStatus.PARTIAL;
+        } else {
+            return RevenueStatus.PENDING;
+        }
     }
 }

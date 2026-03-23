@@ -1,12 +1,22 @@
 import { Module } from "@nestjs/common";
 import { RevenueModule } from "./Revenues/revenue.module";
 import { InvoicesModule } from "./Invoices/invoices.module";
-import { BankAccountModule } from "./BankAccounts/bank.accounts.module";
 import { ExpensesModule } from "./Expenses/expenses.module";
 import { PaymentModule } from "./Payment/payment.module";
+import { CreditCardsModule } from "./credit-cards/credit-cards.module";
+import { BankAccountsModule } from './core/bank-accounts/bank-accounts.module';
+import { FinancialEventsModule } from "./core/financial-events/financial-events.module";
 
 @Module({
-    imports: [BankAccountModule, ExpensesModule, InvoicesModule, PaymentModule, RevenueModule],
+    imports: [
+        CreditCardsModule, 
+        ExpensesModule, 
+        InvoicesModule, 
+        PaymentModule, 
+        RevenueModule, 
+        BankAccountsModule,
+        FinancialEventsModule
+    ],
     controllers: [],
     exports: [InvoicesModule]
 

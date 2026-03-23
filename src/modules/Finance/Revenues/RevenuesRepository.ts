@@ -4,6 +4,9 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import Revenue from "src/EntityModels/Revenue";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
+import { RevenueStatus } from "./Types/revenue.status.type";
+import Payment from "src/EntityModels/Payment";
+import DataMapper from "src/Shared/mapper/DataMapper";
 
 @Injectable()
 export default class RevenuesRepository extends BaseRepository<Revenue> {
@@ -12,9 +15,15 @@ export default class RevenuesRepository extends BaseRepository<Revenue> {
     }   
     
     async getRevenues(periodo: PeriodoDTO): Promise<Revenue[]> {
-        const query = "SELECT * FROM revenue WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ?";
+        const query = "SELECT * FROM revenue WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ? AND status NOT IN ('archived', 'cancelled');";
         const rows = await this.database.select(query, [this.authContext.getClientId(), periodo.start, periodo.end]);
         return this.extractToEntity(rows, Revenue);
+    }
+
+    async getRevenueById(id: number): Promise<Revenue> {
+        const query = `SELECT * FROM revenue WHERE clientId = ? AND id = ?`;
+        const result = await this.database.select(query, [this.authContext.getClientId(), id]);
+        return this.extractToEntity(result, Revenue)[0];
     }
 
     async saveRevenue(revenue: Revenue): Promise<Revenue> {
@@ -29,13 +38,8 @@ export default class RevenuesRepository extends BaseRepository<Revenue> {
     }
 
     async deleteRevenue(id: number) {
-        const query = "DELETE FROM revenue WHERE clientId = ? AND id = ?";
-        const result = await this.database.execute(query, [this.authContext.getClientId(), id]);
-
-        if (result.affectedRows > 0) {
-            return { isSuccess: true, message: 'Revenue deleted successfully' };
-        }
-        throw new Error('Failed to delete revenue');
+        const query = `UPDATE revenue SET status = ? WHERE id = ? AND clientId = ?`;
+        await this.database.execute(query, [RevenueStatus.CANCELLED, id, this.authContext.getClientId()]);
     }
 
     async searchForRelatedInstallments(consideredId: number, revenueId: number = 0): Promise<Revenue[]> {
@@ -51,5 +55,21 @@ export default class RevenuesRepository extends BaseRepository<Revenue> {
     
         const rows = await this.database.select(query, params);
         return this.extractToEntity(rows, Revenue);
+    }
+
+    async getTotalPayments(id: number): Promise<Payment[]> {
+        const query = `SELECT * FROM payment WHERE clientId = ? AND payable_type = 'revenue' AND payable_id = ?`;
+        const result = await this.database.select(query, [this.authContext.getClientId(), id]);
+        return DataMapper.toEntities(result, Payment);
+    }
+
+    async updateStatus(id: number, status: RevenueStatus, paymentDate: string|null) {
+        const query = `UPDATE revenue SET status = ?, paymentDate = ? WHERE id = ? AND clientId = ?`;
+        await this.database.execute(query, [status, paymentDate, id, this.authContext.getClientId()]);
+    }
+
+    async archive(id: number) {
+        const query = `UPDATE revenue SET status = ? WHERE id = ? AND clientId = ?`;
+        await this.database.execute(query, [RevenueStatus.ARCHIVED, id, this.authContext.getClientId()]);
     }
 }

@@ -12,7 +12,8 @@ export class GetExpenses {
     async execute(periodo: PeriodoDTO): Promise<{ expenses: Expense[] }> {
         const expenses = await this.repository.getExpenses(periodo);
         const promiseArray = expenses.map(async (expense) => {
-            const totalPayments = await this.repository.getPayments(expense.id);
+            const payments = await this.repository.getPayments(expense.id);
+            const totalPayments = payments.reduce((acc, p) => acc + p.value, 0);
             expense.totalPaid = totalPayments;
             return expense;
         })

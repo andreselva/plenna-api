@@ -1,3 +1,5 @@
+import { RevenueStatus } from "src/modules/Finance/Revenues/Types/revenue.status.type";
+
 export default interface IRevenueRow {
     id: number;
     name: string;
@@ -9,4 +11,7 @@ export default interface IRevenueRow {
     typeOfInstallments: string;
     sourceAccountId: number;
     hasInstallments: number
+    status: RevenueStatus;
+    clientId: number;
+    idBankAccount: number;
 }

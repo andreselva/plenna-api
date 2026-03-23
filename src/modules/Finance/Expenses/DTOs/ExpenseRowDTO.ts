@@ -1,4 +1,4 @@
-import { ExpenseStatus } from "../Types/expense.status.type";
+import { ExpenseStatus } from '../Types/expense.status.type';
 
 export class ExpenseRowDTO {
     name: string;
@@ -7,12 +7,13 @@ export class ExpenseRowDTO {
     invoiceDueDate: string;
     idCategory: number;
     idCreditCard: number;
+    idBankAccount: number;
     installments: number;
     typeOfInstallment: string;
     sourceAccountId: number;
     hasInstallments: boolean;
     linkToInvoice: boolean;
     idInvoice: number;
-    status: ExpenseStatus
+    status: ExpenseStatus;
     id: number;
 }

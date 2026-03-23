@@ -18,4 +18,5 @@ export default interface IExpenseRow {
     paymentDate: string;
     clientId: number;
     idSubcategory: number;
+    idBankAccount: number;
 }

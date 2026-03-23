@@ -5,6 +5,8 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import { Expense } from "src/EntityModels/Expense";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
+import Payment from "src/EntityModels/Payment";
+import DataMapper from "src/Shared/mapper/DataMapper";
 
 @Injectable()
 export class ExpensesRepository extends BaseRepository<Expense> {
@@ -13,7 +15,7 @@ export class ExpensesRepository extends BaseRepository<Expense> {
     }
     
     async getExpenses(periodo: PeriodoDTO): Promise<Expense[]> {
-        const query = "SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ?";
+        const query = "SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ? AND status NOT IN ('archived', 'cancelled');";
         const rows = await this.database.select(query, [this.authContext.getClientId(), periodo.start, periodo.end]);
         return this.extractToEntity(rows, Expense);
     }
@@ -28,16 +30,8 @@ export class ExpensesRepository extends BaseRepository<Expense> {
     }
 
     async deleteExpense(id: number) {
-        const query = "DELETE FROM expense WHERE clientId = ? AND id = ?";
-        const result = await this.database.execute(query, [this.authContext.getClientId(), id]);
-
-        if (result.affectedRows > 0) {
-            return {
-                isSuccess: true,
-                message: 'Expense deleted successfully',
-            };
-        }
-        throw new Error('Failed to delete expense');
+        const query = `UPDATE expense SET status = ? WHERE id = ? AND clientId = ?`;
+        await this.database.execute(query, [ExpenseStatus.CANCELLED, id, this.authContext.getClientId()]);
     }
 
     async searchForRelatedInstallments(consideredId: number, expenseId: number = 0): Promise<Expense[]> {
@@ -60,15 +54,20 @@ export class ExpensesRepository extends BaseRepository<Expense> {
         }
     }
 
-    async getPayments(id: number): Promise<number> {
-        const query = "SELECT SUM(value) as totalPayments FROM payment WHERE clientId = ? AND payable_type = 'expense' AND payable_id = ?";
+    async getPayments(id: number): Promise<Payment[]> {
+        const query = "SELECT * FROM payment WHERE clientId = ? AND payable_type = 'expense' AND payable_id = ?";
         const result = await this.database.select(query, [this.authContext.getClientId(), id]);
-        return Number(result[0]?.totalPayments) || 0;
+        return DataMapper.toEntities(result, Payment);
     }
 
     async getExpenseById(id: number) {
         const query = "SELECT * FROM expense WHERE clientId = ? AND id = ?";
         const result = await this.database.select(query, [this.authContext.getClientId(), id]);
         return this.extractToEntity(result, Expense)[0] ?? null;
+    }
+
+    async archive(id: number) {
+        const query = `UPDATE expense SET status = ? WHERE id = ? AND clientId = ?`;
+        await this.database.execute(query, [ExpenseStatus.ARCHIVED, id, this.authContext.getClientId()]);
     }
 }

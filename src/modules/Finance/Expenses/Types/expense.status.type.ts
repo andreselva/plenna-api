@@ -2,5 +2,8 @@ export enum ExpenseStatus {
     PENDING = 'pending',
     PAID = 'paid',
     PARTIAL = 'partial',
-    CANCELED = 'cancelled'
+    CANCELLED = 'cancelled',
+    REVERSED = 'reversed',
+    DELETED = 'deleted',
+    ARCHIVED = 'archived'
 }

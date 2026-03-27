@@ -12,7 +12,7 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                 `CREATE TABLE IF NOT EXISTS gateways (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(50),
-                    gateway ENUM('PAGARME'),
+                    gateway ENUM('PAGAR_ME', 'STRIPE', 'MERCADO_PAGO'),
                     icon VARCHAR(120)
                 );`
             ),

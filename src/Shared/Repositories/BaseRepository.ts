@@ -31,9 +31,16 @@ export default abstract class BaseRepository<T extends EntityModel> {
         return await this.database.execute(sql, values);
     }
 
-    async laodById(id: number, entityFactory: IEntityFactory<T>): Promise<T | null> {
-        const sql = `SELECT * FROM ${entityFactory.prototype.getTableName()} WHERE ${entityFactory.prototype.getPrimaryKey()} = ?`;
-        const rows = await this.database.select(sql, [id]);
+    async loadById(id: number, entityFactory: IEntityFactory<T>): Promise<T | null> {
+        let sql = `SELECT * FROM ${entityFactory.prototype.getTableName()} WHERE ${entityFactory.prototype.getPrimaryKey()} = ?`;
+        let values = [id];
+
+        if ('clientId' in entityFactory.prototype) {
+            sql += ` AND clientId = ?`;
+            values.push(this.authContext.getClientId());
+        }
+
+        const rows = await this.database.select(sql, values);
         if (rows.length === 0) {
             return null;
         }

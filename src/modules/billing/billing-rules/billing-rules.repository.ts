@@ -11,7 +11,7 @@ export class BillingRulesRepository extends BaseRepository<BillingRule> {
     }
 
     async loadBillingRule(id: number): Promise<BillingRule | null> {
-        return await this.laodById(id, BillingRule);
+        return await this.loadById(id, BillingRule);
     }
 
     async loadBillingRuleByPaymentMethodAndCustomer(paymentMethodId: number, customerId: number): Promise<BillingRule[]> {

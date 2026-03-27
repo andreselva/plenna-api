@@ -63,6 +63,8 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                     gatewayId BIGINT, 
                     billingRuleId BIGINT,
                     customerId BIGINT,
+                    expenseId BIGINT NOT NULL,
+                    amount DECIMAL(15,2) NOT NULL,
                     status ENUM('DRAFT', 'PROCESSING', 'AWAITING_PAYMENT', 'PAID', 'FAILED', 'CANCELLED', 'EXPIRED'),
                     qrcode VARCHAR(250),
                     externalId VARCHAR(250),

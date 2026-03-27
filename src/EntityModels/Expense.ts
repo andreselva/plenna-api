@@ -25,6 +25,8 @@ export class Expense extends EntityModel implements IEntity {
     public totalPaid: number = 0;
     public updateInstallments: boolean = false;
     public idSubcategory: number;
+    public customerId: number;
+    public paymentMethodId: number;
 
     public static ignoredProperties: string[] = ['totalPaid', 'updateInstallments'];
 

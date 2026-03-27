@@ -19,6 +19,7 @@ import { ClientModulesModule } from './modules/client-modules/client-modules.mod
 import { SaasModule } from './modules/saas/saas.module';
 import { BankAccountsModule } from './modules/Finance/core/bank-accounts/bank-accounts.module';
 import { LedgerModule } from './modules/Finance/core/ledger/ledger.module';
+import { BillingModule } from './modules/billing/billing.module';
 
 @Module({
   imports: [
@@ -40,7 +41,8 @@ import { LedgerModule } from './modules/Finance/core/ledger/ledger.module';
     ClientModulesModule,
     SaasModule,
     BankAccountsModule,
-    LedgerModule
+    LedgerModule,
+    BillingModule
   ],
   controllers: [
     AppController,

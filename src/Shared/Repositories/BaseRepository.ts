@@ -47,6 +47,19 @@ export default abstract class BaseRepository<T extends EntityModel> {
         return DataMapper.toEntities(rows, entityFactory)[0];
     }
 
+    async loadAll(entityFactory: IEntityFactory<T>): Promise<T[]> {
+        let sql = `SELECT * FROM ${entityFactory.prototype.getTableName()}`;
+        let values: any[] = [];
+
+        if ('clientId' in entityFactory.prototype) {
+            sql += ` WHERE clientId = ?`;
+            values.push(this.authContext.getClientId());
+        }
+
+        const rows = await this.database.select(sql, values);
+        return DataMapper.toEntities(rows, entityFactory);
+    }
+
     extractToEntity(rows: any, entity: IEntityFactory<T>): T[] {
         return DataMapper.toEntities(rows, entity)
     }

@@ -1,4 +1,9 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
 @Controller('payment-methods')
-export class PaymentMethodsController {}
+export class PaymentMethodsController {
+    @Get()
+    async getPaymentMethods() {
+
+    }
+}

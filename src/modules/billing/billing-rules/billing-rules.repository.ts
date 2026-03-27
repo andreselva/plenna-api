@@ -25,4 +25,8 @@ export class BillingRulesRepository extends BaseRepository<BillingRule> {
         const rows = await this.database.select(sql, [paymentMethodId, this.authContext.getClientId()]);
         return this.extractToEntity(rows, BillingRule);
     }
+
+    async loadAllBillingRules(): Promise<BillingRule[]> {
+        return await this.loadAll(BillingRule);
+    }
 }

@@ -17,4 +17,12 @@ export class ChargesRepository extends BaseRepository<Charge> {
         const result = await this.database.select(query, [expenseId, this.authContext.getClientId()]);
         return DataMapper.toEntities(result, Expense)[0];
     }
+
+    async loadChargeById(id: number): Promise<Charge | null> {
+        return await this.loadById(id, Charge);
+    }
+
+    async loadAllCharges(): Promise<Charge[]> {
+        return await this.loadAll(Charge);
+    }
 }

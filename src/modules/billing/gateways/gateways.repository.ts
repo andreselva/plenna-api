@@ -14,4 +14,16 @@ export class GatewaysRepository extends BaseRepository<Gateway> {
         return await this.loadById(id, Gateway);
     }
 
+    async loadAllGateways(): Promise<Gateway[]> {
+        return await this.loadAll(Gateway);
+    }
+
+    async loadAllGatewaysConfiguredForCliendId(): Promise<Gateway[]> {
+        const sql = `SELECT g.* FROM gateways g
+                        JOIN gateways_configs gc ON g.id = gc.gatewayId
+                        WHERE g.clientId = ?`;
+        const rows = await this.database.select(sql, [this.authContext.getClientId()]);
+        return this.extractToEntity(rows, Gateway);
+    }
+
 }

@@ -7,13 +7,13 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 @Injectable()
 export default class CreditCardsRepository extends BaseRepository<CreditCard>{
     constructor(database: MySQLDatabase, authContext: AuthContextService) { 
-        super(database, authContext)
+        super(database, authContext, CreditCard)
     }
 
     async getCreditCards(): Promise<CreditCard[]> {
         const query = "SELECT * FROM credit_cards WHERE clientId = ?";
         const rows = await this.database.select(query, [this.authContext.getClientId()]);
-        return this.extractToEntity(rows, CreditCard);
+        return this.extractToEntity(rows);
     }
 
     async saveCreditCard(entity: CreditCard): Promise<CreditCard> {

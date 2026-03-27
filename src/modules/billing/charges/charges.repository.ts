@@ -9,7 +9,7 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 @Injectable()
 export class ChargesRepository extends BaseRepository<Charge> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext);
+        super(database, authContext, Charge);
     }
 
     async loadExpense(expenseId: number): Promise<Expense> {
@@ -19,10 +19,10 @@ export class ChargesRepository extends BaseRepository<Charge> {
     }
 
     async loadChargeById(id: number): Promise<Charge | null> {
-        return await this.loadById(id, Charge);
+        return await this.loadById(id);
     }
 
     async loadAllCharges(): Promise<Charge[]> {
-        return await this.loadAll(Charge);
+        return await this.loadAll();
     }
 }

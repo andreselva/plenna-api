@@ -7,7 +7,7 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 @Injectable()
 export class FinancialEventsRepository extends BaseRepository<FinancialEvents>{
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext)
+        super(database, authContext, FinancialEvents)
     }
 
     async saveEvent(financialEvent: FinancialEvents): Promise<FinancialEvents> {

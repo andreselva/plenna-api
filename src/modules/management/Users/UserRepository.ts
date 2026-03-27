@@ -7,12 +7,12 @@ import { AuthContextService } from "src/modules/Auth/auth-context.service";
 @Injectable()
 export default class UsersRepository extends BaseRepository<User> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext)
+        super(database, authContext, User)
     }
     async findUserByUsername(username: string) {
         const query = "SELECT * FROM user WHERE username = ?";
         const result = await this.database.select(query, [username]);
-        return this.extractToEntity(result, User)[0] ?? null;
+        return this.extractToEntity(result)[0] ?? null;
     }
 
     async saveUser(user: User) {
@@ -37,13 +37,13 @@ export default class UsersRepository extends BaseRepository<User> {
         }
         const query = "SELECT id, username, email, name, role, clientId FROM user WHERE id = ? AND clientId = ?";
         const result = await this.database.select(query, [id, clientId]);
-        return this.extractToEntity(result, User)[0] ?? null;
+        return this.extractToEntity(result)[0] ?? null;
     }
 
     async getUsers() {
         const query = "SELECT * FROM user WHERE clientId = ?";
         const result = await this.database.select(query, [this.authContext.getClientId()]);
-        return this.extractToEntity(result, User);
+        return this.extractToEntity(result);
     }
 
     async updatePassword(newPassword: string, userId: number) {
@@ -56,7 +56,7 @@ export default class UsersRepository extends BaseRepository<User> {
         const clientId = this.authContext.getClientId();
         const query = "SELECT * FROM user WHERE id = ? AND clientId = ?";
         const result = await this.database.select(query, [userId, clientId]);
-        return this.extractToEntity(result, User)[0] ?? null;
+        return this.extractToEntity(result)[0] ?? null;
     }
 
     async deleteUser(userId: number) {

@@ -5,10 +5,10 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 
 export class PaymentMethodsRepository extends BaseRepository<PaymentMethod>{
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext);
+        super(database, authContext, PaymentMethod);
     }
 
     async getPaymentMethods(): Promise<PaymentMethod[]> {
-        return await this.loadAll(PaymentMethod);
+        return await this.loadAll();
     }
 }

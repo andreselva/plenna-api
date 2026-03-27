@@ -1,6 +1,7 @@
 import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
 import { ICustomerRow } from "src/Shared/interfaces/ICustomerRow";
+import { CustomerDTO } from "src/modules/customers/dtos/customer.dto";
 
 export class Customer extends EntityModel implements IEntity {
     public id: number;
@@ -27,7 +28,20 @@ export class Customer extends EntityModel implements IEntity {
         customer.state = row.state;
         customer.country = row.country;
         return customer;
-    }    
+    }
+
+    public static fromDTO(dto: CustomerDTO) {
+        const customer = new Customer();
+        customer.name = dto.name;
+        customer.email = dto.email;
+        customer.document = dto.document;
+        customer.cep = dto.cep;
+        customer.neighborhood = dto.neighborhood;
+        customer.city = dto.city;
+        customer.state = dto.state;
+        customer.country = dto.country;
+        return customer;
+    }
 
     getTableName(): string {
         return 'customer';

@@ -11,7 +11,8 @@ import { Exception } from "handlebars";
 export default abstract class BaseRepository<T extends EntityModel> {
     constructor(
         protected readonly database: MySQLDatabase,
-        protected readonly authContext: AuthContextService
+        protected readonly authContext: AuthContextService,
+        protected readonly entityClass: IEntityFactory<T>
     ) {}
 
     async save(entity: IEntity, cleanNullables: boolean = false) {
@@ -31,11 +32,11 @@ export default abstract class BaseRepository<T extends EntityModel> {
         return await this.database.execute(sql, values);
     }
 
-    async loadById(id: number, entityFactory: IEntityFactory<T>): Promise<T | null> {
-        let sql = `SELECT * FROM ${entityFactory.prototype.getTableName()} WHERE ${entityFactory.prototype.getPrimaryKey()} = ?`;
+    async loadById(id: number): Promise<T | null> {
+        let sql = `SELECT * FROM ${this.entityClass.prototype.getTableName()} WHERE ${this.entityClass.prototype.getPrimaryKey()} = ?`;
         let values = [id];
 
-        if ('clientId' in entityFactory.prototype) {
+        if ('clientId' in this.entityClass.prototype) {
             sql += ` AND clientId = ?`;
             values.push(this.authContext.getClientId());
         }
@@ -44,23 +45,23 @@ export default abstract class BaseRepository<T extends EntityModel> {
         if (rows.length === 0) {
             return null;
         }
-        return DataMapper.toEntities(rows, entityFactory)[0];
+        return DataMapper.toEntities(rows, this.entityClass)[0];
     }
 
-    async loadAll(entityFactory: IEntityFactory<T>): Promise<T[]> {
-        let sql = `SELECT * FROM ${entityFactory.prototype.getTableName()}`;
+    async loadAll(): Promise<T[]> {
+        let sql = `SELECT * FROM ${this.entityClass.prototype.getTableName()}`;
         let values: any[] = [];
 
-        if ('clientId' in entityFactory.prototype) {
+        if ('clientId' in this.entityClass.prototype) {
             sql += ` WHERE clientId = ?`;
             values.push(this.authContext.getClientId());
         }
 
         const rows = await this.database.select(sql, values);
-        return DataMapper.toEntities(rows, entityFactory);
+        return DataMapper.toEntities(rows, this.entityClass);
     }
 
-    extractToEntity(rows: any, entity: IEntityFactory<T>): T[] {
-        return DataMapper.toEntities(rows, entity)
+    extractToEntity(rows: any): T[] {
+        return DataMapper.toEntities(rows, this.entityClass)
     }
 }

@@ -12,7 +12,7 @@ import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
 @Injectable()
 export class LedgerRepository extends BaseRepository<LedgerEntry> {
  constructor(database: MySQLDatabase, authContext: AuthContextService) {
-  super(database, authContext);
+  super(database, authContext, LedgerEntry);
  }
 
  async getBankAccountById(accountId: number): Promise<BankAccount> {

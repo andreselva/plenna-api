@@ -41,4 +41,8 @@ export default class RedisService {
     async incrby(key: string, increment: number): Promise<number> {
         return await this.redis.incrby(key, increment);
     }
+
+    async expire(key: string, seconds: number): Promise<number> {
+        return await this.redis.expire(key, seconds);
+    }
 }

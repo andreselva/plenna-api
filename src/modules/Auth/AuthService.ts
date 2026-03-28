@@ -1,17 +1,18 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 import AuthRepository, { RefreshTokenMetadata } from './AuthRepository';
 import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
 import RefreshToken from 'src/EntityModels/RefreshToken';
 import { UsersService } from 'src/modules/management/Users/UserService';
 import TokenHasher from 'src/Shared/Utils/Secutiry/TokenHasher';
+import { AccessTokenPayload, AuthenticatedUser, RefreshTokenPayload } from './JwtPayloadInterface';
 
 @Injectable()
 export class AuthService {
     private readonly jwtSecret = process.env.JWT_SECRET;
     private readonly refreshSecret = process.env.JWT_REFRESH_SECRET;
+    private readonly logger = new Logger(AuthService.name);
 
     constructor(
         private userService: UsersService,
@@ -23,7 +24,7 @@ export class AuthService {
         }
     }
 
-    async generateTokens(user: any, metadata: RefreshTokenMetadata = {}): Promise<{ accessToken: string; refreshTokenGenerated: string }> {
+    async generateTokens(user: AuthenticatedUser, metadata: RefreshTokenMetadata = {}): Promise<{ accessToken: string; refreshTokenGenerated: string }> {
         const accessToken = this.generateToken(user);
         const refreshTokenGenerated = this.generateRefreshToken(user);
         const refreshToken = new RefreshToken();
@@ -38,13 +39,20 @@ export class AuthService {
         return { accessToken, refreshTokenGenerated };
     }
 
-    generateToken(user: any): string {
-        const payload = { sub: user.id, username: user.username, role: user.role, clientId: user.clientId, name: user.name };
+    generateToken(user: AuthenticatedUser): string {
+        const payload: AccessTokenPayload = {
+            sub: user.id,
+            username: user.username,
+            role: user.role,
+            clientId: user.clientId,
+            name: user.name,
+        };
+
         return this.jwtService.sign(payload, { secret: this.jwtSecret, expiresIn: '1h' });
     }
 
-    generateRefreshToken(user: any): string {
-        const payload = { sub: user.id, clientId: user.clientId };
+    generateRefreshToken(user: Pick<AuthenticatedUser, 'id' | 'clientId'>): string {
+        const payload: RefreshTokenPayload = { sub: user.id, clientId: user.clientId };
         return this.jwtService.sign(payload, { secret: this.refreshSecret, expiresIn: '7d' });
     }
 
@@ -54,88 +62,113 @@ export class AuthService {
 
     async refreshAccessToken(refreshToken: string, metadata: RefreshTokenMetadata = {}) {
         try {
-            const decoded = await this.jwtService.verifyAsync<jwt.JwtPayload>(refreshToken, {
+            const decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(refreshToken, {
                 secret: this.refreshSecret,
             });
-            if (!decoded || !decoded.sub) throw new UnauthorizedException();
 
-            const storedToken = await this.repository.findRefreshTokenByUserId(Number(decoded.sub));
+            if (!decoded?.sub) {
+                throw new UnauthorizedException();
+            }
+
+            const userId = Number(decoded.sub);
+            const storedToken = await this.repository.findRefreshTokenByUserId(userId);
             if (!storedToken) {
                 throw new UnauthorizedException();
             }
 
             const isRefreshTokenValid = await TokenHasher.compare(refreshToken, storedToken.refresh_token);
             if (!isRefreshTokenValid) {
-                await this.repository.deleteRefreshToken(Number(decoded.sub));
+                await this.repository.deleteRefreshToken(userId);
                 throw new UnauthorizedException();
             }
 
-            await this.repository.updateRefreshTokenMetadata(Number(decoded.sub), metadata);
+            await this.repository.updateRefreshTokenMetadata(userId, metadata);
 
-            const user = await this.userService.findUserById(decoded.sub, decoded.clientId);
-            if (!user) throw new UnauthorizedException();
+            const user = await this.userService.findUserById(String(decoded.sub), String(decoded.clientId));
+            if (!user) {
+                throw new UnauthorizedException();
+            }
 
-            const newAccessToken = this.generateToken(user);
-            const newRefreshToken = this.generateRefreshToken(user);
+            const authUser = this.toAuthenticatedUser(user);
+            const newAccessToken = this.generateToken(authUser);
+            const newRefreshToken = this.generateRefreshToken(authUser);
 
             const refreshTokenModel = new RefreshToken();
-            refreshTokenModel.idUser = Number(user.id);
+            refreshTokenModel.idUser = authUser.id;
             refreshTokenModel.refresh_token = await TokenHasher.hash(newRefreshToken);
             await this.repository.saveRefreshToken(refreshTokenModel, metadata);
 
             return { accessToken: newAccessToken, newRefreshToken };
-
         } catch (err) {
-            console.error('Falha no refresh do token:', err);
+            this.logger.warn('Falha no refresh do token.');
             throw new UnauthorizedException();
         }
     }
 
-    async validateUser(username: string, password: string) {
+    async validateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
         const userEntity = await this.userService.findByUsername(username);
         if (userEntity && (await PasswordHasher.compare(password, userEntity.password))) {
-            return { id: userEntity.id, username: userEntity.username, role: userEntity.role, clientId: userEntity.clientId, name: userEntity.name };
+            return this.toAuthenticatedUser(userEntity);
         }
+
         return null;
     }
 
-    async getUserFromToken(token: string | undefined): Promise<any> {
+    async getUserFromToken(token: string | undefined): Promise<AuthenticatedUser> {
         if (!token) {
             throw new UnauthorizedException();
         }
 
         try {
-            if (!this.jwtSecret) throw new UnauthorizedException();
+            if (!this.jwtSecret) {
+                throw new UnauthorizedException();
+            }
 
-            const decoded = await this.jwtService.verifyAsync<jwt.JwtPayload>(token, { secret: this.jwtSecret });
+            const decoded = await this.jwtService.verifyAsync<AccessTokenPayload>(token, { secret: this.jwtSecret });
 
-            if (!decoded || !decoded.sub) {
+            if (!decoded?.sub) {
                 throw new UnauthorizedException();
             }
 
             return {
-                id: decoded.sub,
+                id: Number(decoded.sub),
                 username: decoded.username,
                 role: decoded.role,
-                clientId: decoded.clientId,
-                name: decoded.name
+                clientId: Number(decoded.clientId),
+                name: decoded.name,
             };
-
-        } catch (error) {
-            console.error('Erro ao verificar o token:', error);
+        } catch {
+            this.logger.warn('Erro ao verificar o token de acesso.');
             throw new UnauthorizedException();
         }
     }
 
     async revokeRefreshToken(refreshToken: string) {
         try {
-            const decoded = await this.jwtService.verifyAsync<jwt.JwtPayload>(refreshToken, { secret: this.refreshSecret });
-            if (!decoded || !decoded.sub) {
+            const decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(refreshToken, { secret: this.refreshSecret });
+            if (!decoded?.sub) {
                 return;
             }
+
             await this.repository.deleteRefreshToken(Number(decoded.sub));
-        } catch (error) {
-            console.warn('Falha ao decodificar refresh token para revogação:', error);
+        } catch {
+            this.logger.warn('Falha ao decodificar refresh token para revogação.');
         }
+    }
+
+    private toAuthenticatedUser(user: {
+        id: number;
+        username: string;
+        role: string;
+        clientId: number;
+        name: string;
+    }): AuthenticatedUser {
+        return {
+            id: Number(user.id),
+            username: user.username,
+            role: user.role,
+            clientId: Number(user.clientId),
+            name: user.name,
+        };
     }
 }

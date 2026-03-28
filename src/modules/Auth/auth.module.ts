@@ -8,6 +8,8 @@ import AuthRepository from './AuthRepository';
 import MySQLDatabase from 'src/modules/Config/Database/MySQLDatabase';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthContextService } from './auth-context.service';
+import { AuthControllerService } from './auth-controller.service';
+import { AuthHttpHelper } from './auth-http.helper';
 import { ManagementModule } from 'src/modules/management/management.module';
 import { AuthRateLimitGuard } from 'src/common/guards/auth-rate-limit.guard';
 import RequestPasswordResetController from './request-password-reset.controller';
@@ -41,7 +43,9 @@ import { EmailModule } from '../email/email.module';
     MySQLDatabase,
     AuthContextService,
     AuthRateLimitGuard,
-    ResetPasswordService
+    ResetPasswordService,
+    AuthControllerService,
+    AuthHttpHelper
   ],
   exports: [
     PassportModule,  // para que outros módulos possam usar Guards

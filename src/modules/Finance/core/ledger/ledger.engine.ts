@@ -18,27 +18,27 @@ export class LedgerEngine {
  
  async process(event: FinancialEvents): Promise<void> {
   this.validate(event);
-  
-  try {
-    await this.saveEventProcessing(event);
-  } catch (e) {
-    if (HelperFunctions.isDuplicateKeyError(e)) {
-      throw new EventAlreadyProcessedException(event.id);
+
+  await this.repository.executeInTransaction(async () => {
+    try {
+      await this.saveEventProcessing(event);
+    } catch (e) {
+      if (HelperFunctions.isDuplicateKeyError(e)) {
+        throw new EventAlreadyProcessedException(event.id);
+      }
+      throw e;
     }
-    throw e;
-  }
 
-  const builder = new LedgerBuilder(this.repository);
-  const entries: LedgerEntry[] = await builder.build(event);
-  if (entries.length % 2 !== 0) {
-   throw new InvalidQuantityLedgerEntriesException(event.id);
-  }
+    const builder = new LedgerBuilder(this.repository);
+    const entries: LedgerEntry[] = await builder.build(event);
+    if (entries.length % 2 !== 0) {
+      throw new InvalidQuantityLedgerEntriesException(event.id);
+    }
 
-  await Promise.all(
-    entries.map(async (e) => {
-        await this.repository.save(e);
-    })
-  )
+    for (const entry of entries) {
+      await this.repository.save(entry);
+    }
+  });
  }
 
  private async saveEventProcessing(event: FinancialEvents): Promise<void> {

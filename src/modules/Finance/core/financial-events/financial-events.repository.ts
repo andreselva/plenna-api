@@ -27,10 +27,15 @@ export class FinancialEventsRepository extends BaseRepository<FinancialEvents>{
         return value !== null && value !== undefined ? Number(value) : null;
     }
 
-    async getLastEventHash(): Promise<string | null> {
-        const query = `SELECT eventHash as previousHash FROM financial_events WHERE clientId = ? ORDER BY sequenceNumber DESC LIMIT 1`;
+    async getLastEventHash(lockForUpdate: boolean = false): Promise<string | null> {
+        const forUpdateClause = lockForUpdate ? ' FOR UPDATE' : '';
+        const query = `SELECT eventHash as previousHash FROM financial_events WHERE clientId = ? ORDER BY sequenceNumber DESC LIMIT 1${forUpdateClause}`;
         const result = await this.database.select(query, [this.authContext.getClientId()]);
         return result[0]?.previousHash ?? null;
+    }
+
+    async executeInTransaction<T>(callback: () => Promise<T>): Promise<T> {
+        return this.database.transaction(callback);
     }
 
 }

@@ -27,16 +27,18 @@ export class FinancialEventsService {
   ) {}
 
   async register(data: IFinancialEvent): Promise<FinancialEvents> {
-    const event = await this.buildEvent(data);
-    const saved = await this.repository.saveEvent(event);
-    if (saved?.id > 0) {
-      const rkPreviousHash = RedisKeys.previousHash(this.authContext.getClientId());
-      await this.redisService.set(rkPreviousHash, saved.eventHash);
-    }
-    return saved;
+    return this.repository.executeInTransaction(async () => {
+      const event = await this.buildEvent(data, true);
+      const saved = await this.repository.saveEvent(event);
+      if (saved?.id > 0) {
+        const rkPreviousHash = RedisKeys.previousHash(this.authContext.getClientId());
+        await this.redisService.set(rkPreviousHash, saved.eventHash);
+      }
+      return saved;
+    });
   }
 
-  private async buildEvent(data: IFinancialEvent): Promise<FinancialEvents> {
+  private async buildEvent(data: IFinancialEvent, lockPreviousHash: boolean = false): Promise<FinancialEvents> {
     const event = new FinancialEvents();
     event.clientId = this.authContext.getClientId();
     event.accountId = data.accountId;
@@ -47,7 +49,7 @@ export class FinancialEventsService {
     event.sequenceNumber = await this.getSequenceNumber();
     event.referenceType = data.referenceType;
     event.referenceId = data.referenceId;
-    event.previousHash = await this.getPreviousHash();
+    event.previousHash = await this.getPreviousHash(lockPreviousHash);
     event.eventHash = this.generateEventHash(event);
     return event;
   }
@@ -66,7 +68,12 @@ export class FinancialEventsService {
     return await this.redisService.incr(rk);
   }
 
-  private async getPreviousHash(): Promise<string> {
+  private async getPreviousHash(lockForUpdate: boolean = false): Promise<string> {
+    if (lockForUpdate) {
+      const lastHashFromDbLocked = await this.repository.getLastEventHash(true);
+      return lastHashFromDbLocked ?? 'INITIAL';
+    }
+
     const rkPreviousHash = RedisKeys.previousHash(this.authContext.getClientId());
 
     const redisValue = await this.redisService.get<string>(rkPreviousHash);

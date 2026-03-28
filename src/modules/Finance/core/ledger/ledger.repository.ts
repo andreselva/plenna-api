@@ -25,4 +25,8 @@ export class LedgerRepository extends BaseRepository<LedgerEntry> {
   const { sql, values } = QueryBuilder.buildQuery(ledgerEventProcessing, ledgerEventProcessing.getTableName(), ledgerEventProcessing.getPrimaryKey());
   await this.database.execute(sql, values);
  }
+
+ async executeInTransaction<T>(callback: () => Promise<T>): Promise<T> {
+  return this.database.transaction(callback);
+ }
 }

@@ -9,6 +9,4 @@ export class CustomersRepository extends BaseRepository<Customer> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
         super(database, authContext, Customer);
     }
-
-
 }

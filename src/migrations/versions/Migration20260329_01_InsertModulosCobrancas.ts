@@ -9,6 +9,9 @@ export class Migration20260329_01_InsertModulosCobrancas implements IMigration {
     execute() {
         return [
             MigrationSteps.RunSQL(
+                `ALTER TABLE modules ADD CONSTRAINT UNIQUE (name, location)`
+            ),
+            MigrationSteps.RunSQL(
                 `INSERT INTO modules (name, location, description, showInSidebar,  \`group\`, displayName) VALUES
                 ('billing', null, 'Gerenciamento de cobranças', 0, '', 'Cobranças'),
                 ('customers', '/customers', 'Registro de clientes para cobranças', 1, 'navigation', 'Clientes'),
@@ -29,9 +32,6 @@ export class Migration20260329_01_InsertModulosCobrancas implements IMigration {
             ),
             MigrationSteps.RunSQL(
                 `UPDATE modules SET parentId = '14' WHERE id = 18`
-            ),
-            MigrationSteps.RunSQL(
-                `UPDATE modules SET parentId = '14' WHERE id = 19`
             )
         ]
     }

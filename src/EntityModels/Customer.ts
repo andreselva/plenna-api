@@ -14,6 +14,9 @@ export class Customer extends EntityModel implements IEntity {
     public city: string;
     public state: string;
     public country: string;
+    public street: string;
+    public number: string;
+    public phone: string;
 
     public static fromRow(row: ICustomerRow): Customer {
         const customer = new Customer();
@@ -27,6 +30,9 @@ export class Customer extends EntityModel implements IEntity {
         customer.city = row.city;
         customer.state = row.state;
         customer.country = row.country;
+        customer.street = row.street;
+        customer.number = row.number;
+        customer.phone = row.phone;
         return customer;
     }
 
@@ -40,6 +46,9 @@ export class Customer extends EntityModel implements IEntity {
         customer.city = dto.city;
         customer.state = dto.state;
         customer.country = dto.country;
+        customer.street = dto.street;
+        customer.number = dto.number;
+        customer.phone = dto.phone;
         return customer;
     }
 

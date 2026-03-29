@@ -46,6 +46,7 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                     clientId BIGINT NOT NULL,
                     name VARCHAR(120),
                     email VARCHAR(60), CONSTRAINT unique_client_email UNIQUE (clientId, email),
+                    phone VARCHAR(20), CONSTRAINT unique_client_phone UNIQUE (clientId, phone),
                     document VARCHAR(20), CONSTRAINT unique_client_document UNIQUE (clientId, document),
                     cep VARCHAR(15),
                     street VARCHAR(120),

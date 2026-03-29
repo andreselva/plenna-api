@@ -21,4 +21,13 @@ export class CustomersService {
     async getCustomerById(id: number) {
         return await this.repository.loadById(id);
     }
+
+    async updateCustomer(id: number, dto: CustomerDTO) {
+        const entity = Customer.fromDTO(dto);
+        entity.id = id;
+        if (entity.id === undefined || entity.id === null) {
+            throw new Error('Customer ID is required for update');
+        }
+        await this.repository.save(entity);
+    }
 }

@@ -34,4 +34,16 @@ export class CustomerDTO {
     @IsString({ message: 'country must be string' })
     @IsNotEmpty({ message: 'country cannot be empty' })
     country: string;
+
+    @IsString({ message: 'street must be string' })
+    @IsNotEmpty({ message: 'street cannot be empty' })
+    street: string;
+
+    @IsString({ message: 'number must be string' })
+    @IsNotEmpty({ message: 'number cannot be empty' })
+    number: string;
+
+    @IsString({ message: 'phone must be string' })
+    @IsNotEmpty({ message: 'phone cannot be empty' })
+    phone: string;
 }

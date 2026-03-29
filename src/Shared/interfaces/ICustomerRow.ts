@@ -9,4 +9,7 @@ export interface ICustomerRow {
     city: string;
     state: string;
     country: string;
+    street: string;
+    number: string;
+    phone: string;
 }

@@ -13,4 +13,21 @@ export class PaymentMethodsRepository extends BaseRepository<PaymentMethod>{
     async getPaymentMethods(): Promise<PaymentMethod[]> {
         return await this.loadAll();
     }
+
+    async getPaymentMethodByClient(): Promise<PaymentMethod[]> {
+        const query = `SELECT * FROM payment_method pm
+                       JOIN payment_method_client pmc ON pm.id = pmc.paymentMethodId
+                       WHERE pmc.clientId = ?`;
+        const result = await this.database.select(query, [this.authContext.getClientId()]);
+        return this.extractToEntity(result);
+    }
+
+    async updatePaymentMethodForClient(paymentMethodId: number, enabled: boolean): Promise<void> {
+        const query = `DELETE FROM payment_method_client WHERE clientId = ? AND paymentMethodId = ?`;
+        await this.database.execute(query, [this.authContext.getClientId(), paymentMethodId]);
+        if (enabled) {
+            const insertQuery = `INSERT INTO payment_method_client (clientId, paymentMethodId, enabled) VALUES (?, ?, ?)`;
+            await this.database.execute(insertQuery, [this.authContext.getClientId(), paymentMethodId, enabled]);
+        }
+    }
 }

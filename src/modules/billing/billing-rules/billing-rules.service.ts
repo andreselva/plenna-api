@@ -15,4 +15,8 @@ export class BillingRulesService {
     async getDefaultBillingRuleByPaymentMethod(paymentMethodId: number): Promise<BillingRule[]> {
         return await this.repository.loadDefaultBillingRuleByPaymentMethod(paymentMethodId);
     }
+
+    async getBillingRules(): Promise<BillingRule[]> {
+        return await this.repository.loadAllBillingRules();
+    }
 }

@@ -19,4 +19,9 @@ export class BillingRulesController {
     async getDefaultBillingRuleByPaymentMethod(@Param('paymentMethodId') paymentMethodId: string) {
         return await this.service.getDefaultBillingRuleByPaymentMethod(Number(paymentMethodId));
     }
+
+    @Get()
+    async getBillingRules() {
+        return await this.service.getBillingRules();
+    }
 }

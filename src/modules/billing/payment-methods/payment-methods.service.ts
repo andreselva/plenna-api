@@ -10,4 +10,12 @@ export class PaymentMethodsService {
     async getPaymentMethods() {
         return await this.repository.getPaymentMethods();
     }
+
+    async updatePaymentMethod(id: number) {
+        return await this.repository.updatePaymentMethodForClient(id, true);
+    }
+
+    async getpaymentMethodByClient() {
+        return await this.repository.getPaymentMethodByClient();
+    }
 }

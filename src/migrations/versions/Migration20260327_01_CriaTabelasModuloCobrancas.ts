@@ -21,7 +21,8 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
                     gatewayId BIGINT NOT NULL,
                     clientId BIGINT NOT NULL,
-                    configs JSON
+                    configs JSON,
+                    INDEX idx_gateway_client (gatewayId, clientId)
                 );`
             ),
             MigrationSteps.RunSQL(
@@ -37,7 +38,10 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                     clientId BIGINT NOT NULL,
                     gatewayId BIGINT,
                     paymentMethodId BIGINT,
-                    customerId BIGINT
+                    customerId BIGINT,
+                    INDEX idx_client_gateway (clientId, gatewayId),
+                    INDEX idx_client_payment_method (clientId, paymentMethodId),
+                    INDEX idx_client_customer (clientId, customerId)
                 );`
             ),
             MigrationSteps.RunSQL(
@@ -54,7 +58,10 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                     neighborhood VARCHAR(70),
                     city VARCHAR(70),
                     state CHAR(2),
-                    country VARCHAR(50)
+                    country VARCHAR(50),
+                    INDEX idx_client_email (clientId, email),
+                    INDEX idx_client_phone (clientId, phone),
+                    INDEX idx_client_document (clientId, document)
                 );`
             ),
             MigrationSteps.RunSQL(
@@ -70,7 +77,10 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                     qrcode VARCHAR(250),
                     externalId VARCHAR(250),
                     paymentLink VARCHAR(250),
-                    paymentAt DATETIME
+                    paymentAt DATETIME,
+                    INDEX idx_client_gateway (clientId, gatewayId),
+                    INDEX idx_client_billing_rule (clientId, billingRuleId),
+                    INDEX idx_client_customer (clientId, customerId)
                 );`
             ),
             MigrationSteps.RunSQL(
@@ -93,6 +103,16 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                     ('Pagamento Instantâneo (PIX) - Estático', 20),
                     ('Crédito em Loja', 21),
                     ('Outros', 99);`
+            ),
+            MigrationSteps.RunSQL(
+                `CREATE TABLE payment_method_client (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    clientId BIGINT NOT NULL,
+                    paymentMethodId BIGINT NOT NULL,
+                    enabled BOOLEAN DEFAULT TRUE,
+                    UNIQUE KEY unique_client_payment_method (clientId, paymentMethodId),
+                    INDEX idx_client_payment_method (clientId, paymentMethodId)
+                );`
             )
         ];
     }

@@ -19,6 +19,6 @@ export class CustomersService {
     }
 
     async getCustomerById(id: number) {
-        return await this.repository.loadById(id)
+        return await this.repository.loadById(id);
     }
 }

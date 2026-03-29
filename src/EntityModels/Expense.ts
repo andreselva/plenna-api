@@ -81,6 +81,8 @@ export class Expense extends EntityModel implements IEntity {
         expense.status = row.status;
         expense.clientId = row.clientId;
         expense.idSubcategory = row.idSubcategory;
+        expense.customerId = row.customerId;
+        expense.paymentMethodId = row.paymentMethodId;
         return expense;
     }
 

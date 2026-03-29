@@ -1,4 +1,14 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { GatewaysService } from './gateways.service';
 
 @Controller('gateways')
-export class GatewaysController {}
+export class GatewaysController {
+    constructor(
+        private readonly service: GatewaysService
+    ) {}
+
+    @Get()
+    async getGateways() {
+        return await this.service.getGateways();
+    }
+}

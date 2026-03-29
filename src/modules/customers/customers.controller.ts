@@ -18,7 +18,7 @@ export class CustomersController {
         return await this.service.getCustomerById(Number(id));
     }
 
-    @Post()
+    @Post('/create')
     async createCustomer(@Body() dto: CustomerDTO) {
         await this.service.createCustomer(dto);
     }

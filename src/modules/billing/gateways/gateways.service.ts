@@ -7,7 +7,13 @@ export class GatewaysService {
         private readonly repository: GatewaysRepository
     ) {}
 
-    async getGateways() {
-        return await this.repository.loadAll();
+    async getConfiguredGateways() {
+        const configuredGateways = await this.repository.loadConfiguredGateways();
+        return configuredGateways;
+    }
+
+    async getAvailableGateways() {
+        const options = await this.repository.loadAll();
+        return options;
     }
 }

@@ -9,6 +9,11 @@ export class GatewaysController {
 
     @Get()
     async getGateways() {
-        return await this.service.getGateways();
+        return await this.service.getConfiguredGateways();
+    }
+
+    @Get('/available')
+    async getAvailableGateways() {
+        return await this.service.getAvailableGateways();
     }
 }

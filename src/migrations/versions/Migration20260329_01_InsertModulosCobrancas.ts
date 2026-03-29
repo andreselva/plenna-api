@@ -12,6 +12,9 @@ export class Migration20260329_01_InsertModulosCobrancas implements IMigration {
                 `ALTER TABLE modules ADD CONSTRAINT UNIQUE (name, location)`
             ),
             MigrationSteps.RunSQL(
+                `INSERT INTO gateways (name, gateway, icon) VALUES ('Pagar.me', 'PAGAR_ME', '')`
+            ),
+            MigrationSteps.RunSQL(
                 `INSERT INTO modules (name, location, description, showInSidebar,  \`group\`, displayName) VALUES
                 ('billing', null, 'Gerenciamento de cobranças', 0, '', 'Cobranças'),
                 ('customers', '/customers', 'Registro de clientes para cobranças', 1, 'navigation', 'Clientes'),

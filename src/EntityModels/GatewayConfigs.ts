@@ -7,6 +7,11 @@ export class GatewayConfigs extends EntityModel implements IEntity {
     public gatewayId: number;
     public clientId: number;
     public configs: string;
+    public name?: string;
+    public gateway?: string;
+    public icon?: string;
+
+    public static ignoredProperties = ['name', 'gateway', 'icon'];
 
     public static fromRow(i: IGatewayConfigsRow): GatewayConfigs {
         const gc = new GatewayConfigs();
@@ -14,6 +19,9 @@ export class GatewayConfigs extends EntityModel implements IEntity {
         gc.gatewayId = i.gatewayId;
         gc.clientId = i.clientId;
         gc.configs = i.configs;
+        gc.name = i.name;
+        gc.gateway = i.gateway;
+        gc.icon = i.icon;
         return gc;
     }
 
@@ -26,6 +34,6 @@ export class GatewayConfigs extends EntityModel implements IEntity {
     }
 
     getIgnoredProperties(): string[] {
-        return [];
+        return GatewayConfigs.ignoredProperties;
     }
 }

@@ -3,4 +3,7 @@ export interface IGatewayConfigsRow {
     gatewayId: number;
     clientId: number;
     configs: string;
+    name?: string;
+    gateway?: string;
+    icon?: string;
 }

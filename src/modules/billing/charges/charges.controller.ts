@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { CreateChargeDto } from './dtos/create-charge.dto';
 import { ChargesService } from './charges.service';
 
@@ -11,5 +11,10 @@ export class ChargesController {
     @Post('/create')
     async createCharge(@Body() dto: CreateChargeDto) {
         return await this.service.create(dto);
+    }
+
+    @Get()
+    async getCharges() {
+        return await this.service.getCharges();
     }
 }

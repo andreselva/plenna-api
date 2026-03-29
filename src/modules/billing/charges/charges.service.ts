@@ -42,4 +42,8 @@ export class ChargesService {
         charge.paymentAt = gatewayResult.paidAt ?? charge.paymentAt;
         await this.repository.save(charge, true);
     }
+
+    async getCharges() {
+        return await this.repository.loadAll();
+    }
 }

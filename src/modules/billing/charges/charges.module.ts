@@ -4,11 +4,11 @@ import { ChargesService } from './charges.service';
 import { ChargesRepository } from './charges.repository';
 import { BillingRulesModule } from '../billing-rules/billing-rules.module';
 import { ChargesEngine } from './charges.engine';
-import { GatewaysModule } from '../gateways/gateways.module';
+import { IntegrationsModule } from 'src/modules/integrations/integrations.module';
 
 @Module({
   controllers: [ChargesController],
   providers: [ChargesService, ChargesRepository, ChargesEngine],
-  imports: [BillingRulesModule, GatewaysModule]
+  imports: [BillingRulesModule, IntegrationsModule]
 })
 export class ChargesModule {}

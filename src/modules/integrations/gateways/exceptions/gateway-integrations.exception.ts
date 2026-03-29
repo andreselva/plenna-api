@@ -1,6 +1,6 @@
 import { BadRequestException } from "@nestjs/common";
 
-export class GatewaysException extends BadRequestException {
+export class GatewayIntegrationsException extends BadRequestException {
     constructor(message: string) {
         super(message);
     }

@@ -4,14 +4,14 @@ import { ChargesRepository } from './charges.repository';
 import { ChargesException } from './exceptions/ChargesException';
 import { ChargesEngine } from './charges.engine';
 import { Charge } from 'src/EntityModels/Charge';
-import { GatewayIntegrationsService } from 'src/modules/integrations/gateways/gateways-integrations.service';
+import { ChargeGatewayService } from './charge-gateway.service';
 
 @Injectable()
 export class ChargesService {
     constructor(
         private readonly repository: ChargesRepository,
         private readonly engine: ChargesEngine,
-        private readonly gatewayIntegrationsService: GatewayIntegrationsService
+        private readonly chargeGatewayService: ChargeGatewayService
     ) {}
 
     async create(dto: CreateChargeDto) {
@@ -24,7 +24,7 @@ export class ChargesService {
         await this.repository.save(charge);
         
         if (charge.gatewayId > 0) {
-            await this.gatewayIntegrationsService.sendChargeToGateway(charge);
+            await this.chargeGatewayService.sendCharge(charge);
         }
 
         return charge;

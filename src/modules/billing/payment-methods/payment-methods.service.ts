@@ -8,14 +8,26 @@ export class PaymentMethodsService {
     ) {}
 
     async getPaymentMethods() {
-        return await this.repository.getPaymentMethods();
+        const paymentMethods = await this.repository.getPaymentMethodsWithClientStatus();
+
+        return {
+            paymentMethods,
+        };
     }
 
-    async updatePaymentMethod(id: number) {
-        return await this.repository.updatePaymentMethodForClient(id, true);
+    async updatePaymentMethod(code: string, isActive: boolean) {
+        const paymentMethod = await this.repository.updatePaymentMethodForClientByCode(code, isActive);
+
+        return {
+            paymentMethod,
+        };
     }
 
     async getpaymentMethodByClient() {
-        return await this.repository.getPaymentMethodByClient();
+        const paymentMethods = await this.repository.getPaymentMethodByClient();
+
+        return {
+            paymentMethods,
+        };
     }
 }

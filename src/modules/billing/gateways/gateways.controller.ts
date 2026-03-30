@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { GatewaysService } from './gateways.service';
+import { GatewayConfigDTO } from './dtos/gateway.dto';
 
 @Controller('gateways')
 export class GatewaysController {
@@ -15,5 +16,10 @@ export class GatewaysController {
     @Get('/available')
     async getAvailableGateways() {
         return await this.service.getAvailableGateways();
+    }
+
+    @Post()
+    async addGateway(@Body() dto: GatewayConfigDTO) {
+        return await this.service.addGateway(dto);
     }
 }

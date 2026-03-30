@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put } from '@nestjs/common';
 import { BillingRulesService } from './billing-rules.service';
 
 @Controller('billing-rules')
@@ -18,6 +18,14 @@ export class BillingRulesController {
     @Get('/payment-method/:paymentMethodId/default')
     async getDefaultBillingRuleByPaymentMethod(@Param('paymentMethodId') paymentMethodId: string) {
         return await this.service.getDefaultBillingRuleByPaymentMethod(Number(paymentMethodId));
+    }
+
+    @Put('/payment-methods/:paymentMethodCode')
+    async upsertDefaultBillingRuleByPaymentMethodCode(
+        @Param('paymentMethodCode') paymentMethodCode: string,
+        @Body() body: { gatewayId: number }
+    ) {
+        return await this.service.upsertDefaultBillingRuleByPaymentMethodCode(paymentMethodCode, body.gatewayId);
     }
 
     @Get()

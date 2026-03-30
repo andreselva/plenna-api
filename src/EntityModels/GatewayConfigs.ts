@@ -7,6 +7,7 @@ export class GatewayConfigs extends EntityModel implements IEntity {
     public gatewayId: number;
     public clientId: number;
     public configs: string;
+    public isActive: boolean;
     public name?: string;
     public gateway?: string;
     public icon?: string;

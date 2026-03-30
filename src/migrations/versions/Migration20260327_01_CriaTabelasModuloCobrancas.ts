@@ -22,6 +22,7 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                     gatewayId BIGINT NOT NULL,
                     clientId BIGINT NOT NULL,
                     configs JSON,
+                    isActive BOOLEAN DEFAULT TRUE,
                     INDEX idx_gateway_client (gatewayId, clientId)
                 );`
             ),

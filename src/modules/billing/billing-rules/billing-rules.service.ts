@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { BillingRulesRepository } from './billing-rules.repository';
-import { BillingRule } from 'src/EntityModels/BillingRule';
 
 @Injectable()
 export class BillingRulesService {
@@ -8,15 +7,35 @@ export class BillingRulesService {
         private readonly repository: BillingRulesRepository
     ) {}
 
-    async getBillingRuleByPaymentMethodAndCustomer(paymentMethodId: number, customerId: number): Promise<BillingRule[]> {
-        return await this.repository.loadBillingRuleByPaymentMethodAndCustomer(paymentMethodId, customerId);
+    async getBillingRuleByPaymentMethodAndCustomer(paymentMethodId: number, customerId: number) {
+        const billingRules = await this.repository.loadBillingRuleByPaymentMethodAndCustomer(paymentMethodId, customerId);
+
+        return {
+            billingRules,
+        };
     }
 
-    async getDefaultBillingRuleByPaymentMethod(paymentMethodId: number): Promise<BillingRule[]> {
-        return await this.repository.loadDefaultBillingRuleByPaymentMethod(paymentMethodId);
+    async getDefaultBillingRuleByPaymentMethod(paymentMethodId: number) {
+        const billingRules = await this.repository.loadDefaultBillingRuleByPaymentMethod(paymentMethodId);
+
+        return {
+            billingRules,
+        };
     }
 
-    async getBillingRules(): Promise<BillingRule[]> {
-        return await this.repository.loadAllBillingRules();
+    async upsertDefaultBillingRuleByPaymentMethodCode(paymentMethodCode: string, gatewayId: number) {
+        const billingRule = await this.repository.upsertDefaultBillingRuleByPaymentMethodCode(paymentMethodCode, gatewayId);
+
+        return {
+            billingRule,
+        };
+    }
+
+    async getBillingRules() {
+        const billingRules = await this.repository.loadAllBillingRules();
+
+        return {
+            billingRules,
+        };
     }
 }

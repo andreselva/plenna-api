@@ -10,24 +10,91 @@ export class PaymentMethodsRepository extends BaseRepository<PaymentMethod>{
         super(database, authContext, PaymentMethod);
     }
 
-    async getPaymentMethods(): Promise<PaymentMethod[]> {
-        return await this.loadAll();
+    async getPaymentMethodsWithClientStatus(): Promise<Array<{ id: number; name: string; code: string; isActive: boolean }>> {
+        const query = `
+            SELECT
+                pm.id,
+                pm.name,
+                LPAD(pm.code, 2, '0') AS code,
+                COALESCE(pmc.enabled, FALSE) AS isActive
+            FROM payment_methods pm
+            LEFT JOIN payment_method_client pmc
+                ON pm.id = pmc.paymentMethodId
+               AND pmc.clientId = ?
+            ORDER BY pm.code ASC
+        `;
+
+        const rows = await this.database.select(query, [this.authContext.getClientId()]);
+
+        return rows.map((row: any) => ({
+            id: Number(row.id),
+            name: row.name,
+            code: String(row.code).padStart(2, '0'),
+            isActive: !!row.isActive,
+        }));
     }
 
-    async getPaymentMethodByClient(): Promise<PaymentMethod[]> {
-        const query = `SELECT * FROM payment_method pm
-                       JOIN payment_method_client pmc ON pm.id = pmc.paymentMethodId
-                       WHERE pmc.clientId = ?`;
+    async getPaymentMethodByClient(): Promise<Array<{ id: number; name: string; code: string; isActive: boolean }>> {
+        const query = `
+            SELECT
+                pm.id,
+                pm.name,
+                LPAD(pm.code, 2, '0') AS code,
+                pmc.enabled AS isActive
+            FROM payment_methods pm
+            INNER JOIN payment_method_client pmc
+                ON pm.id = pmc.paymentMethodId
+            WHERE pmc.clientId = ?
+            ORDER BY pm.code ASC
+        `;
+
         const result = await this.database.select(query, [this.authContext.getClientId()]);
-        return this.extractToEntity(result);
+
+        return result.map((row: any) => ({
+            id: Number(row.id),
+            name: row.name,
+            code: String(row.code).padStart(2, '0'),
+            isActive: !!row.isActive,
+        }));
     }
 
-    async updatePaymentMethodForClient(paymentMethodId: number, enabled: boolean): Promise<void> {
-        const query = `DELETE FROM payment_method_client WHERE clientId = ? AND paymentMethodId = ?`;
-        await this.database.execute(query, [this.authContext.getClientId(), paymentMethodId]);
+    async updatePaymentMethodForClientByCode(code: string, enabled: boolean): Promise<{ id: number; name: string; code: string; isActive: boolean }> {
+        const paymentMethod = await this.findPaymentMethodByCode(code);
+
+        if (!paymentMethod) {
+            throw new Error(`Payment method not found for code ${code}`);
+        }
+
+        const deleteQuery = `DELETE FROM payment_method_client WHERE clientId = ? AND paymentMethodId = ?`;
+        await this.database.execute(deleteQuery, [this.authContext.getClientId(), paymentMethod.id]);
+
         if (enabled) {
             const insertQuery = `INSERT INTO payment_method_client (clientId, paymentMethodId, enabled) VALUES (?, ?, ?)`;
-            await this.database.execute(insertQuery, [this.authContext.getClientId(), paymentMethodId, enabled]);
+            await this.database.execute(insertQuery, [this.authContext.getClientId(), paymentMethod.id, true]);
         }
+
+        return {
+            id: paymentMethod.id,
+            name: paymentMethod.name,
+            code: String(paymentMethod.code).padStart(2, '0'),
+            isActive: enabled,
+        };
+    }
+
+    async findPaymentMethodByCode(code: string): Promise<{ id: number; name: string; code: number } | null> {
+        const query = `SELECT id, name, code FROM payment_methods WHERE code = ? LIMIT 1`;
+        const rows = await this.database.select(query, [Number(code)]);
+
+        if (!rows.length) {
+            return null;
+        }
+
+        const row: any = rows[0];
+
+        return {
+            id: Number(row.id),
+            name: row.name,
+            code: Number(row.code),
+        };
     }
 }

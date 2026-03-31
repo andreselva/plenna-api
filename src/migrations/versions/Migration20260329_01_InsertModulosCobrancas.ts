@@ -9,7 +9,7 @@ export class Migration20260329_01_InsertModulosCobrancas implements IMigration {
     execute() {
         return [
             MigrationSteps.RunSQL(
-                `ALTER TABLE modules ADD CONSTRAINT UNIQUE (name, location)`
+                `ALTER TABLE modules ADD CONSTRAINT UNIQUE (name)`
             ),
             MigrationSteps.RunSQL(
                 `INSERT INTO gateways (name, gateway, icon) VALUES ('Pagar.me', 'PAGAR_ME', '')`
@@ -25,17 +25,17 @@ export class Migration20260329_01_InsertModulosCobrancas implements IMigration {
                 ('gateways-config', null, 'Configuração de gateways de pagamento', 0, 'config', 'Configuração de Gateways');`
             ),
             MigrationSteps.RunSQL(
-                `UPDATE modules SET parentId = '19' WHERE id = 20`
+                `UPDATE modules child
+                JOIN modules parent ON parent.name = 'gateways'
+                SET child.parentId = parent.id
+                WHERE child.name = 'gateways-config';`
             ),
             MigrationSteps.RunSQL(
-                `UPDATE modules SET parentId = '14' WHERE id = 16`
+                `UPDATE modules child
+                JOIN modules parent ON parent.name = 'billing'
+                SET child.parentId = parent.id
+                WHERE child.name IN ('charges', 'payment-methods', 'billing-rules');`
             ),
-            MigrationSteps.RunSQL(
-                `UPDATE modules SET parentId = '14' WHERE id = 17`
-            ),
-            MigrationSteps.RunSQL(
-                `UPDATE modules SET parentId = '14' WHERE id = 18`
-            )
         ]
     }
 

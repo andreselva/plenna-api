@@ -25,10 +25,6 @@ export default class Revenue extends EntityModel implements IEntity {
 
     public static ignoredProperties: string[] = ['totalPaid'];
 
-    constructor() {
-        super();
-    }
-
     static fromEntity(entity: Revenue) {
         const newRevenue = new Revenue();
         Object.assign(newRevenue, entity);

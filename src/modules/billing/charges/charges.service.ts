@@ -7,31 +7,37 @@ import { Charge } from 'src/EntityModels/Charge';
 import { ChargeGatewayService } from './charge-gateway.service';
 import { ResultSetHeader } from 'mysql2';
 import { IGatewayOperationResult } from 'src/Shared/interfaces/IGatewayOperationResult';
+import { ChargesFactory } from './charges.factory';
 
 @Injectable()
 export class ChargesService {
     constructor(
         private readonly repository: ChargesRepository,
         private readonly engine: ChargesEngine,
-        private readonly chargeGatewayService: ChargeGatewayService
+        private readonly chargeGatewayService: ChargeGatewayService,
+        private readonly factory: ChargesFactory
     ) {}
 
     async create(dto: CreateChargeDto) {
-        const expense = await this.repository.loadExpense(dto.expenseId);
-        if (!expense) {
-            throw new ChargesException('Expense not found');
+        try {
+            const input = await this.factory.resolve(dto.type, dto.entityId);
+            if (!input) {
+                throw new ChargesException(`Entity of type ${dto.type} with ID ${dto.entityId} not found`);
+            }
+    
+            const charge: Charge = await this.engine.process(input);
+            const result = await this.repository.save(charge);
+            charge.id = (result as ResultSetHeader).insertId;
+            
+            if (charge.gatewayId > 0) {
+                const gatewayResult = await this.chargeGatewayService.sendCharge(charge);
+                await this.syncGatewayResponse(charge, gatewayResult);
+            }
+    
+            return charge;
+        } catch (error) {
+            throw new ChargesException(`Error creating charge: ${error.message}`);
         }
-
-        const charge: Charge = await this.engine.process(expense);
-        const result = await this.repository.save(charge);
-        charge.id = (result as ResultSetHeader).insertId;
-        
-        if (charge.gatewayId > 0) {
-            const gatewayResult = await this.chargeGatewayService.sendCharge(charge);
-            await this.syncGatewayResponse(charge, gatewayResult);
-        }
-
-        return charge;
     }
 
     private async syncGatewayResponse(charge: Charge, gatewayResult: IGatewayOperationResult) {

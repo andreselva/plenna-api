@@ -20,6 +20,8 @@ export default class Revenue extends EntityModel implements IEntity {
     public hasInstallments: boolean = false;
     public status: RevenueStatus = RevenueStatus.PENDING;
     public totalPaid: number = 0;
+    public customerId: number = 0;
+    public paymentMethodId: number = 0;
 
     public static ignoredProperties: string[] = ['totalPaid'];
 

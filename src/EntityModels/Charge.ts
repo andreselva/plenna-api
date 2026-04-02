@@ -2,11 +2,13 @@ import IEntity from "src/Shared/interfaces/IEntity";
 import EntityModel from "./entity.model";
 import { ChargeStatus } from "src/enum/charge-status.enum";
 import { IChargeRow } from "src/Shared/interfaces/IChargeRow";
+import { ChargeEntityType } from "src/enum/charge-entity-type.enum";
 
 export class Charge extends EntityModel implements IEntity {
     public id: number;
     public clientId: number;
-    public expenseId: number;
+    public entityId: number;
+    public entityType: ChargeEntityType;
     public gatewayId: number;
     public billingRuleId: number;
     public customerId: number;
@@ -23,7 +25,8 @@ export class Charge extends EntityModel implements IEntity {
         const charge = new Charge();
         charge.id = i.id;
         charge.clientId = i.clientId;
-        charge.expenseId = i.expenseId;
+        charge.entityId = i.entityId;
+        charge.entityType = i.entityType;
         charge.gatewayId = i.gatewayId;
         charge.billingRuleId = i.billingRuleId;
         charge.customerId = i.customerId;

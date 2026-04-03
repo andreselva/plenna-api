@@ -109,13 +109,32 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                     ('Outros', 99);`
             ),
             MigrationSteps.RunSQL(
-                `CREATE TABLE payment_method_client (
+                `CREATE TABLE IF NOT EXISTS payment_method_client (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
                     clientId BIGINT NOT NULL,
                     paymentMethodId BIGINT NOT NULL,
                     enabled BOOLEAN DEFAULT TRUE,
                     UNIQUE KEY unique_client_payment_method (clientId, paymentMethodId),
                     INDEX idx_client_payment_method (clientId, paymentMethodId)
+                );`
+            ),
+            MigrationSteps.RunSQL(
+                `CREATE TABLE IF NOT EXISTS charges_events (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    chargeId BIGINT NOT NULL,
+                    username VARCHAR(120),
+                    event VARCHAR(250),
+                    description VARCHAR(250),
+                    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_charge_event (chargeId, event)
+                ); `
+            ),
+            MigrationSteps.RunSQL(
+                `CREATE TABLE IF NOT EXISTS charges_processing (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    entityId BIGINT NOT NULL,
+                    entityType ENUM('REVENUE'),
+                    \`date\` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 );`
             )
         ];

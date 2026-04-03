@@ -7,8 +7,10 @@ import { Charge } from 'src/EntityModels/Charge';
 import { ChargeGatewayService } from './charge-gateway.service';
 import { ResultSetHeader } from 'mysql2';
 import { IGatewayOperationResult } from 'src/Shared/interfaces/IGatewayOperationResult';
-import { ChargesFactory } from './charges.factory';
+import { ChargesFactory } from './factorys/charges.factory';
 import MySQLDatabase from 'src/modules/Config/Database/MySQLDatabase';
+import { ChargeEventsService } from './events/charge-events.service';
+import { ChargesEventsEnum } from 'src/enum/charges-events.enum';
 
 @Injectable()
 export class ChargesService {
@@ -17,7 +19,8 @@ export class ChargesService {
         private readonly engine: ChargesEngine,
         private readonly chargeGatewayService: ChargeGatewayService,
         private readonly factory: ChargesFactory,
-        private readonly database: MySQLDatabase
+        private readonly database: MySQLDatabase,
+        private readonly events: ChargeEventsService
     ) {}
 
     async create(dto: CreateChargeDto) {
@@ -33,9 +36,12 @@ export class ChargesService {
                 const result = await this.repository.save(charge, true);
                 charge.id = (result as ResultSetHeader).insertId;
 
+                await this.events.logEvent(charge, ChargesEventsEnum.CHARGE_GENERATED);
+
                 if (charge.gatewayId > 0) {
                     const gatewayResult = await this.chargeGatewayService.sendCharge(charge);
                     await this.syncGatewayResponse(charge, gatewayResult);
+                    await this.events.logEvent(charge, ChargesEventsEnum.CHARGE_SENDED_TO_GATEWAY)
                 }
         
                 return charge;

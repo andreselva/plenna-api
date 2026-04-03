@@ -9,7 +9,9 @@ import { IntegrationsModule } from 'src/modules/integrations/integrations.module
 import { ChargeResolver } from './charge.resolver';
 import { CHARGE_PROVIDERS_TOKEN } from './constants/charge-providers.token';
 import { ChargeRevenueProvider } from './providers/charge-revenue.provider';
-import { ChargesFactory } from './charges.factory';
+import { ChargesFactory } from './factorys/charges.factory';
+import { ChargeEventsService } from './events/charge-events.service';
+import { ChargeEventsRepository } from './events/charge-events.repository';
 
 @Module({
   controllers: [ChargesController],
@@ -21,6 +23,8 @@ import { ChargesFactory } from './charges.factory';
     ChargeResolver,
     ChargeRevenueProvider,
     ChargesFactory,
+    ChargeEventsService,
+    ChargeEventsRepository,
     {
       provide: CHARGE_PROVIDERS_TOKEN,
       useFactory: (

@@ -58,4 +58,5 @@ export class ChargeResolver {
     getClientId() {
         return this.authContext.getClientId();
     }
+
 }

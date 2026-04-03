@@ -1,5 +1,5 @@
 import { IChargeProvider } from "src/Shared/interfaces/IChargeProvider";
-import { CHARGE_PROVIDERS_TOKEN } from "./constants/charge-providers.token";
+import { CHARGE_PROVIDERS_TOKEN } from "../constants/charge-providers.token";
 import { Inject, Injectable } from "@nestjs/common";
 import { IChargeInput } from "src/Shared/interfaces/IChargeInput";
 

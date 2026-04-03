@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import Revenue from "src/EntityModels/Revenue";
 import { ChargeEntityType } from "src/enum/charge-entity-type.enum";
 import { IChargeProvider } from "src/Shared/interfaces/IChargeProvider";
 import { ChargesRepository } from "../charges.repository";
@@ -9,12 +8,14 @@ import { ChargesException } from "../exceptions/ChargesException";
 @Injectable()
 export class ChargeRevenueProvider implements IChargeProvider {
     readonly entityType: ChargeEntityType = ChargeEntityType.REVENUE;
+    readonly applyForUpdate: boolean = true;
+
     constructor(
         private readonly repository: ChargesRepository
     ) {}
 
     async load(entityId: number): Promise<IChargeInput> {
-        const revenue = await this.repository.loadRevenue(entityId);
+        const revenue = await this.repository.loadRevenue(entityId, this.applyForUpdate);
         if (!revenue) {
             throw new ChargesException('Revenue not found');
         }

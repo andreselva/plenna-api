@@ -15,4 +15,6 @@ export interface IChargeRow {
     externalId: string;
     paymentLink: string;
     paymentAt: string;
+    title: string;
+    gateway: string;
 }

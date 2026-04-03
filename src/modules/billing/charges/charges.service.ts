@@ -8,6 +8,7 @@ import { ChargeGatewayService } from './charge-gateway.service';
 import { ResultSetHeader } from 'mysql2';
 import { IGatewayOperationResult } from 'src/Shared/interfaces/IGatewayOperationResult';
 import { ChargesFactory } from './charges.factory';
+import MySQLDatabase from 'src/modules/Config/Database/MySQLDatabase';
 
 @Injectable()
 export class ChargesService {
@@ -15,26 +16,31 @@ export class ChargesService {
         private readonly repository: ChargesRepository,
         private readonly engine: ChargesEngine,
         private readonly chargeGatewayService: ChargeGatewayService,
-        private readonly factory: ChargesFactory
+        private readonly factory: ChargesFactory,
+        private readonly database: MySQLDatabase
     ) {}
 
     async create(dto: CreateChargeDto) {
         try {
-            const input = await this.factory.resolve(dto.type, dto.entityId);
-            if (!input) {
-                throw new ChargesException(`Entity of type ${dto.type} with ID ${dto.entityId} not found`);
-            }
-    
-            const charge: Charge = await this.engine.process(input);
-            const result = await this.repository.save(charge);
-            charge.id = (result as ResultSetHeader).insertId;
+            return this.database.transaction(async () => {
+                const input = await this.factory.resolve(dto.type, dto.entityId);
+                if (!input) {
+                    throw new ChargesException(`Entity of type ${dto.type} with ID ${dto.entityId} not found`);
+                }
+        
+                const charge: Charge = await this.engine.process(input);
+                
+                const result = await this.repository.save(charge, true);
+                charge.id = (result as ResultSetHeader).insertId;
+
+                if (charge.gatewayId > 0) {
+                    const gatewayResult = await this.chargeGatewayService.sendCharge(charge);
+                    await this.syncGatewayResponse(charge, gatewayResult);
+                }
+        
+                return charge;
+            })
             
-            if (charge.gatewayId > 0) {
-                const gatewayResult = await this.chargeGatewayService.sendCharge(charge);
-                await this.syncGatewayResponse(charge, gatewayResult);
-            }
-    
-            return charge;
         } catch (error) {
             throw new ChargesException(`Error creating charge: ${error.message}`);
         }

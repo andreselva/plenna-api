@@ -5,6 +5,7 @@ import { ChargeStatus } from "src/enum/charge-status.enum";
 import { GatewayEnum } from "src/enum/gateway.enum";
 import { IGatewayOperationResult } from "src/Shared/interfaces/IGatewayOperationResult";
 import { IGatewayStatusResult } from "src/Shared/interfaces/IGatewayStatusResult";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export class PagarmePaymentGateway implements IPaymentGateway {
@@ -14,6 +15,10 @@ export class PagarmePaymentGateway implements IPaymentGateway {
         return {
             success: true,
             status: ChargeStatus.PROCESSING,
+            externalId: `pagarme_${charge.id}`,
+            paymentLink: `https://pagar.me/checkout/${charge.id}`,
+            qrcode: `https://pagar.me/qrcode/${charge.id}`,
+            paidAt: DateHelper.getCurrentDate(),
             raw: { chargeId: charge.id }
         };
     }

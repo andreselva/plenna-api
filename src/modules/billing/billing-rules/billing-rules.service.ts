@@ -9,33 +9,21 @@ export class BillingRulesService {
 
     async getBillingRuleByPaymentMethodAndCustomer(paymentMethodId: number, customerId: number) {
         const billingRules = await this.repository.loadBillingRuleByPaymentMethodAndCustomer(paymentMethodId, customerId);
-
-        return {
-            billingRules,
-        };
+        return billingRules;
     }
 
     async getDefaultBillingRuleByPaymentMethod(paymentMethodId: number) {
         const billingRules = await this.repository.loadDefaultBillingRuleByPaymentMethod(paymentMethodId);
-
-        return {
-            billingRules,
-        };
+        return billingRules;
     }
 
     async upsertDefaultBillingRuleByPaymentMethodCode(paymentMethodCode: string, gatewayId: number) {
         const billingRule = await this.repository.upsertDefaultBillingRuleByPaymentMethodCode(paymentMethodCode, gatewayId);
-
-        return {
-            billingRule,
-        };
+        return billingRule;
     }
 
     async getBillingRules() {
         const billingRules = await this.repository.loadAllBillingRules();
-
-        return {
-            billingRules,
-        };
+        return billingRules;
     }
 }

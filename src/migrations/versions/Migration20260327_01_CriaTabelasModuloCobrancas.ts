@@ -68,6 +68,8 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
             MigrationSteps.RunSQL(
                 `CREATE TABLE IF NOT EXISTS charges (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    title VARCHAR(120),
+                    gatewayName VARCHAR(50),
                     clientId BIGINT NOT NULL,
                     gatewayId BIGINT, 
                     billingRuleId BIGINT,

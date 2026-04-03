@@ -5,7 +5,18 @@ import { IChargeRow } from "src/Shared/interfaces/IChargeRow";
 import { ChargeEntityType } from "src/enum/charge-entity-type.enum";
 
 export class Charge extends EntityModel implements IEntity {
+    public static INVALID_AMOUNT_ERROR = 'Valor inválido.';
+    public static INVALID_PAYMENT_METHOD_ERROR = 'Método de pagamento inválido.';
+    public static INVALID_CUSTOMER_ERROR = 'Cliente inválido.';
+    public static INVALID_ENTITY_ID_ERROR = 'ID da entidade inválido.';
+    public static ENTITY_TYPE_REQUIRED_ERROR = 'Tipo da entidade é obrigatório.';
+    public static INVALID_CLIENT_ID_ERROR = 'Client ID inválido.';
+    public static MULTIPLE_BILLING_RULES_ERROR_CUSTOMER = 'Múltiplas regras de cobrança encontradas para o mesmo método de pagamento e cliente.';
+    public static MULTIPLE_BILLING_RULES_ERROR = 'Múltiplas regras de cobrança encontradas para o mesmo método de pagamento.';
+    public static CUSTOMER_NOT_FOUND_ERROR = 'Cliente não encontrado.';
+    
     public id: number;
+    public title: string;
     public clientId: number;
     public entityId: number;
     public entityType: ChargeEntityType;
@@ -18,6 +29,7 @@ export class Charge extends EntityModel implements IEntity {
     public externalId: string;
     public paymentLink: string;
     public paymentAt: string;
+    public gateway: string;
 
     public static ignoredProperties = [];
 
@@ -36,6 +48,8 @@ export class Charge extends EntityModel implements IEntity {
         charge.externalId = i.externalId;
         charge.paymentLink = i.paymentLink;
         charge.paymentAt = i.paymentAt;
+        charge.title = i.title;
+        charge.gateway = i.gateway;
         return charge;
     }
 

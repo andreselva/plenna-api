@@ -14,6 +14,7 @@ export class Charge extends EntityModel implements IEntity {
     public static MULTIPLE_BILLING_RULES_ERROR_CUSTOMER = 'Múltiplas regras de cobrança encontradas para o mesmo método de pagamento e cliente.';
     public static MULTIPLE_BILLING_RULES_ERROR = 'Múltiplas regras de cobrança encontradas para o mesmo método de pagamento.';
     public static CUSTOMER_NOT_FOUND_ERROR = 'Cliente não encontrado.';
+    public static ERROR_DUPLICATE_CHARGE = 'CHARGE_ALREADY_PROCESSED';
     
     public id: number;
     public title: string;

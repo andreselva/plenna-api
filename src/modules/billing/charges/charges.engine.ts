@@ -4,6 +4,8 @@ import { Charge } from "src/EntityModels/Charge";
 import { ChargeStatus } from "src/enum/charge-status.enum";
 import { ChargeResolver } from "./charge.resolver";
 import { IChargeInput } from "src/Shared/interfaces/IChargeInput";
+import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
+import { ChargeAlreadyProcessedException } from "./exceptions/ChargeAlreadyProcessedException";
 
 @Injectable()
 export class ChargesEngine {
@@ -15,7 +17,16 @@ export class ChargesEngine {
 
     async process(input: IChargeInput): Promise<Charge> {
         this.validate(input);
-        await this.resolver.saveEventProcessing(input);
+
+        try {
+            await this.resolver.saveEventProcessing(input);
+        } catch (error) {
+            if (HelperFunctions.isDuplicateKeyError(error)) {
+                this.logger.error(`Error saving charge processing for entityId ${input.entityId} and entityType ${input.entityType}: ${error.message}`);
+                throw new ChargeAlreadyProcessedException(input.entityId, input.entityType);
+            }
+            throw error;
+        }
 
         const charge = new Charge();
         charge.id = 0;
@@ -23,13 +34,8 @@ export class ChargesEngine {
         charge.customerId = input.customerId;
         charge.amount = input.amount;
         charge.entityType = input.entityType;
-        charge.clientId = this.resolver.getClientId();
         charge.status = ChargeStatus.DRAFT;
         charge.title = await this.resolver.defineTitle(input);
-
-        if (!charge.clientId) {
-            throw new ChargesException(Charge.INVALID_CLIENT_ID_ERROR);
-        }
 
         const bRule = await this.resolver.defineBillingRule(input);
         if (bRule === null) {

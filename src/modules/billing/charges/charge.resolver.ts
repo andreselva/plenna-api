@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { ChargesException } from "./exceptions/ChargesException";
 import { BillingRulesService } from "../billing-rules/billing-rules.service";
 import { IChargeInput } from "src/Shared/interfaces/IChargeInput";
-import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import { Charge } from "src/EntityModels/Charge";
 import { ChargesRepository } from "./charges.repository";
 import { ChargeProcessing } from "src/EntityModels/ChargeProcessing";
@@ -13,7 +12,6 @@ import DateHelper from "src/Shared/Utils/DateHelper";
 export class ChargeResolver {
     constructor(
         private readonly billingRulesService: BillingRulesService,
-        private readonly authContext: AuthContextService,
         private readonly repository: ChargesRepository
     ) {}
 
@@ -60,15 +58,9 @@ export class ChargeResolver {
     async saveEventProcessing(input: IChargeInput): Promise<void> {
         const processing = new ChargeProcessing();
         processing.id = 0;
-        processing.clientId = this.getClientId();
         processing.entityId = input.entityId;
         processing.entityType = input.entityType;
         processing.date = DateHelper.getCurrentDate();
         await this.repository.saveProcessing(processing);
     }
-
-    getClientId() {
-        return this.authContext.getClientId();
-    }
-
 }

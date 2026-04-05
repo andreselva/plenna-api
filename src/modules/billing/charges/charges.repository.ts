@@ -32,6 +32,9 @@ export class ChargesRepository extends BaseRepository<Charge> {
     }
 
     async saveProcessing(processing: ChargeProcessing): Promise<void> {
+        if (processing.clientId === null || processing.clientId === undefined) {
+            processing.clientId = this.authContext.getClientId();
+        }
         const { sql, values } = QueryBuilder.buildQuery(processing, processing.getTableName(), processing.getPrimaryKey(), processing.getIgnoredProperties());
         await this.database.execute(sql, values);
     }

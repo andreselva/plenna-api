@@ -31,6 +31,7 @@ export default class PaymentService {
         const entity = Payment.fromDTO(payment);
         return await this.repository.savePayment(entity);
     }
+    
     async registerPayment(dto: PaymentInicialDataDTO) {
         if (!dto || Object.keys(dto).length === 0) {
             throw new Error("Invalid payment data");

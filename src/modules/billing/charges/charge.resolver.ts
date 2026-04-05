@@ -7,6 +7,7 @@ import { Charge } from "src/EntityModels/Charge";
 import { ChargesRepository } from "./charges.repository";
 import { ChargeProcessing } from "src/EntityModels/ChargeProcessing";
 import { ChargeEntityType } from "src/enum/charge-entity-type.enum";
+import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
 export class ChargeResolver {
@@ -62,6 +63,7 @@ export class ChargeResolver {
         processing.clientId = this.getClientId();
         processing.entityId = input.entityId;
         processing.entityType = input.entityType;
+        processing.date = DateHelper.getCurrentDate();
         await this.repository.saveProcessing(processing);
     }
 

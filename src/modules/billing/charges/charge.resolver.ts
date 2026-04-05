@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { ChargesException } from "./exceptions/ChargesException";
-import { BillingRule } from "src/EntityModels/BillingRule";
 import { BillingRulesService } from "../billing-rules/billing-rules.service";
 import { IChargeInput } from "src/Shared/interfaces/IChargeInput";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import { Charge } from "src/EntityModels/Charge";
 import { ChargesRepository } from "./charges.repository";
+import { ChargeProcessing } from "src/EntityModels/ChargeProcessing";
+import { ChargeEntityType } from "src/enum/charge-entity-type.enum";
 
 @Injectable()
 export class ChargeResolver {
@@ -43,16 +44,25 @@ export class ChargeResolver {
     async defineTitle(input: IChargeInput): Promise<string> {
         const customer = await this.repository.loadCustomer(input.customerId);
 
-        if (!customer) {
+        if (customer === null || customer === undefined) {
             throw new ChargesException(Charge.CUSTOMER_NOT_FOUND_ERROR);
         }
 
         switch (input.entityType) {
-            case 'REVENUE':
-                return `Cobrança para ${customer.name} - Receita #${input.sequenceNumber || input.entityId}`;
+            case ChargeEntityType.REVENUE:
+                return `Cobrança para ${customer.name} - #${input.sequenceNumber || input.entityId}`;
             default:
                 return `Cobrança para ${customer.name}`;
         }
+    }
+
+    async saveEventProcessing(input: IChargeInput): Promise<void> {
+        const processing = new ChargeProcessing();
+        processing.id = 0;
+        processing.clientId = this.getClientId();
+        processing.entityId = input.entityId;
+        processing.entityType = input.entityType;
+        await this.repository.saveProcessing(processing);
     }
 
     getClientId() {

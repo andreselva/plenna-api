@@ -9,4 +9,10 @@ export class ChargeEventsRepository extends BaseRepository<ChargeEvent> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
         super(database, authContext, ChargeEvent);
     }
+
+    async loadHistoryByChargeId(chargeId: number): Promise<ChargeEvent[]> {
+        const query = `SELECT * FROM  charges_events WHERE chargeId = ? AND clientId = ? ORDER BY createdAt DESC`;
+        const result = await this.database.select(query, [chargeId, this.authContext.getClientId()]);
+        return this.extractToEntity(result);
+    }
 }

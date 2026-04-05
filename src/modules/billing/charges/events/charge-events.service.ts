@@ -23,11 +23,16 @@ export class ChargeEventsService {
         event.username = this.authContext.getUser().username;
         event.event = eventString;
         event.description = "";
+        event.clientId = this.authContext.getClientId();
 
         if (eventString === ChargesEventsEnum.CHARGE_SENDED_TO_GATEWAY) {
             event.description = `Cobrança enviada para gateway ${charge.gateway}. Status atual: ${charge.status}`;
         }
 
         await this.repository.save(event, true);
+    }
+
+    async loadHistory(chargeID: number): Promise<ChargeEvent[]> {
+        return await this.repository.loadHistoryByChargeId(chargeID);
     }
 }

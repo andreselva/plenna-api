@@ -64,4 +64,8 @@ export class ChargesService {
     async getCharges() {
         return await this.repository.loadAll();
     }
+
+    async getHistory(chargeId: number) {
+        return await this.events.loadHistory(chargeId);
+    }
 }

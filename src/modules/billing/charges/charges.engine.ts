@@ -15,6 +15,7 @@ export class ChargesEngine {
 
     async process(input: IChargeInput): Promise<Charge> {
         this.validate(input);
+        await this.resolver.saveEventProcessing(input);
 
         const charge = new Charge();
         charge.id = 0;

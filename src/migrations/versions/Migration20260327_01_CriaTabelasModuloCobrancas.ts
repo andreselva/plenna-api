@@ -122,6 +122,7 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
                 `CREATE TABLE IF NOT EXISTS charges_events (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
                     chargeId BIGINT NOT NULL,
+                    clientId BIGINT NOT NULL,
                     username VARCHAR(120),
                     event VARCHAR(250),
                     description VARCHAR(250),
@@ -132,8 +133,10 @@ export class Migration20260327_01_CriaTabelasModuloCobrancas implements IMigrati
             MigrationSteps.RunSQL(
                 `CREATE TABLE IF NOT EXISTS charges_processing (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    clientId BIGINT NOT NULL,
                     entityId BIGINT NOT NULL,
                     entityType ENUM('REVENUE'),
+                    UNIQUE(clientId, entityId, entityType),
                     \`date\` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 );`
             )

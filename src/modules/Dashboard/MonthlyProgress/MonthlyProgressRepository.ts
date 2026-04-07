@@ -31,6 +31,7 @@ export class MonthlyProgressRepository {
                         expense
                     WHERE clientId = ?
                         AND invoiceDueDate BETWEEN ? AND ?
+                        AND status NOT IN ('cancelled', 'reversed', 'archived')
                     GROUP BY month
                     ORDER BY month ASC`;
         const rows = await this.database.select(query, [this.authContext.getClientId(), startDate, endDate]) as MonthlyProgressRowDTO[];

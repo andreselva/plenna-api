@@ -11,13 +11,13 @@ export class CurrentBalanceRepository {
     ) { }
 
     async getSumAllRevenues(args: DashboardArgs): Promise<number> {
-        const query = "SELECT SUM(value) as total FROM revenue WHERE invoiceDueDate >= ? AND invoiceDueDate <= ? AND clientId = ?";
+        const query = "SELECT SUM(value) as total FROM revenue WHERE invoiceDueDate >= ? AND invoiceDueDate <= ? AND clientId = ? AND status NOT IN ('cancelled', 'reversed', 'archived');";
         const [row] = await this.database.select(query, [args.startDate, args.endDate, this.authContext.getClientId()]);
         return row.total ?? 0;
     }
 
     async getSumAllExpenses(args: DashboardArgs): Promise<number> {
-        const query = "SELECT SUM(value) as total FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ? AND clientId = ?";
+        const query = "SELECT SUM(value) as total FROM expense WHERE invoiceDueDate >= ? AND invoiceDueDate <= ? AND clientId = ? AND status NOT IN ('cancelled', 'reversed', 'archived')";
         const [row] = await this.database.select(query, [args.startDate, args.endDate, this.authContext.getClientId()]);
         return row.total ?? 0;
     }

@@ -21,6 +21,7 @@ export class BillsDueRepository {
                         WHERE clientId = ?
                         AND invoiceDueDate >= ? AND invoiceDueDate <= ?
                         AND (idCreditCard <= 0 OR idCreditCard is null OR idCreditCard = "")
+                        AND status NOT IN ('cancelled', 'reversed', 'archived')
                         ORDER BY invoiceDueDate`;
         const rows = await this.database.select(query, [this.authContext.getClientId(), args.startDate, args.endDate]) as ExpenseRowDTO[];
 

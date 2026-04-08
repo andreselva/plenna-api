@@ -26,7 +26,7 @@ export class ChargesService {
     async create(dto: CreateChargeDto) {
         try {
             return this.database.transaction(async () => {
-                const input = await this.factory.resolve(dto.type, dto.entityId);
+                const input = await this.factory.loadEntity(dto.type, dto.entityId);
                 if (!input) {
                     throw new ChargesException(`Entity of type ${dto.type} with ID ${dto.entityId} not found`);
                 }

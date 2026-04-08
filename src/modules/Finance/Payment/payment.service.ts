@@ -11,7 +11,6 @@ import Payment from "src/EntityModels/Payment";
 import { PaymentRepository } from "./payment.repository";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import { FinancialEventsService, IFinancialEvent } from "../core/financial-events/financial-events.service";
-import { LedgerEngine } from "../core/ledger/ledger.engine";
 import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
 import { FinancialEvents } from "src/EntityModels/FinancialEvent";
 
@@ -22,7 +21,6 @@ export default class PaymentService {
         private readonly expenseService: ExpensesServices,
         private readonly revenueService: RevenuesService,
         private readonly financialEventsService: FinancialEventsService,
-        private readonly ledgerEngine: LedgerEngine,
         private readonly repository: PaymentRepository,
         private readonly database: MySQLDatabase
     ) {}
@@ -45,15 +43,14 @@ export default class PaymentService {
             );
             
             const normalizedAmount = this.normalizeAmount(dto.value, dto.payableType);
-            const event = await this.createEvent({
+
+            await this.createEvent({
                 accountId: dto.accountId,
                 amount: normalizedAmount,
                 type: this.resolveEventType(dto.payableType),
                 referenceId: dto.payableId,
                 referenceType: dto.payableType
             });
-
-            await this.ledgerEngine.process(event);
 
             return this.updateStatus(dto.payableType, payment.payable_id, payment.payment_date);
         });
@@ -78,7 +75,8 @@ export default class PaymentService {
             await this.register(paymentDTO);
             
             const amount = this.normalizeReversalAmount(dto.amount, dto.referenceType);
-            const event = await this.createEvent({
+
+            await this.createEvent({
                 accountId: dto.accountId,
                 amount,
                 type: FinancialEventsEnum.REVERSAL,
@@ -86,7 +84,6 @@ export default class PaymentService {
                 referenceType: dto.referenceType
             });
 
-            await this.ledgerEngine.process(event);
             await this.repository.updateReverseDate(dto.paymentId, DateHelper.getCurrentDate());
             return this.updateStatus(dto.referenceType, dto.entityId, null);
         });

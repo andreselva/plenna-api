@@ -17,7 +17,11 @@ export class ChargesFactory {
         )
     }
 
-    resolve(entityType: string, entityId: number): Promise<IChargeInput> {
+    loadEntity(entityType: string, entityId: number): Promise<IChargeInput> {
+        return this.resolve(entityType, entityId);
+    }
+
+    private resolve(entityType: string, entityId: number): Promise<IChargeInput> {
         const provider = this.chargeProviders.get(entityType);
         if (provider === undefined) {
             throw new ChargesException(`Unsupported charge entity type: ${entityType}`);

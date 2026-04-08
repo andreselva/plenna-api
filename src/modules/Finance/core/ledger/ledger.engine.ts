@@ -9,18 +9,20 @@ import { LedgerEventProcessing } from "src/EntityModels/LedgerEventProcessing";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import { EventAlreadyProcessedException } from "./exceptions/EventAlreadyProcessedException";
 import { InvalidQuantityLedgerEntriesException } from "./exceptions/InvalidQuantityLedgerEntriesException";
+import { LedgerResolver } from "./ledger.resolver";
 
 @Injectable()
 export class LedgerEngine {
  constructor(
-    private readonly repository: LedgerRepository
+  private readonly builder: LedgerBuilder,
+  private readonly resolver: LedgerResolver
  ) {}
  
  async process(event: FinancialEvents): Promise<void> {
   this.validate(event);
   
   try {
-    await this.saveEventProcessing(event);
+    await this.resolver.saveEventLedgerProcessing(event.id);
   } catch (e) {
     if (HelperFunctions.isDuplicateKeyError(e)) {
       throw new EventAlreadyProcessedException(event.id);
@@ -28,24 +30,12 @@ export class LedgerEngine {
     throw e;
   }
 
-  const builder = new LedgerBuilder(this.repository);
-  const entries: LedgerEntry[] = await builder.build(event);
+  const entries: LedgerEntry[] = await this.builder.build(event);
   if (entries.length % 2 !== 0) {
    throw new InvalidQuantityLedgerEntriesException(event.id);
   }
 
-  await Promise.all(
-    entries.map(async (e) => {
-        await this.repository.save(e);
-    })
-  )
- }
-
- private async saveEventProcessing(event: FinancialEvents): Promise<void> {
-  const ledgerEventProcessing = new LedgerEventProcessing();
-  ledgerEventProcessing.eventId = event.id;
-  ledgerEventProcessing.processedAt = DateHelper.getCurrentDate();
-  await this.repository.saveLedgerEventProcessing(ledgerEventProcessing);
+  await this.resolver.saveDoubleLedgerEntries(entries);
  }
 
  private validate(event: FinancialEvents): void {

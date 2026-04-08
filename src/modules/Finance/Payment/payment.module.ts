@@ -6,10 +6,9 @@ import { InvoicesModule } from "../Invoices/invoices.module";
 import { ExpensesModule } from "../Expenses/expenses.module";
 import { RevenueModule } from "../Revenues/revenue.module";
 import { FinancialEventsModule } from "../core/financial-events/financial-events.module";
-import { LedgerModule } from "../core/ledger/ledger.module";
 
 @Module({
-    imports: [forwardRef(() => InvoicesModule), ExpensesModule, RevenueModule, FinancialEventsModule, LedgerModule],
+    imports: [forwardRef(() => InvoicesModule), ExpensesModule, RevenueModule, FinancialEventsModule],
     providers: [PaymentService, PaymentRepository],
     controllers: [PaymentController],
     exports: []

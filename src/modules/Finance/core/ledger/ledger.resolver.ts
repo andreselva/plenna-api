@@ -53,7 +53,7 @@ export class LedgerResolver {
         if (HelperFunctions.isNullable(event.amount, true, true)) {
             return { originAmount: 0, destinationAmount: 0 }
         }
-        
+
         switch (event.type) {
             case FinancialEventsEnum.OPENING_BALANCE:
                 return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
@@ -71,12 +71,45 @@ export class LedgerResolver {
                 } else if (event.referenceType === PaymentType.REVENUE) {
                     return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
                 }
-            
+                throw new InvalidEventTypeException(event.id);
+
+            // Cobrança gerada: registra o direito a receber (sem movimentação de caixa)
+            // Reconhecimento de receita: registra o direito a receber (accrual)
             case FinancialEventsEnum.CHARGE_GENERATED:
-            
+            case FinancialEventsEnum.REVENUE_RECOGNIZED:
+                return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
+
+            // Cobrança liquidada: o dinheiro chegou na conta
+            case FinancialEventsEnum.CHARGE_PAID:
+                return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
+
+            // Cobrança cancelada ou expirada: estorna o direito a receber
+            case FinancialEventsEnum.CHARGE_CANCELLED:
+            case FinancialEventsEnum.CHARGE_EXPIRED:
+                return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
+
+            // Estorno de cobrança paga: dinheiro sai da conta
+            case FinancialEventsEnum.CHARGE_REFUNDED:
+                return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
+
+            // Reconhecimento de despesa: registra a obrigação a pagar (accrual)
+            case FinancialEventsEnum.EXPENSE_RECOGNIZED:
+                return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
+
             default:
                 throw new InvalidEventTypeException(event.id);
         }
+    }
+
+    defineDestinationLiquidity(event: FinancialEvents): boolean {
+        const nonLiquidEvents = [
+            FinancialEventsEnum.CHARGE_GENERATED,
+            FinancialEventsEnum.CHARGE_CANCELLED,
+            FinancialEventsEnum.CHARGE_EXPIRED,
+            FinancialEventsEnum.REVENUE_RECOGNIZED,
+            FinancialEventsEnum.EXPENSE_RECOGNIZED,
+        ];
+        return !nonLiquidEvents.includes(event.type);
     }
 
     defineTypeOrigin(referenceType: PaymentType): LedgerEntryTypeEnum {
@@ -85,7 +118,8 @@ export class LedgerResolver {
             [PaymentType.REVENUE]: LedgerEntryTypeEnum.R,
             [PaymentType.TRANSFER]: LedgerEntryTypeEnum.T,
             [PaymentType.INVOICE]: LedgerEntryTypeEnum.INVOICE,
-            [PaymentType.ACCOUNT_OPENING]: LedgerEntryTypeEnum.ACCOUNT_OPENING
+            [PaymentType.ACCOUNT_OPENING]: LedgerEntryTypeEnum.ACCOUNT_OPENING,
+            [PaymentType.CHARGE]: LedgerEntryTypeEnum.CHARGE,
         }
         return types[referenceType];
     }

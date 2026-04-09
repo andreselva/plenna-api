@@ -3,7 +3,6 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import MySQLDatabase from "../Config/Database/MySQLDatabase";
 import { AuthContextService } from "../Auth/auth-context.service";
 import { Injectable } from "@nestjs/common";
-import DataMapper from "src/Shared/mapper/DataMapper";
 
 @Injectable()
 export class CustomersRepository extends BaseRepository<Customer> {

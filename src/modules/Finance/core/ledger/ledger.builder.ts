@@ -36,7 +36,7 @@ export class LedgerBuilder {
   destinationEntry.type = this.resolver.defineTypeDestination(account);
   destinationEntry.accountId = event.accountId;
   destinationEntry.metadata = metadata;
-  destinationEntry.liquidity = true;
+  destinationEntry.liquidity = this.resolver.defineDestinationLiquidity(event);
   destinationEntry.createdAt = DateHelper.getCurrentDate();
  
   return [originEntry, destinationEntry]

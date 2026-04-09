@@ -6,6 +6,7 @@ import { BillingRulesModule } from '../billing-rules/billing-rules.module';
 import { ChargesEngine } from './charges.engine';
 import { ChargeGatewayService } from './charge-gateway.service';
 import { IntegrationsModule } from 'src/modules/integrations/integrations.module';
+import { FinancialEventsModule } from 'src/modules/Finance/core/financial-events/financial-events.module';
 import { ChargeResolver } from './charge.resolver';
 import { CHARGE_PROVIDERS_TOKEN } from './constants/charge-providers.token';
 import { ChargeRevenueProvider } from './providers/charge-revenue.provider';
@@ -36,6 +37,6 @@ import { ChargeEventsRepository } from './events/charge-events.repository';
       inject: [ChargeRevenueProvider],
     }
   ],
-  imports: [BillingRulesModule, IntegrationsModule]
+  imports: [BillingRulesModule, IntegrationsModule, FinancialEventsModule]
 })
 export class ChargesModule {}

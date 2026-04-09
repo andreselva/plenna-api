@@ -1,12 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { FinancialEvents } from "src/EntityModels/FinancialEvent";
-import { LedgerRepository } from "./ledger.repository";
 import { LedgerBuilder } from "./ledger.builder";
 import { LedgerEntry } from "src/EntityModels/ledger-entry";
 import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
 import { PaymentType } from "../../Payment/Types/payment.type";
-import { LedgerEventProcessing } from "src/EntityModels/LedgerEventProcessing";
-import DateHelper from "src/Shared/Utils/DateHelper";
 import { EventAlreadyProcessedException } from "./exceptions/EventAlreadyProcessedException";
 import { InvalidQuantityLedgerEntriesException } from "./exceptions/InvalidQuantityLedgerEntriesException";
 import { LedgerResolver } from "./ledger.resolver";

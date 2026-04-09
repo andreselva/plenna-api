@@ -6,5 +6,6 @@ export interface IChargeInput {
     amount: number;
     paymentMethodId: number;
     customerId: number;
+    accountId?: number;
     sequenceNumber?: string;
 }

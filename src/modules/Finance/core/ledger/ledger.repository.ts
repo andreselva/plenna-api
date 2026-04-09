@@ -7,7 +7,6 @@ import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import DataMapper from "src/Shared/mapper/DataMapper";
 import QueryBuilder from "src/Shared/QueryBuilder/QueryBuilder";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
-import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
 
 @Injectable()
 export class LedgerRepository extends BaseRepository<LedgerEntry> {

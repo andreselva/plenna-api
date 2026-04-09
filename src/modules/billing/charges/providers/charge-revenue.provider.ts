@@ -25,7 +25,8 @@ export class ChargeRevenueProvider implements IChargeProvider {
             entityType: this.entityType,
             amount: Number(revenue.value),
             paymentMethodId: revenue.paymentMethodId,
-            customerId: revenue.customerId
+            customerId: revenue.customerId,
+            accountId: revenue.idBankAccount
         } satisfies IChargeInput;
 
     }

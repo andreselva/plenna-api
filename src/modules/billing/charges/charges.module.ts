@@ -13,19 +13,22 @@ import { ChargeRevenueProvider } from './providers/charge-revenue.provider';
 import { ChargesFactory } from './factorys/charges.factory';
 import { ChargeEventsService } from './events/charge-events.service';
 import { ChargeEventsRepository } from './events/charge-events.repository';
+import { ChargesWebhookController } from './webhooks/charges-webhook.controller';
+import { ChargeExpirationService } from './expiration/charge-expiration.service';
 
 @Module({
-  controllers: [ChargesController],
+  controllers: [ChargesController, ChargesWebhookController],
   providers: [
-    ChargesService, 
-    ChargesRepository, 
-    ChargesEngine, 
-    ChargeGatewayService, 
+    ChargesService,
+    ChargesRepository,
+    ChargesEngine,
+    ChargeGatewayService,
     ChargeResolver,
     ChargeRevenueProvider,
     ChargesFactory,
     ChargeEventsService,
     ChargeEventsRepository,
+    ChargeExpirationService,
     {
       provide: CHARGE_PROVIDERS_TOKEN,
       useFactory: (
@@ -33,10 +36,10 @@ import { ChargeEventsRepository } from './events/charge-events.repository';
       ) => [
         chargeRevenueProvider
       ],
-
       inject: [ChargeRevenueProvider],
     }
   ],
-  imports: [BillingRulesModule, IntegrationsModule, FinancialEventsModule]
+  imports: [BillingRulesModule, IntegrationsModule, FinancialEventsModule],
+  exports: [ChargesService, ChargeExpirationService]
 })
 export class ChargesModule {}

@@ -14,15 +14,18 @@ import { EmailModule } from '../email/email.module';
 import { RedisModule } from '../redis/redis.module';
 import type { Redis } from 'ioredis';
 import { REDIS_CONNECTION } from '../redis/redis.tokens';
+import { ChargesModule } from '../billing/charges/charges.module';
+import { ChargeExpirationAppointment } from './definitions/charge-expiration.appointment';
 
 @Module({
-  imports: [EmailModule, RedisModule],
+  imports: [EmailModule, RedisModule, ChargesModule],
   providers: [
     AppointmentsService,
     AppointmentsQueueService,
     UpcomingExpensesService,
     UpcomingExpensesEmailService,
     UpcomingExpensesEmailAppointment,
+    ChargeExpirationAppointment,
     AppointmentSettingsService,
     AppointmentsRepository,
     {
@@ -32,8 +35,11 @@ import { REDIS_CONNECTION } from '../redis/redis.tokens';
     },
     {
       provide: AVAILABLE_APPOINTMENTS_TOKEN,
-      useFactory: (upcomingExpenses: UpcomingExpensesEmailAppointment) => [upcomingExpenses],
-      inject: [UpcomingExpensesEmailAppointment],
+      useFactory: (
+        upcomingExpenses: UpcomingExpensesEmailAppointment,
+        chargeExpiration: ChargeExpirationAppointment,
+      ) => [upcomingExpenses, chargeExpiration],
+      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment],
     },
   ],
   controllers: [

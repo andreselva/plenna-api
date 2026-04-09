@@ -18,8 +18,23 @@ export class ChargesController {
         return await this.service.getCharges();
     }
 
+    @Get('/:id')
+    async getCharge(@Param('id') id: number) {
+        return await this.service.findById(id);
+    }
+
     @Get('/:id/history')
     async getHistory(@Param('id') id: number) {
-        return await this. service.getHistory(id);
+        return await this.service.getHistory(id);
+    }
+
+    @Post('/:id/cancel')
+    async cancel(@Param('id') id: number) {
+        return await this.service.cancel(id);
+    }
+
+    @Post('/:id/refund')
+    async refund(@Param('id') id: number) {
+        return await this.service.refund(id);
     }
 }

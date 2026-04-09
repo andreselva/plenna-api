@@ -12,4 +12,12 @@ export class ChargeGatewayService {
     async sendCharge(charge: Charge): Promise<IGatewayOperationResult> {
         return await this.gatewayIntegrationsService.sendChargeToGateway(charge);
     }
+
+    async cancelCharge(charge: Charge): Promise<IGatewayOperationResult> {
+        return await this.gatewayIntegrationsService.cancelCharge(charge);
+    }
+
+    async refundCharge(charge: Charge): Promise<IGatewayOperationResult> {
+        return await this.gatewayIntegrationsService.refundCharge(charge);
+    }
 }

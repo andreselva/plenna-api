@@ -5,6 +5,7 @@ import { ChargeStatus } from "src/enum/charge-status.enum";
 import { GatewayEnum } from "src/enum/gateway.enum";
 import { IGatewayOperationResult } from "src/Shared/interfaces/IGatewayOperationResult";
 import { IGatewayStatusResult } from "src/Shared/interfaces/IGatewayStatusResult";
+import { IWebhookParseResult } from "src/Shared/interfaces/IWebhookParseResult";
 import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
@@ -46,5 +47,24 @@ export class PagarmePaymentGateway implements IPaymentGateway {
             externalId: charge.externalId,
             raw: { chargeId: charge.id }
         };
+    }
+
+    parseWebhook(payload: unknown, headers: Record<string, string>): IWebhookParseResult {
+        const body = payload as Record<string, any>;
+
+        const statusMap: Record<string, ChargeStatus> = {
+            'paid': ChargeStatus.PAID,
+            'payment_failed': ChargeStatus.FAILED,
+            'canceled': ChargeStatus.CANCELED,
+            'waiting_payment': ChargeStatus.AWAITING_PAYMENT,
+            'processing': ChargeStatus.PROCESSING,
+        };
+
+        const rawStatus = body?.order?.status ?? body?.charge?.status ?? '';
+        const newStatus = statusMap[rawStatus] ?? ChargeStatus.PROCESSING;
+        const externalId = body?.order?.id ?? body?.charge?.id ?? '';
+        const paidAt = body?.order?.paid_at ?? body?.charge?.paid_at ?? undefined;
+
+        return { externalId, newStatus, paidAt };
     }
 }

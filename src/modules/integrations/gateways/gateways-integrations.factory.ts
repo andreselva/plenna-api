@@ -31,4 +31,13 @@ export class GatewaysIntegrationsFactory {
 
         return provider;
     }
+
+    resolveByGatewayName(name: string): IPaymentGateway {
+        const normalized = name.toUpperCase().replace(/-/g, '_');
+        const provider = this.gatewayRegistry.get(normalized);
+        if (provider === undefined) {
+            throw new GatewayIntegrationsException(`Unsupported gateway: ${name}`);
+        }
+        return provider;
+    }
 }

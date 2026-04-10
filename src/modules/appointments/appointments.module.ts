@@ -13,9 +13,9 @@ import { createQueue } from './queue.provider';
 import { AppointmentsDebugController } from './debug/appointments.debug.controller';
 import { UpcomingExpensesService } from './services/upcoming-expenses.service';
 import type { Redis } from 'ioredis';
-import { ChargeExpirationAppointment } from './definitions/charge-expiration/charge-expiration.appointment';
-import { UpcomingExpensesEmailAppointment } from './definitions/upcoming-expenses-email/upcoming-expenses-email.appointment';
+import { UpcomingExpensesEmailAppointment } from './definitions/upcoming-expenses-email.appointment';
 import { ChargesModule } from '../billing/charges/charges.module';
+import { ChargeExpirationAppointment } from './definitions/charge-expiration.appointment';
 
 @Module({
   imports: [EmailModule, RedisModule, ChargesModule],

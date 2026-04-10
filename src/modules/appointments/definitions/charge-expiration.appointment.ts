@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Recurrence } from 'src/enum/recurrence.enum';
-import { ExecutableAppointment } from '../../executable-appointment.base';
 import { ChargesService } from 'src/modules/billing/charges/charges.service';
-import { AppointmentJobData } from '../../types/appointment-job-data.type';
+import { ExecutableAppointment } from '../executable-appointment.base';
+import { AppointmentJobData } from '../types/appointment-job-data.type';
 
 
 @Injectable()

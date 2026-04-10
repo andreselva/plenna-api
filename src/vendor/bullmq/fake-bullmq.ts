@@ -195,8 +195,9 @@ export class Queue<DataType = any, NameType extends string = string> {
         const next = computeNextCron(opts.repeat!.pattern!, tz, now);
 
         const diff = next.diff(now, 'milliseconds');
-        const diffMs = safeNumber(diff.milliseconds, 0);
-        const delay = safeNumber(Math.max(Math.floor(diffMs), 0), 0);
+        const rawMilliseconds: unknown = diff.milliseconds;
+        const diffMs = typeof rawMilliseconds === 'number' ? rawMilliseconds : 0;
+        const delay = Math.max(Math.floor(diffMs), 0);
 
         const controller: RepeatInterval = {
           type: 'timeout',

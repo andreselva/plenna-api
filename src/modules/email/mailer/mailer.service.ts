@@ -175,7 +175,11 @@ export class MailerService {
     const buffer = await new Promise<Buffer>((resolve, reject) => {
       composer.compile().build((err: unknown, message: unknown) => {
         if (err) {
-          return reject(err instanceof Error ? err : new Error(String(err)));
+          return reject(
+            err instanceof Error
+              ? err
+              : new Error(JSON.stringify(err))
+          );
         }
         resolve(message as Buffer);
       });

@@ -6,7 +6,6 @@ import { IEntityFactory } from "../interfaces/IEntityFactory";
 import IEntity from "../interfaces/IEntity";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import { HelperFunctions } from "../Utils/HelperFunctions";
-import { Exception } from "handlebars";
 
 export default abstract class BaseRepository<T extends EntityModel> {
     constructor(

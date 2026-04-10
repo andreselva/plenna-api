@@ -118,7 +118,7 @@ export class AuthService {
                 throw new UnauthorizedException();
             }
 
-            const isRefreshTokenValid = TokenHasher.compare(
+            const isRefreshTokenValid = await TokenHasher.compare(
                 refreshToken,
                 storedToken.refresh_token
             );

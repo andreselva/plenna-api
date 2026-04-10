@@ -96,7 +96,11 @@ export default class FinancialSummaryService implements IReports<IFinancialSumma
         const groupedExpenses = new Map<string, { label: string; value: number }>();
 
         for (const expense of expenses) {
-            const dueDate = String(expense.invoiceDueDate);
+            const rawDueDate: unknown = expense.invoiceDueDate;
+            const dueDate = typeof rawDueDate === 'string'
+                ? rawDueDate
+                : String(rawDueDate);
+
             const { yearAndMonth, month } = DateHelper.getYearAndMonth(dueDate);
 
             if (!yearAndMonth || !month) continue;

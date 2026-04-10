@@ -1,4 +1,4 @@
-import { Dependencies, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import CreateRevenue from "./UseCases/CreateRevenue";
 import GetRevenues from "./UseCases/GetRevenues";
 import { RevenueDTO } from "./DTOs/RevenueDTO";

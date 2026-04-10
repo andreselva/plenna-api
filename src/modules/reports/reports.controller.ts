@@ -1,4 +1,4 @@
-import { Controller, Get, Query, DefaultValuePipe, ParseIntPipe, ParseBoolPipe, ParseEnumPipe } from '@nestjs/common';
+import { Controller, Get, Query, DefaultValuePipe, ParseIntPipe, ParseEnumPipe } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { AnalysisType } from 'src/enum/analysis-type.enum';
 import { Roles } from 'src/common/decorators/roles.decoratos';

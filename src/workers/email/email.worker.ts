@@ -65,24 +65,26 @@ async function bootstrap() {
 
   worker.on('failed', (job, err) => {
     logger.error(
-      `[FAILED EVENT] ${job?.name} -> ${job?.id}: ${(err as Error).message}`,
-      (err as Error).stack,
+      `[FAILED EVENT] ${job?.name} -> ${job?.id}: ${err.message}`,
+      err.stack,
     );
   });
 
-  worker.on('completed', async (job) => {
+  worker.on('completed', (job) => {
     if (!job) return;
 
-    logger.log(`[DONE] ${job.name} -> ${job.id}`);
+    void (async () => {
+      logger.log(`[DONE] ${job.name} -> ${job.id}`);
 
-    try {
-      await job.remove();
-      logger.log(`Job removido do Redis: ${job.id}`);
-    } catch (err) {
-      logger.warn(
-        `Falha ao remover o job ${job.id} do Redis: ${(err as Error).message}`,
-      );
-    }
+      try {
+        await job.remove();
+        logger.log(`Job removido do Redis: ${job.id}`);
+      } catch (err) {
+        logger.warn(
+          `Falha ao remover o job ${job.id} do Redis: ${(err as Error).message}`,
+        );
+      }
+    })();
   });
 
   logger.log(

@@ -21,7 +21,7 @@ export default abstract class BaseRepository<T extends EntityModel> {
         }
 
         if ('clientId' in entity && HelperFunctions.isNullable(entity.clientId)) {
-            throw new Exception('Invalid clientId.');
+            throw new Error('Invalid clientId.');
         }
 
         if (cleanNullables) {
@@ -34,7 +34,7 @@ export default abstract class BaseRepository<T extends EntityModel> {
 
     async loadById(id: number): Promise<T | null> {
         let sql = `SELECT * FROM ${this.entityClass.prototype.getTableName()} WHERE ${this.entityClass.prototype.getPrimaryKey()} = ?`;
-        let values = [id];
+        const values = [id];
 
         if ('clientId' in this.entityClass.prototype) {
             sql += ` AND clientId = ?`;
@@ -50,7 +50,7 @@ export default abstract class BaseRepository<T extends EntityModel> {
 
     async loadAll(): Promise<T[]> {
         let sql = `SELECT * FROM ${this.entityClass.prototype.getTableName()}`;
-        let values: any[] = [];
+        const values: any[] = [];
 
         if ('clientId' in this.entityClass.prototype) {
             sql += ` WHERE clientId = ?`;
@@ -61,7 +61,7 @@ export default abstract class BaseRepository<T extends EntityModel> {
         return DataMapper.toEntities(rows, this.entityClass);
     }
 
-    extractToEntity(rows: any): T[] {
+    extractToEntity(rows: object[]): T[] {
         return DataMapper.toEntities(rows, this.entityClass)
     }
 }

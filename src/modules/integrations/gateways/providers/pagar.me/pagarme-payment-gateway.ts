@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Charge } from "src/EntityModels/Charge";
-import { IPaymentGateway } from "src/Shared/interfaces/IPaymentGateway";
+// import { IPaymentGateway } from "src/Shared/interfaces/IPaymentGateway";
 import { ChargeStatus } from "src/enum/charge-status.enum";
 import { GatewayEnum } from "src/enum/gateway.enum";
 import { IGatewayOperationResult } from "src/Shared/interfaces/IGatewayOperationResult";
@@ -9,10 +9,10 @@ import { IWebhookParseResult } from "src/Shared/interfaces/IWebhookParseResult";
 import DateHelper from "src/Shared/Utils/DateHelper";
 
 @Injectable()
-export class PagarmePaymentGateway implements IPaymentGateway {
+export class PagarmePaymentGateway { // implements IPaymentGateway -> quando terminar a implementação.
     readonly gateway = GatewayEnum.PAGAR_ME;
 
-    async registerCharge(charge: Charge): Promise<IGatewayOperationResult> {
+    registerCharge(charge: Charge): IGatewayOperationResult {
         return {
             success: true,
             status: ChargeStatus.PROCESSING,
@@ -24,7 +24,7 @@ export class PagarmePaymentGateway implements IPaymentGateway {
         };
     }
 
-    async cancelCharge(charge: Charge): Promise<IGatewayOperationResult> {
+    cancelCharge(charge: Charge): IGatewayOperationResult {
         return {
             success: true,
             status: ChargeStatus.CANCELED,
@@ -32,7 +32,7 @@ export class PagarmePaymentGateway implements IPaymentGateway {
         };
     }
 
-    async refundCharge(charge: Charge): Promise<IGatewayOperationResult> {
+    refundCharge(charge: Charge): IGatewayOperationResult {
         return {
             success: true,
             status: ChargeStatus.CANCELED,
@@ -40,7 +40,7 @@ export class PagarmePaymentGateway implements IPaymentGateway {
         };
     }
 
-    async getStatus(charge: Charge): Promise<IGatewayStatusResult> {
+    getStatus(charge: Charge): IGatewayStatusResult {
         return {
             success: true,
             status: ChargeStatus.PROCESSING,
@@ -49,7 +49,7 @@ export class PagarmePaymentGateway implements IPaymentGateway {
         };
     }
 
-    parseWebhook(payload: unknown, headers: Record<string, string>): IWebhookParseResult {
+    parseWebhook(payload: unknown): IWebhookParseResult {//headers: Record<string, string> -> segundo parâmetro, avaliar uso quando implementar
         const body = payload as Record<string, any>;
 
         const statusMap: Record<string, ChargeStatus> = {

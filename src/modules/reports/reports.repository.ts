@@ -4,7 +4,6 @@ import { AuthContextService } from "../Auth/auth-context.service";
 import DataMapper from "src/Shared/mapper/DataMapper";
 import Category from "src/EntityModels/Category";
 import { Expense } from "src/EntityModels/Expense";
-import Revenue from "src/EntityModels/Revenue";
 
 @Injectable()
 export default class ReportsRepository {

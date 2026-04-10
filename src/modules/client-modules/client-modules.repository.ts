@@ -1,4 +1,4 @@
-import { Injectable, Query } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import MySQLDatabase from "../Config/Database/MySQLDatabase";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";

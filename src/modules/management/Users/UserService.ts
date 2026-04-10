@@ -37,8 +37,8 @@ export class UsersService {
         return await this.repository.saveUser(user);
     }
 
-    async findUserById(id: string, clientId: string) {
-        return await this.repository.findUserById(Number(id), Number(clientId));
+    async findUserById(id: number, clientId: number) {
+        return await this.repository.findUserById(id, clientId);
     }
 
     async getUsers() {

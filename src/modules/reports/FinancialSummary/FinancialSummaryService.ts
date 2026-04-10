@@ -8,21 +8,39 @@ import { IFinancialSummaryOutput } from "src/Shared/interfaces/IFinancialSummary
 import { IReports } from "src/Shared/interfaces/IReports";
 import DateHelper from "src/Shared/Utils/DateHelper";
 
+type RevenueRow = {
+    y: number | string;
+    m: number | string;
+    total: number | string;
+};
+
+type CategoryRow = {
+    id: number | string;
+    name: string;
+};
+
 @Injectable()
 export default class FinancialSummaryService implements IReports<IFinancialSummaryInput, IFinancialSummaryOutput> {
     constructor(
         private readonly repository: ReportsRepository,
         private readonly openaiService: OpenAIService
     ) {}
-    
+
     async process(dto: IFinancialSummaryInput): Promise<IFinancialSummaryOutput> {
         const { initialDate, endDate } = this.definePeriod(dto);
         const labelsMap = DateHelper.getMonthLabels();
         const monthsRange = DateHelper.listMonthsBetween(initialDate, endDate);
-        
-        const revenues = new Map(
-            (await this.repository.getRevenues(initialDate, endDate))
-            .map(r => [DateHelper.ymKey(r.y, r.m), Number(r.total)])
+
+        const revenueRows = await this.repository.getRevenues(initialDate, endDate) as RevenueRow[];
+
+        const revenues = new Map<string, number>(
+            revenueRows.map((revenue) => {
+                const year = Number(revenue.y);
+                const month = Number(revenue.m);
+                const total = Number(revenue.total);
+
+                return [DateHelper.ymKey(year, month), total];
+            })
         );
 
         const expenses = await this.repository.getExpenses(initialDate, endDate);
@@ -32,15 +50,19 @@ export default class FinancialSummaryService implements IReports<IFinancialSumma
         const labels: string[] = [];
         const allExpenses: number[] = [];
         const allRevenues: number[] = [];
-        for (const { y, m } of monthsRange) {
-            const key = DateHelper.ymKey(y, m);
-            labels.push(labelsMap.get(m)!)
+
+        for (const monthRange of monthsRange) {
+            const year = Number(monthRange.y);
+            const month = Number(monthRange.m);
+            const key = DateHelper.ymKey(year, month);
+
+            labels.push(labelsMap.get(month) ?? String(month));
             allExpenses.push(groupedExpenses.get(key)?.value ?? 0);
-            allRevenues.push(revenues.get(key) ?? 0)
+            allRevenues.push(revenues.get(key) ?? 0);
         }
 
-        const summary = await this.openaiService.gerarRelatorio({ 
-            expenses: allExpenses, 
+        const summary = await this.openaiService.gerarRelatorio({
+            expenses: allExpenses,
             revenues: allRevenues,
             categories: Array.from(groupedExpensesByCategory.values())
         }) as string;
@@ -49,11 +71,11 @@ export default class FinancialSummaryService implements IReports<IFinancialSumma
             allLabels: labels,
             allExpenseData: allExpenses,
             allIncomeData: allRevenues,
-            summary: summary
-        }
+            summary
+        };
     }
 
-    private definePeriod(dto: IFinancialSummaryInput) {
+    private definePeriod(dto: IFinancialSummaryInput): { initialDate: string; endDate: string } {
         switch (dto.period) {
             case 1: {
                 return DateHelper.getStartingAndEndDateOfCurrentMonth();
@@ -65,51 +87,56 @@ export default class FinancialSummaryService implements IReports<IFinancialSumma
                 return DateHelper.getFirstAndLastDateByNumberOfMonths(dto.period, plus);
             }
             default:
-                throw new BadRequestException(`Invalid period.`);
+                throw new BadRequestException('Invalid period.');
         }
     }
 
-    private groupExpensesByDueDate(expenses: Expense[]) {
+    private groupExpensesByDueDate(expenses: Expense[]): Map<string, { label: string; value: number }> {
         const labelsMap = DateHelper.getMonthLabels();
+        const groupedExpenses = new Map<string, { label: string; value: number }>();
 
-        const groupedExpenses = new Map<string, { label: string, value: number }>();
         for (const expense of expenses) {
-            const { yearAndMonth, month } = DateHelper.getYearAndMonth(expense.invoiceDueDate);
+            const dueDate = String(expense.invoiceDueDate);
+            const { yearAndMonth, month } = DateHelper.getYearAndMonth(dueDate);
 
             if (!yearAndMonth || !month) continue;
-                
+
             const current = groupedExpenses.get(yearAndMonth);
+            const expenseValue = Number(expense.value);
+
             if (current) {
-                // já existe -> soma o valor
-                current.value += Number(expense.value);
+                current.value += expenseValue;
             } else {
-                // não existe -> cria a chave
                 groupedExpenses.set(yearAndMonth, {
-                    label: labelsMap.get(month) ?? String(month),
-                    value: Number(expense.value),
+                    label: labelsMap.get(Number(month)) ?? String(month),
+                    value: expenseValue,
                 });
             }
         }
+
         return groupedExpenses;
     }
 
-    private async groupExpensesByCategory(expenses: Expense[]) {
-        const categories = await this.repository.getCategories();
+    private async groupExpensesByCategory(expenses: Expense[]): Promise<Map<string, { label: string; value: number }>> {
+        const categories = await this.repository.getCategories() as CategoryRow[];
 
-        const byCategory = new Map<string, {label: string, value: number}>();
+        const byCategory = new Map<string, { label: string; value: number }>();
+
         for (const expense of expenses) {
-            const categoryName = categories.find(category => category.id === expense.idCategory)?.name;
+            const expenseCategoryId = Number(expense.idCategory);
+            const categoryName = categories.find((category) => Number(category.id) === expenseCategoryId)?.name;
 
             if (!categoryName) continue;
 
             const current = byCategory.get(categoryName);
-            
+            const expenseValue = Number(expense.value);
+
             if (current) {
-                current.value += Number(expense.value);
+                current.value += expenseValue;
             } else {
                 byCategory.set(categoryName, {
                     label: categoryName,
-                    value: Number(expense.value)
+                    value: expenseValue
                 });
             }
         }

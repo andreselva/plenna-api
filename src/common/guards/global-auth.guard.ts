@@ -69,7 +69,8 @@ export class GlobalAuthGuard extends JwtAuthGuard {
 
         const refererHeader = request.headers.referer;
         const referer = Array.isArray(refererHeader) ? refererHeader[0] : refererHeader;
-        if (!referer) {
+
+        if (typeof referer !== 'string' || referer.length === 0) {
             return undefined;
         }
 
@@ -80,7 +81,7 @@ export class GlobalAuthGuard extends JwtAuthGuard {
             return undefined;
         }
     }
-
+    
     private getAllowedOrigins(): string[] {
         const fromEnv = process.env.CSRF_ALLOWED_ORIGINS;
         const defaults = ['https://plenna.me', 'https://app.plenna.me'];

@@ -1,5 +1,6 @@
 import { Injectable, Scope, Inject } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
+import { Role } from 'src/enum/role.enum';
 
 /**
  * Este serviço tem escopo de REQUISIÇÃO. Uma nova instância é criada para cada
@@ -16,7 +17,7 @@ export class AuthContextService {
     /**
      * Retorna o payload do usuário que foi anexado à requisição pelo AuthGuard.
      */
-    getUser(): { id: number; username: string; role: string, clientId: number } {
+    getUser(): { id: number; username: string; role: Role, clientId: number } {
         return this.request.user;
     }
 
@@ -34,7 +35,7 @@ export class AuthContextService {
         return this.request.user?.clientId;
     }
 
-    getRole(): string {
+    getRole(): Role {
         return this.request.user?.role;
     }
 }

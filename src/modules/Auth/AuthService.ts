@@ -154,7 +154,7 @@ export class AuthService {
             await this.repository.saveRefreshToken(refreshTokenModel, metadata);
 
             return { accessToken: newAccessToken, newRefreshToken };
-        } catch (err) {
+        } catch {
             this.logger.warn('Falha no refresh do token.');
             throw new UnauthorizedException();
         }

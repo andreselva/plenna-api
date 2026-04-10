@@ -39,7 +39,7 @@ export default class RevenuesRepository extends BaseRepository<Revenue> {
 
     async deleteRevenue(id: number) {
         const query = `UPDATE revenue SET status = ? WHERE id = ? AND clientId = ?`;
-        await this.database.execute(query, [RevenueStatus.CANCELLED, id, this.authContext.getClientId()]);
+        await this.database.execute(query, [RevenueStatus.CANCELED, id, this.authContext.getClientId()]);
     }
 
     async searchForRelatedInstallments(consideredId: number, revenueId: number = 0): Promise<Revenue[]> {

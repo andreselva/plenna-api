@@ -28,7 +28,7 @@ const VALID_TRANSITIONS: Record<ChargeStatus, ChargeStatus[]> = {
     [ChargeStatus.AWAITING_PAYMENT]: [ChargeStatus.PAID, ChargeStatus.EXPIRED, ChargeStatus.CANCELED],
     [ChargeStatus.PAID]: [],
     [ChargeStatus.FAILED]: [],
-    [ChargeStatus.CANCELED]: [ChargeStatus.DRAFT],
+    [ChargeStatus.CANCELED]: [],
     [ChargeStatus.EXPIRED]: [],
 };
 
@@ -126,8 +126,8 @@ export class ChargesService {
             await this.repository.updateStatus(chargeId, ChargeStatus.CANCELED);
             charge.status = ChargeStatus.CANCELED;
 
-            await this.events.logEvent(charge, ChargesEventsEnum.CHARGE_CANCELLED);
-            await this.registerChargeFinancialEvent(charge, FinancialEventsEnum.CHARGE_CANCELLED);
+            await this.events.logEvent(charge, ChargesEventsEnum.CHARGE_CANCELED);
+            await this.registerChargeFinancialEvent(charge, FinancialEventsEnum.CHARGE_CANCELED);
             await this.syncRevenueStatus(charge, RevenueStatus.PENDING, null);
 
             return charge;

@@ -68,7 +68,7 @@ export class LedgerResolver {
             case FinancialEventsEnum.REVENUE_RECEIVED:
             case FinancialEventsEnum.TRANSFER_POSTED:
             case FinancialEventsEnum.CHARGE_PAID:
-            case FinancialEventsEnum.CHARGE_CANCELLED:
+            case FinancialEventsEnum.CHARGE_CANCELED:
             case FinancialEventsEnum.CHARGE_EXPIRED:
             case FinancialEventsEnum.EXPENSE_RECOGNIZED:
                 return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
@@ -86,7 +86,7 @@ export class LedgerResolver {
     defineDestinationLiquidity(event: FinancialEvents): boolean {
         const nonLiquidEvents = [
             FinancialEventsEnum.CHARGE_GENERATED,
-            FinancialEventsEnum.CHARGE_CANCELLED,
+            FinancialEventsEnum.CHARGE_CANCELED,
             FinancialEventsEnum.CHARGE_EXPIRED,
             FinancialEventsEnum.REVENUE_RECOGNIZED,
             FinancialEventsEnum.EXPENSE_RECOGNIZED,

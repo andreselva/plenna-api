@@ -31,7 +31,7 @@ export class ExpensesRepository extends BaseRepository<Expense> {
 
     async deleteExpense(id: number) {
         const query = `UPDATE expense SET status = ? WHERE id = ? AND clientId = ?`;
-        await this.database.execute(query, [ExpenseStatus.CANCELLED, id, this.authContext.getClientId()]);
+        await this.database.execute(query, [ExpenseStatus.CANCELED, id, this.authContext.getClientId()]);
     }
 
     async searchForRelatedInstallments(consideredId: number, expenseId: number = 0): Promise<Expense[]> {

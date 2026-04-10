@@ -17,7 +17,7 @@ export class Migration20260408_01_AdicionaEventosFinanceirosLedger implements IM
                     'REVENUE_RECEIVED',
                     'CHARGE_GENERATED',
                     'CHARGE_PAID',
-                    'CHARGE_CANCELLED',
+                    'CHARGE_CANCELED',
                     'CHARGE_EXPIRED',
                     'CHARGE_REFUNDED',
                     'REVENUE_RECOGNIZED',

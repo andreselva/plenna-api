@@ -100,7 +100,7 @@ export default class DateHelper {
         return months;
     }
 
-    static getYearAndMonth(date: string) {
+    static getYearAndMonth(date: string): { yearAndMonth: string, month: number } {
         const dt = DateTime.fromISO(date, { zone: "America/Sao_Paulo" });
 
         return {

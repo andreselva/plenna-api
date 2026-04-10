@@ -1,0 +1,9 @@
+export enum ChargeStatus {
+    DRAFT = 'DRAFT',
+    PROCESSING = 'PROCESSING',
+    AWAITING_PAYMENT = 'AWAITING_PAYMENT',
+    PAID = 'PAID',
+    FAILED = 'FAILED',
+    CANCELED = 'CANCELED',
+    EXPIRED = 'EXPIRED'
+}

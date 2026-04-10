@@ -194,6 +194,30 @@ interface AppointmentJobData<TConfig = unknown> {
 
 ---
 
+## Contexto multi-tenant
+
+O worker (`appointments.worker.ts`) chama `authContext.runWithContext({ clientId: job.data.clientId, ... })` antes de despachar para o handler. Isso garante que, dentro de todo `execute()`, o `AuthContextService` (e o `WorkerAuthContextService`) retornam o `clientId` correto para aquele job.
+
+**Consequências práticas:**
+
+- Repositórios e serviços que injetam `AuthContextService` podem chamar `getClientId()` diretamente — o contexto já está correto. Não é necessário passar `clientId` como parâmetro.
+- Um agendamento **nunca** deve processar dados de múltiplos clientes em uma única execução. O job é sempre escopado a um tenant; se múltiplos tenants precisam executar, cada um tem seu próprio job agendado.
+
+```typescript
+// CORRETO — AuthContextService já retorna o clientId do job
+async loadItems(): Promise<Item[]> {
+  const query = 'SELECT * FROM items WHERE clientId = ?';
+  return this.database.select(query, [this.authContext.getClientId()]);
+}
+
+// ERRADO — varre todos os tenants, ignora o escopo do job
+async loadItems(): Promise<Item[]> {
+  return this.database.select('SELECT * FROM items', []);
+}
+```
+
+---
+
 ## Persistência de configuração
 
 As configurações por tenant são salvas na tabela `appointment_settings` pelo `AppointmentSettingsService`. O campo `config` é serializado como JSON. O `AppointmentsService` lida com isso automaticamente via `updateStatus()` — o appointment em si não precisa fazer esse controle.

@@ -7,7 +7,7 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 @Injectable()
 export default class CategoriesRepository extends BaseRepository<Category>{
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext)
+        super(database, authContext, Category)
     }
 
     /**
@@ -16,7 +16,7 @@ export default class CategoriesRepository extends BaseRepository<Category>{
     async getCategories(): Promise<Category[]> {
         const query = `SELECT * FROM category WHERE clientId = ? AND kind = 'C'`;
         const rows = await this.database.select(query, [this.authContext.getClientId()]);
-        return this.extractToEntity(rows, Category)
+        return this.extractToEntity(rows)
     }
 
     /**
@@ -25,7 +25,7 @@ export default class CategoriesRepository extends BaseRepository<Category>{
     async getSubcategoriesByParentId(parentId: number): Promise<Category[]> {
         const query = `SELECT * FROM category WHERE clientId = ? AND kind = 'S' AND parentId = ?`
         const rows = await this.database.select(query, [this.authContext.getClientId(), parentId]);
-        return this.extractToEntity(rows, Category);
+        return this.extractToEntity(rows);
     }
 
     /**

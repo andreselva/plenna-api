@@ -19,4 +19,6 @@ export default interface IExpenseRow {
     clientId: number;
     idSubcategory: number;
     idBankAccount: number;
+    customerId: number;
+    paymentMethodId: number;
 }

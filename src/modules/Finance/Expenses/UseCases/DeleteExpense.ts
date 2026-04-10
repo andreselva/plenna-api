@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { ExpensesRepository } from "../ExpensesRepository";
-import PeriodoDTO from "src/DTOs/PeriodoDTO";
 
 @Injectable()
 export class DeleteExpense {

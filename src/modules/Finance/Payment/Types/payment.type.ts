@@ -4,4 +4,5 @@ export enum PaymentType {
     REVENUE = 'revenue',
     TRANSFER = 'transfer',
     ACCOUNT_OPENING = 'account_opening',
+    CHARGE = 'charge',
 }

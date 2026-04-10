@@ -54,4 +54,12 @@ export class RevenueDTO {
     @IsOptional()
     @IsInt({ message: 'Invalid ID!' })
     id: number;
+
+    @IsOptional()
+    @IsNumber({}, { message: 'Invalid customer ID!' })
+    customerId: number;
+
+    @IsOptional()
+    @IsInt({ message: 'Invalid payment method ID!' })
+    paymentMethodId: number;
 }

@@ -7,7 +7,7 @@ import Payment from "src/EntityModels/Payment";
 @Injectable()
 export class PaymentRepository extends BaseRepository<Payment> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext);
+        super(database, authContext, Payment);
     }
     
     async savePayment(payment: Payment) {
@@ -33,7 +33,7 @@ export class PaymentRepository extends BaseRepository<Payment> {
                         WHERE clientId = ? AND payable_id = ? AND payable_type = ?`;
         const values = [this.authContext.getClientId(), entityId, entityType];
         const results = await this.database.select(query, values);
-        return this.extractToEntity(results, Payment);
+        return this.extractToEntity(results);
     }
 
     async updateReverseDate(paymentId: number, reverseDate: string) {
@@ -44,6 +44,6 @@ export class PaymentRepository extends BaseRepository<Payment> {
     async verifyReversePayment(id: number): Promise<Payment> {
         const query = `SELECT * FROM payment WHERE id = ? AND clientId = ?`;
         const result = await this.database.select(query, [id, this.authContext.getClientId()]);
-        return this.extractToEntity(result, Payment)[0];
+        return this.extractToEntity(result)[0];
     }
 }

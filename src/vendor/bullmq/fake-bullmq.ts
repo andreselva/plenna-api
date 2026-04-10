@@ -124,7 +124,7 @@ function computeNextCron(pattern: string, tz: string, from: DateTime): DateTime 
     return candidate;
   }
 
-  while (!allowedDays.has(candidate.weekday)) {
+  while (!allowedDays.has(safeNumber(candidate.weekday, 0))) {
     candidate = candidate.plus({ days: 1 }).set({
       hour: safeHour,
       minute,

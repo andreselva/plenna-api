@@ -3,6 +3,7 @@ import { FinancialEventsService } from './financial-events.service';
 import { AuthContextService } from 'src/modules/Auth/auth-context.service';
 import RedisService from 'src/modules/redis/redis-service';
 import { FinancialEventsRepository } from './financial-events.repository';
+import { LedgerEngine } from '../ledger/ledger.engine';
 
 describe('FinancialEventsService', () => {
   let service: FinancialEventsService;
@@ -31,6 +32,12 @@ describe('FinancialEventsService', () => {
             saveEvent: jest.fn(),
             getMaxSequenceNumber: jest.fn(),
             getLastEventHash: jest.fn(),
+          },
+        },
+        {
+          provide: LedgerEngine,
+          useValue: {
+            process: jest.fn(),
           },
         },
       ],

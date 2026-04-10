@@ -31,14 +31,13 @@ export class BankAccountsService {
         return this.database.transaction(async () => {
             const saved = await this.repository.save(entity, true);
             entity.id = saved.insertId;
-            const event = await this.financialEventsService.register({
+            await this.financialEventsService.register({
                 accountId: entity.id,
                 type: FinancialEventsEnum.OPENING_BALANCE,
                 amount: !HelperFunctions.isNullable(entity.initialBalance) ? entity.initialBalance : 0,
                 referenceType: PaymentType.ACCOUNT_OPENING,
                 referenceId: entity.id
             })
-             await this.ledgerEngine.process(event);
         })
     }
 

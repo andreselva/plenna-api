@@ -9,6 +9,7 @@ import { AuthContextService } from 'src/modules/Auth/auth-context.service';
 import RedisService from 'src/modules/redis/redis-service';
 import { PaymentType } from '../../Payment/Types/payment.type';
 import { RedisKeys } from 'src/modules/redis/redis.keys';
+import { LedgerEngine } from '../ledger/ledger.engine';
 
 export interface IFinancialEvent {
   accountId: number;
@@ -23,12 +24,14 @@ export class FinancialEventsService {
   constructor(
     private readonly authContext: AuthContextService,
     private readonly redisService: RedisService,
-    private readonly repository: FinancialEventsRepository
+    private readonly repository: FinancialEventsRepository,
+    private readonly ledgerEngine: LedgerEngine
   ) {}
 
   async register(data: IFinancialEvent): Promise<FinancialEvents> {
     const event = await this.buildEvent(data);
     const saved = await this.repository.saveEvent(event);
+    await this.ledgerEngine.process(saved);
     if (saved?.id > 0) {
       const rkPreviousHash = RedisKeys.previousHash(this.authContext.getClientId());
       await this.redisService.set(rkPreviousHash, saved.eventHash);

@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { BankAccountDTO } from './DTOs/bank-account.dto';
-import { Exception } from 'handlebars';
 import { BankAccountsService } from './bank-accounts.service';
 import { HelperFunctions } from 'src/Shared/Utils/HelperFunctions';
 
@@ -31,6 +30,6 @@ export class BankAccountsController {
             dto.id = Number(id);
             return await this.service.updateBankAccount(dto);
         }
-        throw new Exception(`Invalid id to update bank account`);
+        throw new Error(`Invalid id to update bank account`);
     }
 }

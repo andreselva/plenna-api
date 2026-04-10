@@ -11,19 +11,19 @@ import DataMapper from "src/Shared/mapper/DataMapper";
 @Injectable()
 export default class RevenuesRepository extends BaseRepository<Revenue> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext);
+        super(database, authContext, Revenue);
     }   
     
     async getRevenues(periodo: PeriodoDTO): Promise<Revenue[]> {
         const query = "SELECT * FROM revenue WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ? AND status NOT IN ('archived', 'cancelled');";
         const rows = await this.database.select(query, [this.authContext.getClientId(), periodo.start, periodo.end]);
-        return this.extractToEntity(rows, Revenue);
+        return this.extractToEntity(rows);
     }
 
     async getRevenueById(id: number): Promise<Revenue> {
         const query = `SELECT * FROM revenue WHERE clientId = ? AND id = ?`;
         const result = await this.database.select(query, [this.authContext.getClientId(), id]);
-        return this.extractToEntity(result, Revenue)[0];
+        return this.extractToEntity(result)[0];
     }
 
     async saveRevenue(revenue: Revenue): Promise<Revenue> {
@@ -39,7 +39,7 @@ export default class RevenuesRepository extends BaseRepository<Revenue> {
 
     async deleteRevenue(id: number) {
         const query = `UPDATE revenue SET status = ? WHERE id = ? AND clientId = ?`;
-        await this.database.execute(query, [RevenueStatus.CANCELLED, id, this.authContext.getClientId()]);
+        await this.database.execute(query, [RevenueStatus.CANCELED, id, this.authContext.getClientId()]);
     }
 
     async searchForRelatedInstallments(consideredId: number, revenueId: number = 0): Promise<Revenue[]> {
@@ -54,7 +54,7 @@ export default class RevenuesRepository extends BaseRepository<Revenue> {
         query += " ORDER BY id ASC";
     
         const rows = await this.database.select(query, params);
-        return this.extractToEntity(rows, Revenue);
+        return this.extractToEntity(rows);
     }
 
     async getTotalPayments(id: number): Promise<Payment[]> {

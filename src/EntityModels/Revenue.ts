@@ -20,12 +20,10 @@ export default class Revenue extends EntityModel implements IEntity {
     public hasInstallments: boolean = false;
     public status: RevenueStatus = RevenueStatus.PENDING;
     public totalPaid: number = 0;
+    public customerId: number = 0;
+    public paymentMethodId: number = 0;
 
     public static ignoredProperties: string[] = ['totalPaid'];
-
-    constructor() {
-        super();
-    }
 
     static fromEntity(entity: Revenue) {
         const newRevenue = new Revenue();
@@ -47,6 +45,8 @@ export default class Revenue extends EntityModel implements IEntity {
         revenue.value = dto.value;
         revenue.status = dto.status;
         revenue.id = dto.id ?? 0;
+        revenue.customerId = dto.customerId ?? 0;
+        revenue.paymentMethodId = dto.paymentMethodId ?? 0;
         return revenue;
     }
 
@@ -65,6 +65,8 @@ export default class Revenue extends EntityModel implements IEntity {
         revenue.hasInstallments = Boolean(row.hasInstallments);
         revenue.status = row.status;
         revenue.clientId = row.clientId ?? 0;
+        revenue.customerId = row.customerId ?? 0;
+        revenue.paymentMethodId = row.paymentMethodId ?? 0;
         return revenue;
     }
 

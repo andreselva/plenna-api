@@ -18,6 +18,7 @@ export default class CreditCardStatementsRepository {
                                 JOIN
                             bank_account ba ON ba.id = e.idCreditCard
                             WHERE e.invoiceDueDate >= ? AND e.invoiceDueDate <= ?
+                            AND e.status NOT IN ('cancelled', 'reversed', 'archived')
                         GROUP BY 2
                         ORDER BY value DESC`;
         const rows = await this.database.select(query, [args.startDate, args.endDate]) as CreditCardStatementsDTO[];

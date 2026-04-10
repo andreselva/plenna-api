@@ -20,6 +20,7 @@ export class ExpensesByCategoryRepository {
                             category c ON c.id = e.idCategory AND c.clientId = e.clientId
                             WHERE e.clientId = ? 
                                 AND e.invoiceDueDate >= ? AND e.invoiceDueDate <= ?
+                                AND e.status NOT IN ('cancelled', 'reversed', 'archived')
                         GROUP BY 1
                         ORDER BY value DESC
                         LIMIT 5`;

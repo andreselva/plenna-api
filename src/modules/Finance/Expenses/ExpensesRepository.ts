@@ -11,13 +11,13 @@ import DataMapper from "src/Shared/mapper/DataMapper";
 @Injectable()
 export class ExpensesRepository extends BaseRepository<Expense> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext);
+        super(database, authContext, Expense);
     }
     
     async getExpenses(periodo: PeriodoDTO): Promise<Expense[]> {
         const query = "SELECT * FROM expense WHERE clientId = ? AND invoiceDueDate >= ? AND invoiceDueDate <= ? AND status NOT IN ('archived', 'cancelled');";
         const rows = await this.database.select(query, [this.authContext.getClientId(), periodo.start, periodo.end]);
-        return this.extractToEntity(rows, Expense);
+        return this.extractToEntity(rows);
     }
 
     async saveExpense(expense: Expense): Promise<Expense> {
@@ -31,7 +31,7 @@ export class ExpensesRepository extends BaseRepository<Expense> {
 
     async deleteExpense(id: number) {
         const query = `UPDATE expense SET status = ? WHERE id = ? AND clientId = ?`;
-        await this.database.execute(query, [ExpenseStatus.CANCELLED, id, this.authContext.getClientId()]);
+        await this.database.execute(query, [ExpenseStatus.CANCELED, id, this.authContext.getClientId()]);
     }
 
     async searchForRelatedInstallments(consideredId: number, expenseId: number = 0): Promise<Expense[]> {
@@ -43,7 +43,7 @@ export class ExpensesRepository extends BaseRepository<Expense> {
         }
         query += " ORDER BY id ASC";
         const rows = await this.database.select(query, params);
-        return this.extractToEntity(rows, Expense);
+        return this.extractToEntity(rows);
     }
 
     async updateStatus(id: number, status: ExpenseStatus, paymentDate: string | null) {
@@ -63,7 +63,7 @@ export class ExpensesRepository extends BaseRepository<Expense> {
     async getExpenseById(id: number) {
         const query = "SELECT * FROM expense WHERE clientId = ? AND id = ?";
         const result = await this.database.select(query, [this.authContext.getClientId(), id]);
-        return this.extractToEntity(result, Expense)[0] ?? null;
+        return this.extractToEntity(result)[0] ?? null;
     }
 
     async archive(id: number) {

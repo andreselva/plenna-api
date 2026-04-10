@@ -14,13 +14,13 @@ import Payment from "src/EntityModels/Payment";
 @Injectable()
 export default class InvoicesRepository extends BaseRepository<Invoice>{
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext);
+        super(database, authContext, Invoice);
     }
     
     async getInvoices(periodo: PeriodoDTO): Promise<Invoice[]> {
         const query = "SELECT * FROM invoices WHERE clientId = ? AND dueDate >= ? AND dueDate <= ? ";
         const rows = await this.database.select(query, [this.authContext.getClientId(), periodo.start, periodo.end]);
-        return this.extractToEntity(rows, Invoice);
+        return this.extractToEntity(rows);
     }
 
     async createInvoice(invoice: Invoice) {
@@ -35,7 +35,7 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
     async searchInvoice(idBankAccount: number) {
         const query = "SELECT * FROM invoices WHERE clientId = ? AND idBankAccount = ? ORDER BY id DESC LIMIT 1";
         const result = await this.database.select(query, [this.authContext.getClientId(), idBankAccount]);
-        return this.extractToEntity(result, Invoice)[0] ?? null;
+        return this.extractToEntity(result)[0] ?? null;
     }
 
     async getRelatedInvoiceBankAccount(idBankAccount: number) {
@@ -76,9 +76,7 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
     }
 
     async getById(id: number): Promise<Invoice> {
-        const query = "SELECT * FROM invoices WHERE clientId = ? AND id = ?";
-        const result = await this.database.select(query, [this.authContext.getClientId(), id]);
-        return this.extractToEntity(result, Invoice)[0] ?? [];
+       return await this.loadById(id)[0];
     }
 
     async getTotalInvoiceValue(idInvoice: number): Promise<number> {

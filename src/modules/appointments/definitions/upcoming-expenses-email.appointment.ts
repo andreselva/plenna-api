@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Recurrence } from 'src/enum/recurrence.enum';
 import { ExecutableAppointment } from '../executable-appointment.base';
-import { UpcomingExpensesEmailService } from '../services/upcoming-expenses-email.service';
-import { AppointmentJobData } from '../types/appointment-job-data.type';
 import { UpcomingExpensesService } from '../services/upcoming-expenses.service';
+import { UpcomingExpensesEmailService } from '../services/upcoming-expenses-email.service';
 import AppointmentsRepository from '../appointments.repository';
+import { AppointmentJobData } from '../types/appointment-job-data.type';
 
 export interface UpcomingExpensesEmailConfig {
   days?: number;

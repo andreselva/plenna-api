@@ -14,4 +14,6 @@ export default interface IRevenueRow {
     status: RevenueStatus;
     clientId: number;
     idBankAccount: number;
+    customerId: number;
+    paymentMethodId: number;
 }

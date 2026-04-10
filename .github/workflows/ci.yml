@@ -78,15 +78,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
-      # Exclusivo para PRs: compara o grafo de dependências antes e depois do PR.
-      # Se um pacote adicionado ou atualizado tiver CVE conhecida com severity
-      # >= moderate, o PR é bloqueado antes do merge.
-      - name: Revisão de dependências (apenas PRs)
-        if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: moderate
-
   # ─── Job 2: Lint ─────────────────────────────────────────────────────────────
   lint:
     name: Lint

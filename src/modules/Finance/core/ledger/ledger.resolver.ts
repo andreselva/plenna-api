@@ -74,8 +74,6 @@ export class LedgerResolver {
                 return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
                 
             case FinancialEventsEnum.PAYMENT_POSTED:
-            case FinancialEventsEnum.CHARGE_PROCESSING:
-            case FinancialEventsEnum.CHARGE_AWAITING_PAYMENT:
             case FinancialEventsEnum.CHARGE_GENERATED:
             case FinancialEventsEnum.REVENUE_RECOGNIZED:
             case FinancialEventsEnum.CHARGE_REFUNDED:
@@ -90,8 +88,6 @@ export class LedgerResolver {
             FinancialEventsEnum.CHARGE_GENERATED,
             FinancialEventsEnum.CHARGE_CANCELLED,
             FinancialEventsEnum.CHARGE_EXPIRED,
-            FinancialEventsEnum.CHARGE_PROCESSING,
-            FinancialEventsEnum.CHARGE_AWAITING_PAYMENT,
             FinancialEventsEnum.REVENUE_RECOGNIZED,
             FinancialEventsEnum.EXPENSE_RECOGNIZED,
         ];

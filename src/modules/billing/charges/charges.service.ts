@@ -101,8 +101,6 @@ export class ChargesService {
             charge.status = ChargeStatus.PROCESSING;
 
             await this.events.logEvent(charge, ChargesEventsEnum.CHARGE_PROCESSING);
-            await this.registerChargeFinancialEvent(charge, FinancialEventsEnum.CHARGE_PROCESSING);
-            await this.syncRevenueStatus(charge, RevenueStatus.PENDING, null);
 
             return charge;
         })
@@ -116,8 +114,6 @@ export class ChargesService {
             charge.status = ChargeStatus.AWAITING_PAYMENT;
 
             await this.events.logEvent(charge, ChargesEventsEnum.CHARGE_AWAITING_PAYMENT);
-            await this.registerChargeFinancialEvent(charge, FinancialEventsEnum.CHARGE_AWAITING_PAYMENT);
-            await this.syncRevenueStatus(charge, RevenueStatus.PENDING, null);
 
             return charge;
         })

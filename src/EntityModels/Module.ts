@@ -46,7 +46,7 @@ export default class Module extends EntityModel implements IEntity {
         module.group = row.group;
         module.subgroup = row.subgroup;
         module.displayName = row.displayName;
-        module.hasAccess = Boolean(row.hasAccess) ?? null;
+        module.hasAccess = Boolean(row.hasAccess);
         return module;
     }
 

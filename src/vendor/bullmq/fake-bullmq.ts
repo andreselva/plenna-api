@@ -46,25 +46,44 @@ interface RepeatableJob<DataType = any> {
 
 const queues = new Map<string, Queue<any, any>>();
 
+function safeNumber(value: unknown, fallback = 0): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function parseNumber(value: string | undefined, fallback = 0): number {
+  if (value == null) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 function cronDaysToLuxonDays(expression: string | undefined): Set<number> | null {
   if (!expression || expression === '*') {
     return null;
   }
 
   const values = new Set<number>();
+
   for (const part of expression.split(',')) {
     if (!part) continue;
+
     if (part.includes('-')) {
       const [startStr, endStr] = part.split('-');
-      const start = Number(startStr);
-      const end = Number(endStr);
+      const start = parseNumber(startStr, NaN);
+      const end = parseNumber(endStr, NaN);
+
       if (Number.isNaN(start) || Number.isNaN(end)) continue;
+
       for (let i = start; i <= end; i += 1) {
         const normalized = i === 0 ? 7 : i;
         values.add(normalized);
       }
     } else {
-      const normalized = Number(part) === 0 ? 7 : Number(part);
+      const parsed = parseNumber(part, NaN);
+      const normalized = parsed === 0 ? 7 : parsed;
+
       if (!Number.isNaN(normalized)) {
         values.add(normalized);
       }
@@ -75,30 +94,43 @@ function cronDaysToLuxonDays(expression: string | undefined): Set<number> | null
 }
 
 function computeNextCron(pattern: string, tz: string, from: DateTime): DateTime {
+  void tz;
+
   const [minuteExp, hourExp, , , dayOfWeekExp] = pattern.split(' ', 5);
-  const minute = Number(minuteExp);
-  const hour = hourExp === '*' ? null : Number(hourExp);
+
+  const minute = parseNumber(minuteExp, 0);
+  const hour = hourExp === '*' ? null : parseNumber(hourExp, 0);
   const allowedDays = cronDaysToLuxonDays(dayOfWeekExp);
 
   if (hour === null) {
-    // Only supports expressions like "0 * * * *" (top of every hour)
-    const base = from.plus({ hours: 1 }).set({ minute, second: 0, millisecond: 0 });
-    return base;
+    return from.plus({ hours: 1 }).set({
+      minute,
+      second: 0,
+      millisecond: 0,
+    });
   }
 
+  const safeHour: number = hour;
+
   let candidate = from.set({ second: 0, millisecond: 0 });
-  if (candidate.minute > minute || (candidate.minute === minute && candidate.hour >= hour)) {
+
+  if (candidate.minute > minute || (candidate.minute === minute && candidate.hour >= safeHour)) {
     candidate = candidate.plus({ days: 1 });
   }
 
-  candidate = candidate.set({ hour, minute, second: 0, millisecond: 0 });
+  candidate = candidate.set({ hour: safeHour, minute, second: 0, millisecond: 0 });
 
   if (!allowedDays || allowedDays.size === 0) {
     return candidate;
   }
 
-  while (!allowedDays.has(candidate.weekday)) {
-    candidate = candidate.plus({ days: 1 }).set({ hour, minute, second: 0, millisecond: 0 });
+  while (!allowedDays.has(safeNumber(candidate.weekday, 0))) {
+    candidate = candidate.plus({ days: 1 }).set({
+      hour: safeHour,
+      minute,
+      second: 0,
+      millisecond: 0,
+    });
   }
 
   return candidate;
@@ -108,7 +140,6 @@ export class Queue<DataType = any, NameType extends string = string> {
   public readonly name: string;
 
   private readonly repeatableJobs = new Map<string, RepeatableJob<DataType>>();
-
   private readonly workers = new Set<Worker<DataType, NameType>>();
 
   private constructor(name: string) {
@@ -137,38 +168,61 @@ export class Queue<DataType = any, NameType extends string = string> {
     }
 
     if (opts.repeat?.every) {
-      const every = Number(opts.repeat.every ?? 0);
-      if (!Number.isFinite(every) || every <= 0) {
+      const every = safeNumber(opts.repeat.every, 0);
+
+      if (every <= 0) {
         throw new Error('Repeat interval must be greater than zero.');
       }
+
       const controller: RepeatInterval = {
         type: 'interval',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         timer: setInterval(() => {
           void this.dispatch(job);
-        }, Number(every)),
+        }, every),
       };
 
-      this.repeatableJobs.set(jobId, { job, repeat: opts.repeat, controller, next: new Date(Date.now() + every) });
-      // Execute immediately the first time
+      this.repeatableJobs.set(jobId, {
+        job,
+        repeat: opts.repeat,
+        controller,
+        next: new Date(safeNumber(Date.now() + every, Date.now())),
+      });
+
       void this.dispatch(job);
     } else if (opts.repeat?.pattern) {
       const tz = opts.repeat.tz ?? 'UTC';
+
       const scheduleNext = () => {
         const now = DateTime.now().setZone(tz);
         const next = computeNextCron(opts.repeat!.pattern!, tz, now);
-        const diffMs = next.diff(now, 'milliseconds').milliseconds ?? 0;
+
+        const diff = next.diff(now, 'milliseconds');
+        const rawMilliseconds: unknown = diff.milliseconds;
+        const diffMs = typeof rawMilliseconds === 'number' ? rawMilliseconds : 0;
         const delay = Math.max(Math.floor(diffMs), 0);
+
         const controller: RepeatInterval = {
           type: 'timeout',
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           timer: setTimeout(() => {
-            this.repeatableJobs.set(jobId, { job, repeat: opts.repeat!, controller, next: next.toJSDate() });
+            this.repeatableJobs.set(jobId, {
+              job,
+              repeat: opts.repeat!,
+              controller,
+              next: next.toJSDate(),
+            });
+
             void this.dispatch(job).finally(scheduleNext);
           }, delay),
         };
-        this.repeatableJobs.set(jobId, { job, repeat: opts.repeat!, controller, next: next.toJSDate() });
+
+        this.repeatableJobs.set(jobId, {
+          job,
+          repeat: opts.repeat!,
+          controller,
+          next: next.toJSDate(),
+        });
       };
+
       scheduleNext();
     } else {
       setTimeout(() => {
@@ -191,6 +245,7 @@ export class Queue<DataType = any, NameType extends string = string> {
     if (!jobId) {
       return;
     }
+
     const existing = this.repeatableJobs.get(jobId);
     if (existing && existing.job.name === name) {
       if (repeat.pattern === existing.repeat.pattern || repeat.every === existing.repeat.every) {
@@ -217,7 +272,7 @@ export class Queue<DataType = any, NameType extends string = string> {
       id: job.id,
       key: job.id,
       name: job.name,
-      next: next ? next.getTime() : null,
+      next: next ? safeNumber(next.getTime(), 0) : null,
     }));
   }
 
@@ -250,6 +305,7 @@ export class Queue<DataType = any, NameType extends string = string> {
 
 export class QueueEvents {
   constructor(public readonly name: string) {}
+
   async close() {
     return;
   }
@@ -267,7 +323,6 @@ export class Worker<DataType = any, NameType extends string = string> {
     try {
       await this.processor(job);
     } catch (error) {
-       
       console.error(`Worker for queue "${this.queue.name}" failed:`, error);
     }
   }
@@ -290,4 +345,3 @@ export class QueueScheduler {
     return;
   }
 }
-

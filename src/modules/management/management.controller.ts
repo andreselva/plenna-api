@@ -16,7 +16,7 @@ export class ManagementController {
 
     @Public() //Público para a rota de novo cadastro de cliente/usuário
     @Post('register-user')
-    async register(@Body() user: UserDTO) {
+    register() { //@Body() user: UserDTO -> quando subir produção real, inserir no parâmetro
         throw new UnauthorizedException();
         // return await this.service.registerUser(user)
     }

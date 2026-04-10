@@ -1,4 +1,4 @@
-import { Dependencies, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import CreateRevenue from "./UseCases/CreateRevenue";
 import GetRevenues from "./UseCases/GetRevenues";
 import { RevenueDTO } from "./DTOs/RevenueDTO";
@@ -26,7 +26,9 @@ export default class RevenuesService {
             revenue.hasInstallments = true;
         }
         
-        return await this.createRevenueUseCase.execute(revenue, periodo)
+        return this.database.transaction(async () => {
+            return await this.createRevenueUseCase.execute(revenue, periodo)
+        })
     }
 
     async deleteRevenue(id: string, deleteInstallments: string, sourceAccountId: string, periodo: PeriodoDTO) {

@@ -1,4 +1,4 @@
-import { Injectable, Query } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import MySQLDatabase from "../Config/Database/MySQLDatabase";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
@@ -11,7 +11,7 @@ import { Role } from "src/enum/role.enum";
 @Injectable()
 export default class ClientModulesRepository extends BaseRepository<ClientModules> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext)
+        super(database, authContext, ClientModules)
     }
 
     async getModulesByUserId(): Promise<Module[]> {

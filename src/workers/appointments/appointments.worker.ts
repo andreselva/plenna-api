@@ -55,8 +55,8 @@ async function bootstrap() {
 
   worker.on('failed', (job, err) => {
     logger.error(
-      `[FAILED EVENT] ${job?.name} -> ${job?.id}: ${(err as Error).message}`,
-      (err as Error).stack,
+      `[FAILED EVENT] ${job?.name} -> ${job?.id}: ${err.message}`,
+      err.stack,
     );
   });
 

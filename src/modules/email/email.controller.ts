@@ -1,6 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { EmailService } from './email.service';
-import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('email')
 export class EmailController {

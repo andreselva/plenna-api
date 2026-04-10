@@ -100,7 +100,7 @@ export default class DateHelper {
         return months;
     }
 
-    static getYearAndMonth(date: string) {
+    static getYearAndMonth(date: string): { yearAndMonth: string, month: number } {
         const dt = DateTime.fromISO(date, { zone: "America/Sao_Paulo" });
 
         return {
@@ -123,5 +123,9 @@ export default class DateHelper {
 
     static getCurrentISODate(): string {
         return DateTime.local({ zone: "America/Sao_Paulo" }).toFormat("yyyy-MM-dd");
+    }
+
+    static convertToDateTime(date: string): DateTime {
+        return DateTime.fromISO(date, { zone: "America/Sao_Paulo" });
     }
 }

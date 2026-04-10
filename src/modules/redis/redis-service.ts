@@ -6,9 +6,12 @@ import { REDIS_CONNECTION } from "./redis.tokens";
 export default class RedisService {
     constructor(@Inject(REDIS_CONNECTION) private readonly redis: Redis) {}
 
-    async set(key: string, value: any, timeLimit: number = 0) {
-        value = typeof value === 'string' ? value : JSON.stringify(value);
-        await this.redis.set(key, value);
+    async set(key: string, value: unknown, timeLimit: number = 0): Promise<void> {
+        const serializedValue: string =
+            typeof value === 'string' ? value : JSON.stringify(value);
+
+        await this.redis.set(key, serializedValue);
+
         if (timeLimit > 0) {
             await this.redis.expire(key, timeLimit);
         }

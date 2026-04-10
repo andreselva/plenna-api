@@ -4,9 +4,11 @@ import { Injectable } from "@nestjs/common";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
 import { Expense } from "src/EntityModels/Expense";
-import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import AssociateExpensesToInvoiceUseCase from "../../Invoices/UseCases/AssociateExpensesToInvoice";
 import InstallmentsCalculator from "../../InstallmentsServices/InstallmentsCalculator";
+import { FinancialEventsService } from "../../core/financial-events/financial-events.service";
+import { FinancialEventsEnum } from "src/enum/financial-events.enum";
+import { PaymentType } from "../../Payment/Types/payment.type";
 
 @Injectable()
 export class CreateExpense {
@@ -14,7 +16,7 @@ export class CreateExpense {
         private readonly repository: ExpensesRepository,
         private readonly getExpensesUseCase: GetExpenses,
         private readonly associateExpensesToInvoiceUC: AssociateExpensesToInvoiceUseCase,
-        private readonly authContext: AuthContextService
+        private readonly financialEvents: FinancialEventsService,
     ) { }
 
     async execute(expense: ExpenseDTO, periodo: PeriodoDTO) {
@@ -23,6 +25,7 @@ export class CreateExpense {
             entity.idCreditCard = 0;
         }
         const firstExpense = await this.repository.saveExpense(entity);
+        await this.registerExpenseRecognized(firstExpense);
 
         //Só entra nesse if se houver uma quantidade de parcelas informadas e se 
         // o tipo da parcela for P (parcelada), ou se o tipo for F (fixa).
@@ -38,8 +41,9 @@ export class CreateExpense {
             expensesCreated.push(firstExpense);
             for (let i = 0; i < otherInstallments.length; i++) {
                 otherInstallments[i].sourceAccountId = firstExpense.id; //Salva o id da conta de origem para associar as parcelas.
-                //Cria as parcelas no banco de dados e as salva em um novo array para retornar pro front.
-                expensesCreated.push(await this.repository.saveExpense(otherInstallments[i]));
+                const installment = await this.repository.saveExpense(otherInstallments[i]);
+                await this.registerExpenseRecognized(installment);
+                expensesCreated.push(installment);
             }
 
             //Associa à fatura
@@ -54,5 +58,18 @@ export class CreateExpense {
         }
 
         return await this.getExpensesUseCase.execute(periodo)
+    }
+
+    private async registerExpenseRecognized(expense: Expense): Promise<void> {
+        if (!expense?.id || !expense.idBankAccount || expense.idBankAccount <= 0) {
+            return;
+        }
+        await this.financialEvents.register({
+            accountId: expense.idBankAccount,
+            type: FinancialEventsEnum.EXPENSE_RECOGNIZED,
+            amount: expense.value,
+            referenceType: PaymentType.EXPENSE,
+            referenceId: expense.id,
+        });
     }
 }

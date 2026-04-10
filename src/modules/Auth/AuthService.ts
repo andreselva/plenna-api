@@ -6,7 +6,27 @@ import PasswordHasher from 'src/Shared/Utils/Secutiry/PasswordHasher';
 import RefreshToken from 'src/EntityModels/RefreshToken';
 import { UsersService } from 'src/modules/management/Users/UserService';
 import TokenHasher from 'src/Shared/Utils/Secutiry/TokenHasher';
-import { AccessTokenPayload, AuthenticatedUser, RefreshTokenPayload } from './JwtPayloadInterface';
+
+type AuthUser = {
+    id: number;
+    username: string;
+    role: string;
+    clientId: number;
+    name: string;
+};
+
+type AccessTokenPayload = {
+    sub: number;
+    username: string;
+    role: string;
+    clientId: number;
+    name: string;
+};
+
+type RefreshTokenPayload = {
+    sub: number;
+    clientId: number;
+};
 
 @Injectable()
 export class AuthService {
@@ -24,12 +44,17 @@ export class AuthService {
         }
     }
 
-    async generateTokens(user: AuthenticatedUser, metadata: RefreshTokenMetadata = {}): Promise<{ accessToken: string; refreshTokenGenerated: string }> {
+    async generateTokens(
+        user: AuthUser,
+        metadata: RefreshTokenMetadata = {}
+    ): Promise<{ accessToken: string; refreshTokenGenerated: string }> {
         const accessToken = this.generateToken(user);
         const refreshTokenGenerated = this.generateRefreshToken(user);
+
         const refreshToken = new RefreshToken();
-        refreshToken.idUser = Number(user.id);
+        refreshToken.idUser = user.id;
         refreshToken.refresh_token = await TokenHasher.hash(refreshTokenGenerated);
+
         const result = await this.repository.saveRefreshToken(refreshToken, metadata);
 
         if (!result.isSuccess) {
@@ -39,7 +64,7 @@ export class AuthService {
         return { accessToken, refreshTokenGenerated };
     }
 
-    generateToken(user: AuthenticatedUser): string {
+    generateToken(user: AuthUser): string {
         const payload: AccessTokenPayload = {
             sub: user.id,
             username: user.username,
@@ -48,35 +73,57 @@ export class AuthService {
             name: user.name,
         };
 
-        return this.jwtService.sign(payload, { secret: this.jwtSecret, expiresIn: '1h' });
+        return this.jwtService.sign(payload, {
+            secret: this.jwtSecret,
+            expiresIn: '1h',
+        });
     }
 
-    generateRefreshToken(user: Pick<AuthenticatedUser, 'id' | 'clientId'>): string {
-        const payload: RefreshTokenPayload = { sub: user.id, clientId: user.clientId };
-        return this.jwtService.sign(payload, { secret: this.refreshSecret, expiresIn: '7d' });
+    generateRefreshToken(user: AuthUser): string {
+        const payload: RefreshTokenPayload = {
+            sub: user.id,
+            clientId: user.clientId,
+        };
+
+        return this.jwtService.sign(payload, {
+            secret: this.refreshSecret,
+            expiresIn: '7d',
+        });
     }
 
     generateCsrfToken(): string {
         return randomBytes(32).toString('hex');
     }
 
-    async refreshAccessToken(refreshToken: string, metadata: RefreshTokenMetadata = {}) {
+    async refreshAccessToken(
+        refreshToken: string,
+        metadata: RefreshTokenMetadata = {}
+    ): Promise<{ accessToken: string; newRefreshToken: string }> {
         try {
-            const decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(refreshToken, {
-                secret: this.refreshSecret,
-            });
+            const decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(
+                refreshToken,
+                {
+                    secret: this.refreshSecret,
+                }
+            );
 
-            if (!decoded?.sub) {
+            if (!decoded?.sub || !decoded?.clientId) {
                 throw new UnauthorizedException();
             }
 
-            const userId = Number(decoded.sub);
+            const userId = decoded.sub;
+            const clientId = decoded.clientId;
+
             const storedToken = await this.repository.findRefreshTokenByUserId(userId);
             if (!storedToken) {
                 throw new UnauthorizedException();
             }
 
-            const isRefreshTokenValid = await TokenHasher.compare(refreshToken, storedToken.refresh_token);
+            const isRefreshTokenValid = await TokenHasher.compare(
+                refreshToken,
+                storedToken.refresh_token
+            );
+
             if (!isRefreshTokenValid) {
                 await this.repository.deleteRefreshToken(userId);
                 throw new UnauthorizedException();
@@ -84,18 +131,26 @@ export class AuthService {
 
             await this.repository.updateRefreshTokenMetadata(userId, metadata);
 
-            const user = await this.userService.findUserById(String(decoded.sub), String(decoded.clientId));
+            const user = await this.userService.findUserById(userId, clientId);
             if (!user) {
                 throw new UnauthorizedException();
             }
 
-            const authUser = this.toAuthenticatedUser(user);
+            const authUser: AuthUser = {
+                id: Number(user.id),
+                username: String(user.username),
+                role: String(user.role),
+                clientId: Number(user.clientId),
+                name: String(user.name),
+            };
+
             const newAccessToken = this.generateToken(authUser);
             const newRefreshToken = this.generateRefreshToken(authUser);
 
             const refreshTokenModel = new RefreshToken();
             refreshTokenModel.idUser = authUser.id;
             refreshTokenModel.refresh_token = await TokenHasher.hash(newRefreshToken);
+
             await this.repository.saveRefreshToken(refreshTokenModel, metadata);
 
             return { accessToken: newAccessToken, newRefreshToken };
@@ -105,16 +160,23 @@ export class AuthService {
         }
     }
 
-    async validateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
+    async validateUser(username: string, password: string): Promise<AuthUser | null> {
         const userEntity = await this.userService.findByUsername(username);
+
         if (userEntity && (await PasswordHasher.compare(password, userEntity.password))) {
-            return this.toAuthenticatedUser(userEntity);
+            return {
+                id: Number(userEntity.id),
+                username: String(userEntity.username),
+                role: String(userEntity.role),
+                clientId: Number(userEntity.clientId),
+                name: String(userEntity.name),
+            };
         }
 
         return null;
     }
 
-    async getUserFromToken(token: string | undefined): Promise<AuthenticatedUser> {
+    async getUserFromToken(token: string | undefined): Promise<AuthUser> {
         if (!token) {
             throw new UnauthorizedException();
         }
@@ -124,9 +186,17 @@ export class AuthService {
                 throw new UnauthorizedException();
             }
 
-            const decoded = await this.jwtService.verifyAsync<AccessTokenPayload>(token, { secret: this.jwtSecret });
+            const decoded = await this.jwtService.verifyAsync<AccessTokenPayload>(token, {
+                secret: this.jwtSecret,
+            });
 
-            if (!decoded?.sub) {
+            if (
+                !decoded?.sub ||
+                !decoded?.username ||
+                !decoded?.role ||
+                !decoded?.clientId ||
+                !decoded?.name
+            ) {
                 throw new UnauthorizedException();
             }
 
@@ -134,41 +204,31 @@ export class AuthService {
                 id: Number(decoded.sub),
                 username: decoded.username,
                 role: decoded.role,
-                clientId: Number(decoded.clientId),
+                clientId: decoded.clientId,
                 name: decoded.name,
             };
-        } catch {
-            this.logger.warn('Erro ao verificar o token de acesso.');
+        } catch (error) {
+            console.error('Erro ao verificar o token:', error);
             throw new UnauthorizedException();
         }
     }
 
-    async revokeRefreshToken(refreshToken: string) {
+    async revokeRefreshToken(refreshToken: string): Promise<void> {
         try {
-            const decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(refreshToken, { secret: this.refreshSecret });
+            const decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(
+                refreshToken,
+                {
+                    secret: this.refreshSecret,
+                }
+            );
+
             if (!decoded?.sub) {
                 return;
             }
 
-            await this.repository.deleteRefreshToken(Number(decoded.sub));
-        } catch {
-            this.logger.warn('Falha ao decodificar refresh token para revogação.');
+            await this.repository.deleteRefreshToken(decoded.sub);
+        } catch (error) {
+            console.warn('Falha ao decodificar refresh token para revogação:', error);
         }
-    }
-
-    private toAuthenticatedUser(user: {
-        id: number;
-        username: string;
-        role: string;
-        clientId: number;
-        name: string;
-    }): AuthenticatedUser {
-        return {
-            id: Number(user.id),
-            username: user.username,
-            role: user.role,
-            clientId: Number(user.clientId),
-            name: user.name,
-        };
     }
 }

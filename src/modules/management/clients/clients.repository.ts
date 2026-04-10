@@ -7,7 +7,7 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 @Injectable()
 export default class ClientRepository extends BaseRepository<Client> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext);
+        super(database, authContext, Client);
     }
     
     async saveClient(client: Client) {

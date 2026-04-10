@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import ClientModulesRepository from './client-modules.repository';
 import { AuthContextService } from '../Auth/auth-context.service';
 import { Environment } from '../Config/Database/Environment';

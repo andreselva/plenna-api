@@ -5,17 +5,22 @@ import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import GetRevenues from "./GetRevenues";
 import Revenue from "src/EntityModels/Revenue";
 import InstallmentsCalculator from "../../InstallmentsServices/InstallmentsCalculator";
+import { FinancialEventsService } from "../../core/financial-events/financial-events.service";
+import { FinancialEventsEnum } from "src/enum/financial-events.enum";
+import { PaymentType } from "../../Payment/Types/payment.type";
 
 @Injectable()
 export default class CreateRevenue {
     constructor(
         private readonly revenueRepository: RevenuesRepository,
         private readonly getRevenuesUseCase: GetRevenues,
+        private readonly financialEvents: FinancialEventsService,
     ) { }
 
     async execute(dto: RevenueDTO, periodo: PeriodoDTO) {
         const entity = Revenue.fromDTO(dto);
         const revenueCreated = await this.revenueRepository.saveRevenue(entity);
+        await this.registerRevenueRecognized(revenueCreated);
 
         //Só entra nesse if se houver uma quantidade de parcelas informadas e se o tipo da parcela for P (parcelada) ou F (fixa).
         if (revenueCreated
@@ -25,7 +30,7 @@ export default class CreateRevenue {
             )
         ) {
             const otherInstallments = (new InstallmentsCalculator(
-                    revenueCreated.typeOfInstallments as 'P' | 'F',
+                    revenueCreated.typeOfInstallments,
                     revenueCreated.installments,
                     revenueCreated)
             ).getInstallments();
@@ -35,8 +40,9 @@ export default class CreateRevenue {
             revenuesCreated.push(revenueCreated);
             for (let i = 0; i < otherInstallments.length; i++) {
                 otherInstallments[i].sourceAccountId = revenueCreated.id;
-                //Cria as parcelas no banco de dados e as salva em um novo array para retornar pro front.
-                revenuesCreated.push(await this.revenueRepository.saveRevenue(otherInstallments[i]));
+                const installment = await this.revenueRepository.saveRevenue(otherInstallments[i]);
+                await this.registerRevenueRecognized(installment);
+                revenuesCreated.push(installment);
             }
 
         }
@@ -44,4 +50,16 @@ export default class CreateRevenue {
         return await this.getRevenuesUseCase.execute(periodo);
     }
 
+    private async registerRevenueRecognized(revenue: Revenue): Promise<void> {
+        if (!revenue?.id || !revenue.idBankAccount || revenue.idBankAccount <= 0) {
+            return;
+        }
+        await this.financialEvents.register({
+            accountId: revenue.idBankAccount,
+            type: FinancialEventsEnum.REVENUE_RECOGNIZED,
+            amount: revenue.value,
+            referenceType: PaymentType.REVENUE,
+            referenceId: revenue.id,
+        });
+    }
 }

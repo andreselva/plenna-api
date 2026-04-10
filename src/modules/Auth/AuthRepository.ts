@@ -24,7 +24,7 @@ export interface RefreshTokenRecord {
 @Injectable()
 export default class AuthRepository extends BaseRepository<RefreshToken>{
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext);
+        super(database, authContext, RefreshToken);
     }
 
     async saveRefreshToken(entity: RefreshToken, metadata: RefreshTokenMetadata = {}) {

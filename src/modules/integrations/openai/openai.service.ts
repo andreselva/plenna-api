@@ -1,11 +1,14 @@
 import OpenAI from "openai";
 
 export default class OpenAIService {
-    private client: OpenAI;
+    private _client: OpenAI | null = null;
     private standardModel = "gpt-5-nano";
 
-    constructor() {
-        this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    private get client(): OpenAI {
+        if (!this._client) {
+            this._client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        }
+        return this._client;
     }
 
     async gerarRelatorio(data: any) {

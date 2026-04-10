@@ -6,35 +6,43 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
+    if (!(exception instanceof HttpException)) {
+      const isUnknown = !(exception instanceof Error);
+      if (isUnknown) throw exception;
+    }
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    // SE o erro for uma instância de HttpException (400, 401, 403, 404, etc.)
+    const exceptionName = (exception as any)?.constructor?.name ?? 'UnknownException';
+
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
-      const errorResponse = exception.getResponse(); // Pega a resposta detalhada
+      const errorResponse = exception.getResponse();
 
       const responsePayload = typeof errorResponse === 'string'
-          ? { message: errorResponse }
-          : (errorResponse as object);
-      
-      this.logger.error(`HTTP Exception... ${status} ${request.method} ${request.url}`, JSON.stringify(responsePayload));
-      
-      // Retorna o objeto de erro
+        ? { message: errorResponse }
+        : errorResponse;
+
+      this.logger.error(
+        `[${exceptionName}] ${status} ${request.method} ${request.url}`,
+        JSON.stringify(responsePayload),
+      );
+
       response.status(status).json({
-          ...responsePayload,
-          path: request.url,
-          timestamp: new Date().toISOString(),
+        ...responsePayload,
+        path: request.url,
+        timestamp: new Date().toISOString(),
       });
     } else {
-      // SENÃO, é um erro 500 inesperado.
       const status = HttpStatus.INTERNAL_SERVER_ERROR;
 
-      // Logamos o erro completo para depuração.
-      this.logger.error(`Internal Server Error... ${request.method} ${request.url}`, exception instanceof Error ? exception.stack : exception);
+      this.logger.error(
+        `[${exceptionName}] Internal Server Error... ${request.method} ${request.url}`,
+        exception instanceof Error ? exception.stack : exception,
+      );
 
-      // E enviamos uma resposta genérica para o usuário.
       response.status(status).json({
         statusCode: status,
         timestamp: new Date().toISOString(),

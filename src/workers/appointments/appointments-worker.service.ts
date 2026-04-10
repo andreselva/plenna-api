@@ -23,6 +23,6 @@ export class AppointmentsWorkerService {
     }
 
     this.logger.log(`Executando job ${job.name} (${job.id})`);
-    await handler.execute(job.data as AppointmentJobData);
+    await handler.execute(job.data);
   }
 }

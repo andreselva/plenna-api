@@ -1,3 +1,4 @@
+import { Queue } from 'bullmq';
 import { AppointmentsQueueService } from './appointments-queue.service';
 import { ExecutableAppointment } from './executable-appointment.base';
 import { Recurrence } from 'src/enum/recurrence.enum';
@@ -26,7 +27,7 @@ describe('AppointmentsQueueService', () => {
   };
 
   it('remove agendamentos existentes antes de registrar um novo', async () => {
-    const queue = {
+    const queueMock = {
       add: jest.fn().mockResolvedValue(undefined),
       getRepeatableJobs: jest.fn().mockResolvedValue([repeatableJob]),
       removeRepeatable: jest.fn(),
@@ -34,7 +35,8 @@ describe('AppointmentsQueueService', () => {
       remove: jest.fn().mockResolvedValue(undefined),
     };
 
-    const service = new AppointmentsQueueService(queue as any);
+    const queue = queueMock as unknown as Queue<AppointmentJobData<unknown>>;
+    const service = new AppointmentsQueueService(queue);
 
     await service.schedule(appointment, clientId, {
       config: null,
@@ -42,9 +44,9 @@ describe('AppointmentsQueueService', () => {
       timezone: 'America/Sao_Paulo',
     });
 
-    expect(queue.removeRepeatableByKey).toHaveBeenCalledWith(repeatableJob.key);
-    expect(queue.remove).toHaveBeenCalledWith(jobId);
-    expect(queue.add).toHaveBeenCalledWith(
+    expect(queueMock.removeRepeatableByKey).toHaveBeenCalledWith(repeatableJob.key);
+    expect(queueMock.remove).toHaveBeenCalledWith(jobId);
+    expect(queueMock.add).toHaveBeenCalledWith(
       appointment.type,
       expect.objectContaining({ appointmentId: appointment.id, clientId }),
       expect.objectContaining({ jobId }),
@@ -52,22 +54,23 @@ describe('AppointmentsQueueService', () => {
   });
 
   it('usa removeRepeatable quando removeRepeatableByKey não está disponível', async () => {
-    const queue = {
+    const queueMock = {
       add: jest.fn().mockResolvedValue(undefined),
       getRepeatableJobs: jest.fn().mockResolvedValue([repeatableJob]),
       removeRepeatable: jest.fn().mockResolvedValue(undefined),
       remove: jest.fn().mockResolvedValue(undefined),
     };
 
-    const service = new AppointmentsQueueService(queue as any);
+    const queue = queueMock as unknown as Queue<AppointmentJobData<unknown>>;
+    const service = new AppointmentsQueueService(queue);
 
     await service.unschedule(appointment, clientId);
 
-    expect(queue.removeRepeatable).toHaveBeenCalledWith(
+    expect(queueMock.removeRepeatable).toHaveBeenCalledWith(
       appointment.type,
       expect.objectContaining({ pattern: '0 8 * * *' }),
       jobId,
     );
-    expect(queue.remove).toHaveBeenCalledWith(jobId);
+    expect(queueMock.remove).toHaveBeenCalledWith(jobId);
   });
 });

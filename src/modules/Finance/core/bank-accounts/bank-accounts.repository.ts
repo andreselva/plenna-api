@@ -8,13 +8,11 @@ import DateHelper from "src/Shared/Utils/DateHelper";
 @Injectable()
 export class BankAccountsRepository extends BaseRepository<BankAccount> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext);
+        super(database, authContext, BankAccount);
     }
 
-    async listBankAccounts() {
-        const query = `SELECT * FROM bank_accounts WHERE clientId = ? AND isActive = true`;
-        const result = await this.database.select(query, [this.authContext.getClientId()]);
-        return this.extractToEntity(result, BankAccount);
+    async listBankAccounts(): Promise<BankAccount[]> {
+        return await this.loadAll();
     }
 
     async inactiveBankAccount(id: number) {

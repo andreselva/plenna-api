@@ -11,7 +11,7 @@ import { Role } from "src/enum/role.enum";
 @Injectable()
 export default class ClientModulesRepository extends BaseRepository<ClientModules> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
-        super(database, authContext)
+        super(database, authContext, ClientModules)
     }
 
     async getModulesByUserId(): Promise<Module[]> {

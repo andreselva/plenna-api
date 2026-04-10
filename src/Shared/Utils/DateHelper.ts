@@ -124,4 +124,8 @@ export default class DateHelper {
     static getCurrentISODate(): string {
         return DateTime.local({ zone: "America/Sao_Paulo" }).toFormat("yyyy-MM-dd");
     }
+
+    static convertToDateTime(date: string): DateTime {
+        return DateTime.fromISO(date, { zone: "America/Sao_Paulo" });
+    }
 }

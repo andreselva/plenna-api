@@ -13,11 +13,10 @@ import { ChargeRevenueProvider } from './providers/charge-revenue.provider';
 import { ChargesFactory } from './factorys/charges.factory';
 import { ChargeEventsService } from './events/charge-events.service';
 import { ChargeEventsRepository } from './events/charge-events.repository';
-import { ChargesWebhookController } from './webhooks/charges-webhook.controller';
 import { ChargeExpirationService } from './expiration/charge-expiration.service';
 
 @Module({
-  controllers: [ChargesController, ChargesWebhookController],
+  controllers: [ChargesController],
   providers: [
     ChargesService,
     ChargesRepository,

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { CreateChargeDto } from './dtos/create-charge.dto';
 import { ChargesService } from './charges.service';
 
@@ -28,13 +28,28 @@ export class ChargesController {
         return await this.service.getHistory(id);
     }
 
-    @Post('/:id/cancel')
+    @Put('/:id/cancel')
     async cancel(@Param('id') id: number) {
         return await this.service.cancel(id);
     }
 
-    @Post('/:id/refund')
+    @Put('/:id/refund')
     async refund(@Param('id') id: number) {
         return await this.service.refund(id);
+    }
+
+    @Put('/:id/pay')
+    async pay(@Param('id') id: number) {
+        return await this.service.markAsPaid(id);
+    }
+
+    @Put('/:id/processing')
+    async moveAsProcessing(@Param('id') id: number) {
+        return await this.service.markAsProcessing(id);
+    }
+
+    @Put('/:id/awaiting-payment')
+    async moveAsAwaitingPayment(@Param('id') id: number) {
+        return await this.service.markAsAwaitingPayment(id);
     }
 }

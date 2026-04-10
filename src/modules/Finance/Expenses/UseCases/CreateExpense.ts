@@ -4,7 +4,6 @@ import { Injectable } from "@nestjs/common";
 import PeriodoDTO from "src/DTOs/PeriodoDTO";
 import { GetExpenses } from "./GetExpenses";
 import { Expense } from "src/EntityModels/Expense";
-import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import AssociateExpensesToInvoiceUseCase from "../../Invoices/UseCases/AssociateExpensesToInvoice";
 import InstallmentsCalculator from "../../InstallmentsServices/InstallmentsCalculator";
 import { FinancialEventsService } from "../../core/financial-events/financial-events.service";
@@ -17,7 +16,6 @@ export class CreateExpense {
         private readonly repository: ExpensesRepository,
         private readonly getExpensesUseCase: GetExpenses,
         private readonly associateExpensesToInvoiceUC: AssociateExpensesToInvoiceUseCase,
-        private readonly authContext: AuthContextService,
         private readonly financialEvents: FinancialEventsService,
     ) { }
 

@@ -9,4 +9,6 @@ export enum ChargesEventsEnum {
     CHARGE_RESOLVED = 'Cobrança resolvida',
     CHARGE_REATTEMPTED = 'Cobrança reprocessada',
     CHARGE_SENDED_TO_GATEWAY = 'Cobrança enviada para gateway',
+    CHARGE_PROCESSING = 'Cobrança em processamento',
+    CHARGE_AWAITING_PAYMENT = 'Cobrança aguardando pagamento'
 }

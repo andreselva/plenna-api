@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateChargeDto } from './dtos/create-charge.dto';
 import { ChargesRepository } from './charges.repository';
 import { ChargesException } from './exceptions/ChargesException';
@@ -20,6 +20,7 @@ import { ChargeStatus } from 'src/enum/charge-status.enum';
 import { ChargeEntityType } from 'src/enum/charge-entity-type.enum';
 import { RevenueStatus } from 'src/modules/Finance/Revenues/Types/revenue.status.type';
 import DateHelper from 'src/Shared/Utils/DateHelper';
+import { IWebhookParseResult } from 'src/Shared/interfaces/IWebhookParseResult';
 
 const VALID_TRANSITIONS: Record<ChargeStatus, ChargeStatus[]> = {
     [ChargeStatus.DRAFT]: [ChargeStatus.PROCESSING, ChargeStatus.CANCELED],
@@ -33,6 +34,8 @@ const VALID_TRANSITIONS: Record<ChargeStatus, ChargeStatus[]> = {
 
 @Injectable()
 export class ChargesService {
+    private readonly logger = new Logger(ChargesService.name);
+
     constructor(
         private readonly repository: ChargesRepository,
         private readonly engine: ChargesEngine,
@@ -90,6 +93,36 @@ export class ChargesService {
         });
     }
 
+    async markAsProcessing(chargeId: number): Promise<Charge> {
+        return this.database.transaction(async () => {
+            const charge = await this.loadAndValidate(chargeId, ChargeStatus.PROCESSING);
+            
+            await this.repository.updateStatus(chargeId, ChargeStatus.PROCESSING);
+            charge.status = ChargeStatus.PROCESSING;
+
+            await this.events.logEvent(charge, ChargesEventsEnum.CHARGE_PROCESSING);
+            await this.registerChargeFinancialEvent(charge, FinancialEventsEnum.CHARGE_PROCESSING);
+            await this.syncRevenueStatus(charge, RevenueStatus.PENDING, null);
+
+            return charge;
+        })
+    }
+
+    async markAsAwaitingPayment(chargeId: number): Promise<Charge> {
+        return this.database.transaction(async () => {
+            const charge = await this.loadAndValidate(chargeId, ChargeStatus.AWAITING_PAYMENT);
+
+            await this.repository.updateStatus(chargeId, ChargeStatus.AWAITING_PAYMENT);
+            charge.status = ChargeStatus.AWAITING_PAYMENT;
+
+            await this.events.logEvent(charge, ChargesEventsEnum.CHARGE_AWAITING_PAYMENT);
+            await this.registerChargeFinancialEvent(charge, FinancialEventsEnum.CHARGE_AWAITING_PAYMENT);
+            await this.syncRevenueStatus(charge, RevenueStatus.PENDING, null);
+
+            return charge;
+        })
+    }
+
     async cancel(chargeId: number): Promise<Charge> {
         return this.database.transaction(async () => {
             const charge = await this.loadAndValidate(chargeId, ChargeStatus.CANCELED);
@@ -123,7 +156,10 @@ export class ChargesService {
     async refund(chargeId: number): Promise<Charge> {
         return this.database.transaction(async () => {
             const charge = await this.repository.findById(chargeId);
-            if (!charge) throw new ChargeNotFoundException(chargeId);
+            if (!charge) {
+                throw new ChargeNotFoundException(chargeId);
+            }
+
             if (charge.status !== ChargeStatus.PAID) {
                 throw new InvalidChargeTransitionException(charge.status, ChargeStatus.CANCELED);
             }
@@ -183,7 +219,9 @@ export class ChargesService {
     }
 
     private async resolveAccountId(charge: Charge): Promise<number> {
-        if (charge.entityType !== ChargeEntityType.REVENUE) return 0;
+        if (charge.entityType !== ChargeEntityType.REVENUE) {
+            return 0;
+        }
         const revenue = await this.repository.loadRevenue(charge.entityId, false);
         return revenue?.idBankAccount ?? 0;
     }
@@ -202,7 +240,9 @@ export class ChargesService {
     }
 
     private async syncRevenueStatus(charge: Charge, status: RevenueStatus, paymentDate: string | null): Promise<void> {
-        if (charge.entityType !== ChargeEntityType.REVENUE) return;
+        if (charge.entityType !== ChargeEntityType.REVENUE) {
+            return;
+        }
         await this.repository.updateRevenueStatus(charge.entityId, status, paymentDate);
     }
 
@@ -226,5 +266,25 @@ export class ChargesService {
         charge.qrcode = gatewayResult.qrcode ?? charge.qrcode;
         charge.paymentAt = gatewayResult.paidAt ?? charge.paymentAt;
         await this.repository.save(charge, true);
+    }
+
+    async findByExternalId(externalId: string): Promise<Charge | undefined> {
+        return await this.repository.findByExternalId(externalId);
+    }
+
+    async resolveStatus(status: ChargeStatus, parsed: IWebhookParseResult, charge: Charge): Promise<void> {
+        switch (status) {
+            case ChargeStatus.PAID:
+                await this.markAsPaid(charge.id, parsed.paidAt);
+                break;
+            case ChargeStatus.FAILED:
+                await this.markAsFailed(charge.id);
+                break;
+            case ChargeStatus.CANCELED:
+                await this.cancel(charge.id);
+                break;
+            default:
+                this.logger.log(`Webhook: unhandled status ${parsed.newStatus} for charge ${charge.id}`);
+        }
     }
 }

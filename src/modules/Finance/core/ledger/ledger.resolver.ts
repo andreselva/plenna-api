@@ -55,47 +55,31 @@ export class LedgerResolver {
         }
 
         switch (event.type) {
-            case FinancialEventsEnum.OPENING_BALANCE:
-                return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
-
-            case FinancialEventsEnum.PAYMENT_POSTED:
-                return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
-
-            case FinancialEventsEnum.REVENUE_RECEIVED:
-            case FinancialEventsEnum.TRANSFER_POSTED:
-                return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
-
             case FinancialEventsEnum.REVERSAL:
                 if ([PaymentType.EXPENSE, PaymentType.INVOICE].includes(event.referenceType)) {
                     return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
                 } else if (event.referenceType === PaymentType.REVENUE) {
                     return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
+                } else {
+                    throw new InvalidEventTypeException(event.id);
                 }
-                throw new InvalidEventTypeException(event.id);
 
-            // Cobrança gerada: registra o direito a receber (sem movimentação de caixa)
-            // Reconhecimento de receita: registra o direito a receber (accrual)
-            case FinancialEventsEnum.CHARGE_GENERATED:
-            case FinancialEventsEnum.REVENUE_RECOGNIZED:
-                return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
-
-            // Cobrança liquidada: o dinheiro chegou na conta
+            case FinancialEventsEnum.OPENING_BALANCE:
+            case FinancialEventsEnum.REVENUE_RECEIVED:
+            case FinancialEventsEnum.TRANSFER_POSTED:
             case FinancialEventsEnum.CHARGE_PAID:
-                return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
-
-            // Cobrança cancelada ou expirada: estorna o direito a receber
             case FinancialEventsEnum.CHARGE_CANCELLED:
             case FinancialEventsEnum.CHARGE_EXPIRED:
-                return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
-
-            // Estorno de cobrança paga: dinheiro sai da conta
-            case FinancialEventsEnum.CHARGE_REFUNDED:
-                return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
-
-            // Reconhecimento de despesa: registra a obrigação a pagar (accrual)
             case FinancialEventsEnum.EXPENSE_RECOGNIZED:
                 return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
-
+                
+            case FinancialEventsEnum.PAYMENT_POSTED:
+            case FinancialEventsEnum.CHARGE_PROCESSING:
+            case FinancialEventsEnum.CHARGE_AWAITING_PAYMENT:
+            case FinancialEventsEnum.CHARGE_GENERATED:
+            case FinancialEventsEnum.REVENUE_RECOGNIZED:
+            case FinancialEventsEnum.CHARGE_REFUNDED:
+                return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
             default:
                 throw new InvalidEventTypeException(event.id);
         }
@@ -106,6 +90,8 @@ export class LedgerResolver {
             FinancialEventsEnum.CHARGE_GENERATED,
             FinancialEventsEnum.CHARGE_CANCELLED,
             FinancialEventsEnum.CHARGE_EXPIRED,
+            FinancialEventsEnum.CHARGE_PROCESSING,
+            FinancialEventsEnum.CHARGE_AWAITING_PAYMENT,
             FinancialEventsEnum.REVENUE_RECOGNIZED,
             FinancialEventsEnum.EXPENSE_RECOGNIZED,
         ];

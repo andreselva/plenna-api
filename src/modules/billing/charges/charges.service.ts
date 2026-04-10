@@ -46,7 +46,7 @@ export class ChargesService {
         private readonly financialEvents: FinancialEventsService
     ) {}
 
-    async create(dto: CreateChargeDto) {
+    async create(dto: CreateChargeDto): Promise<Charge> {
         try {
             return this.database.transaction(async () => {
                 const input = await this.factory.loadEntity(dto.type, dto.entityId);

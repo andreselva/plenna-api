@@ -110,13 +110,15 @@ function computeNextCron(pattern: string, tz: string, from: DateTime): DateTime 
     });
   }
 
+  const safeHour: number = hour;
+
   let candidate = from.set({ second: 0, millisecond: 0 });
 
-  if (candidate.minute > minute || (candidate.minute === minute && candidate.hour >= hour)) {
+  if (candidate.minute > minute || (candidate.minute === minute && candidate.hour >= safeHour)) {
     candidate = candidate.plus({ days: 1 });
   }
 
-  candidate = candidate.set({ hour, minute, second: 0, millisecond: 0 });
+  candidate = candidate.set({ hour: safeHour, minute, second: 0, millisecond: 0 });
 
   if (!allowedDays || allowedDays.size === 0) {
     return candidate;
@@ -124,7 +126,7 @@ function computeNextCron(pattern: string, tz: string, from: DateTime): DateTime 
 
   while (!allowedDays.has(candidate.weekday)) {
     candidate = candidate.plus({ days: 1 }).set({
-      hour,
+      hour: safeHour,
       minute,
       second: 0,
       millisecond: 0,

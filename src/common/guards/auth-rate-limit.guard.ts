@@ -1,43 +1,43 @@
-import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Request } from 'express';
-
-interface RateLimitRecord {
-    count: number;
-    expiresAt: number;
-}
+import RedisService from 'src/modules/redis/redis-service';
 
 @Injectable()
 export class AuthRateLimitGuard implements CanActivate {
-    private static readonly WINDOW_MS = 60_000;
+    private static readonly WINDOW_SECONDS = 60;
     private static readonly MAX_ATTEMPTS = 5;
-    private static readonly attempts: Map<string, RateLimitRecord> = new Map();
+    private readonly logger = new Logger(AuthRateLimitGuard.name);
 
-    canActivate(context: ExecutionContext): boolean {
+    constructor(private readonly redisService: RedisService) {}
+
+    async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest<Request>();
         const key = this.createKey(request);
-        const now = Date.now();
-        const record = AuthRateLimitGuard.attempts.get(key);
 
-        if (!record || record.expiresAt < now) {
-            AuthRateLimitGuard.attempts.set(key, {
-                count: 1,
-                expiresAt: now + AuthRateLimitGuard.WINDOW_MS,
-            });
+        try {
+            const attempts = await this.redisService.incr(key);
+            if (attempts === 1) {
+                await this.redisService.expire(key, AuthRateLimitGuard.WINDOW_SECONDS);
+            }
+
+            if (attempts > AuthRateLimitGuard.MAX_ATTEMPTS) {
+                throw new HttpException('Limite de tentativas excedido. Tente novamente em instantes.', HttpStatus.TOO_MANY_REQUESTS);
+            }
+
+            return true;
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            }
+
+            this.logger.warn('Falha ao consultar rate limit no Redis. Seguindo sem bloqueio.');
             return true;
         }
-
-        if (record.count >= AuthRateLimitGuard.MAX_ATTEMPTS) {
-            throw new HttpException('Limite de tentativas excedido. Tente novamente em instantes.', HttpStatus.TOO_MANY_REQUESTS);
-        }
-
-        record.count += 1;
-        AuthRateLimitGuard.attempts.set(key, record);
-        return true;
     }
 
     private createKey(request: Request): string {
         const ip = this.extractClientIp(request);
-        return `${request.path}:${ip}`;
+        return `auth:rate-limit:${request.path}:${ip}`;
     }
 
     private extractClientIp(request: Request): string {

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes } from 'crypto';
 import AuthRepository, { RefreshTokenMetadata } from './AuthRepository';
@@ -32,6 +32,7 @@ type RefreshTokenPayload = {
 export class AuthService {
     private readonly jwtSecret = process.env.JWT_SECRET;
     private readonly refreshSecret = process.env.JWT_REFRESH_SECRET;
+    private readonly logger = new Logger(AuthService.name);
 
     constructor(
         private userService: UsersService,
@@ -153,8 +154,8 @@ export class AuthService {
             await this.repository.saveRefreshToken(refreshTokenModel, metadata);
 
             return { accessToken: newAccessToken, newRefreshToken };
-        } catch (err) {
-            console.error('Falha no refresh do token:', err);
+        } catch {
+            this.logger.warn('Falha no refresh do token.');
             throw new UnauthorizedException();
         }
     }
@@ -200,7 +201,7 @@ export class AuthService {
             }
 
             return {
-                id: decoded.sub,
+                id: Number(decoded.sub),
                 username: decoded.username,
                 role: decoded.role,
                 clientId: decoded.clientId,

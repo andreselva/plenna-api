@@ -4,7 +4,7 @@ import * as nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
-const MailComposer = require('nodemailer/lib/mail-composer');
+import MailComposer from 'nodemailer/lib/mail-composer';
 
 import {
   SESv2Client,
@@ -173,8 +173,14 @@ export class MailerService {
     });
 
     const buffer = await new Promise<Buffer>((resolve, reject) => {
-      composer.compile().build((err: any, message: any) => {
-        if (err) return reject(err);
+      composer.compile().build((err: unknown, message: unknown) => {
+        if (err) {
+          return reject(
+            err instanceof Error
+              ? err
+              : new Error(JSON.stringify(err))
+          );
+        }
         resolve(message as Buffer);
       });
     });

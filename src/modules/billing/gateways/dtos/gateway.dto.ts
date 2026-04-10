@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
 import { GatewayEnum } from "src/enum/gateway.enum";
 
 export class GatewayConfigDTO {

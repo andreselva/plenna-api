@@ -29,8 +29,8 @@ export default class CreateInvoiceUseCase {
         newInvoice.dueDate = dueDate;
         newInvoice.idBankAccount = invoiceSettings.idAccount;
         newInvoice.name = invoiceSettings.nameAccount;
-        newInvoice.id = 0,
-        newInvoice.status = Invoice.STATUS_PENDING
+        newInvoice.id = 0;
+        newInvoice.status = Invoice.STATUS_PENDING;
         newInvoice.paymentDate = null;
         return await this.repository.createInvoice(newInvoice);
     }

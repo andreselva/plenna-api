@@ -82,7 +82,7 @@ export default class InvoicesRepository extends BaseRepository<Invoice>{
     async getTotalInvoiceValue(idInvoice: number): Promise<number> {
         const query = "SELECT SUM(value) as total FROM expense WHERE clientId = ? AND idInvoice = ?";
         const result = await this.database.select(query, [this.authContext.getClientId(), idInvoice]);
-        return Number(result[0].total) ?? 0;
+        return Number(result[0].total);
     }
 
     async updateStatusExpenseByIdInvoice(idInvoice: number, status: ExpenseStatus) {

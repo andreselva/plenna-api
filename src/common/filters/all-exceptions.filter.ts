@@ -23,7 +23,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
       const responsePayload = typeof errorResponse === 'string'
         ? { message: errorResponse }
-        : (errorResponse as object);
+        : errorResponse;
 
       this.logger.error(
         `[${exceptionName}] ${status} ${request.method} ${request.url}`,

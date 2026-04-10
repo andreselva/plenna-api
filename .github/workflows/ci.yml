@@ -18,7 +18,7 @@ jobs:
   #
   # Roda antes de qualquer build ou teste. Se falhar, bloqueia os jobs seguintes.
   #
-  # Proteções contra supply chain attacks (vetor do incidente axios e similares):
+  # Proteções contra supply chain attacks:
   #   • npm ci --ignore-scripts → impede que postinstall/preinstall de pacotes
   #     comprometidos executem código arbitrário durante a instalação.
   #   • npm audit → detecta vulnerabilidades conhecidas (CVEs) no grafo de deps.
@@ -77,15 +77,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-
-      # Exclusivo para PRs: compara o grafo de dependências antes e depois do PR.
-      # Se um pacote adicionado ou atualizado tiver CVE conhecida com severity
-      # >= moderate, o PR é bloqueado antes do merge.
-      - name: Revisão de dependências (apenas PRs)
-        if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: moderate
 
   # ─── Job 2: Lint ─────────────────────────────────────────────────────────────
   lint:

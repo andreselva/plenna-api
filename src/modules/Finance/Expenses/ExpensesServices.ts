@@ -1,4 +1,4 @@
-import { Dependencies, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { GetExpenses } from "./UseCases/GetExpenses";
 import { ExpenseDTO } from "./DTOs/ExpenseDTO";
 import { CreateExpense } from "./UseCases/CreateExpense";
@@ -26,7 +26,9 @@ export class ExpensesServices {
             dto.hasInstallments = true;
         }
 
-        return await this.createExpenseUseCase.execute(dto, periodo);
+        return this.database.transaction(async () => {
+            return await this.createExpenseUseCase.execute(dto, periodo);
+        })
     }
 
     async deleteExpense(id: string, deleteInstallments: string, sourceAccountId: string, periodo: PeriodoDTO) {

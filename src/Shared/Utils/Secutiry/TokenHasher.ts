@@ -5,11 +5,11 @@ export default class TokenHasher {
     private static readonly saltRounds = 12;
 
     static async hash(token: string): Promise<string> {
-        return bcrypt.hash(token, this.saltRounds);
+        return await bcrypt.hash(token, this.saltRounds);
     }
 
     static async compare(token: string, hash: string): Promise<boolean> {
-        return bcrypt.compare(token, hash);
+        return await bcrypt.compare(token, hash);
     }
 
     static getTokenByPasswordReset() {

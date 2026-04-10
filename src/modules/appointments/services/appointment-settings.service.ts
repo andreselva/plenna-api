@@ -46,9 +46,11 @@ export class AppointmentSettingsService {
       'SELECT clientId, appointmentType, isActive, recurrence, timezone, config FROM appointment_settings WHERE clientId = ? AND appointmentType = ? LIMIT 1',
       [clientId, appointmentType],
     )) as AppointmentSettingRow[];
+
     if (rows.length === 0) {
       return null;
     }
+
     return this.mapRow(rows[0]);
   }
 
@@ -86,7 +88,7 @@ export class AppointmentSettingsService {
   }
 
   private mapRow(row: AppointmentSettingRow): AppointmentSetting {
-    const parsedConfig = this.normalizeConfig(row.config as RawConfig);
+    const parsedConfig = this.normalizeConfig(row.config);
 
     return {
       clientId: row.clientId,
@@ -102,7 +104,7 @@ export class AppointmentSettingsService {
     if (raw == null) return null;
 
     if (typeof raw === 'object' && !Buffer.isBuffer(raw)) {
-      return raw as Record<string, unknown>;
+      return raw;
     }
 
     if (Buffer.isBuffer(raw)) {
@@ -115,7 +117,7 @@ export class AppointmentSettingsService {
     }
 
     try {
-      return JSON.parse(raw as string) as Record<string, unknown>;
+      return JSON.parse(raw) as Record<string, unknown>;
     } catch (e) {
       this.logger.warn(`Falha ao converter config (string): ${(e as Error).message}`);
       return null;

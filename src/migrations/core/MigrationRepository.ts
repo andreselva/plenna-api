@@ -107,7 +107,7 @@ export class MigrationRepository {
            error_msg   = VALUES(error_msg)`,
         [version, name, checksum, failedStep, errorMessage],
       );
-    } catch (_) {
+    } catch {
       // Não propaga — já estamos no fluxo de erro da migration
     }
   }

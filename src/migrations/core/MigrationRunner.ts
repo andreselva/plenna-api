@@ -8,9 +8,6 @@ import { MigrationRepository } from './MigrationRepository';
 
 export type MigrationPhase = 'execute' | 'beforeDeploy';
 
-export interface RunOptions {
-}
-
 export interface DiscoveredMigration {
   version: string;
   className: string;
@@ -22,18 +19,37 @@ export interface MigrationStatus {
   name: string;
   database: string;
   executed: boolean;
-  record?: any;
+  record?: unknown;
 }
 
+type MigrationConstructor = new () => IMigration;
+
+type StepWithChecksum = IMigrationStepProcessor & {
+  checksumPayload?: () => unknown;
+};
+
 export class MigrationRunner {
-  private readonly migrations: DiscoveredMigration[];
+  private migrations: DiscoveredMigration[];
 
   constructor(migrations?: DiscoveredMigration[]) {
-    this.migrations = migrations ?? this.discoverMigrationsFromFilesystem();
+    this.migrations = migrations ?? [];
+    if (migrations) {
+      this.validateMigrations();
+    }
+  }
+
+  async init(): Promise<void> {
+    if (this.migrations.length > 0) {
+      return;
+    }
+
+    this.migrations = await this.discoverMigrationsFromFilesystem();
     this.validateMigrations();
   }
 
-  async runPhase(phase: MigrationPhase, _options: RunOptions = {}): Promise<void> {
+  async runPhase(phase: MigrationPhase): Promise<void> {
+    await this.init();
+
     const phaseLabel = phase === 'beforeDeploy' ? 'before-deploy' : 'execute';
     const databaseMap = this.groupByDatabase();
 
@@ -74,6 +90,8 @@ export class MigrationRunner {
   }
 
   async getStatus(): Promise<MigrationStatus[]> {
+    await this.init();
+
     const result: MigrationStatus[] = [];
     const databaseMap = this.groupByDatabase();
 
@@ -139,12 +157,13 @@ export class MigrationRunner {
       }
 
       console.log(`  [OK]    ${entry.version}: ${entry.migration.name}\n`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (entry.migration.isTransactional()) {
         await conn.rollback();
       }
 
-      const errorMessage = err?.message ?? String(err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+
       console.error(`  [FAIL]  ${entry.version}: ${entry.migration.name}`);
       console.error(`          Falha no step ${currentStep}: ${errorMessage}\n`);
 
@@ -164,7 +183,7 @@ export class MigrationRunner {
     }
   }
 
-  private discoverMigrationsFromFilesystem(): DiscoveredMigration[] {
+  private async discoverMigrationsFromFilesystem(): Promise<DiscoveredMigration[]> {
     const versionsDir = this.resolveVersionsDir();
 
     const files = fs
@@ -176,23 +195,39 @@ export class MigrationRunner {
 
     for (const file of files) {
       const fullPath = path.join(versionsDir, file);
-      const mod = require(fullPath);
+      const mod = (await import(fullPath)) as Record<string, unknown>;
 
       for (const exported of Object.values(mod)) {
-        if (typeof exported !== 'function') continue;
+        if (typeof exported !== 'function') {
+          continue;
+        }
 
-        const className = (exported as any).name as string | undefined;
-        if (!className) continue;
+        const MigrationClass = exported as MigrationConstructor;
+        const className = MigrationClass.name;
+
+        if (!className) {
+          continue;
+        }
 
         const version = this.extractVersionFromClassName(className);
-        if (!version) continue;
+        if (!version) {
+          continue;
+        }
 
-        const instance = new (exported as any)() as IMigration;
+        const instance = new MigrationClass();
 
-        if (typeof instance.execute !== 'function') continue;
-        if (typeof instance.executeBeforeDeploy !== 'function') continue;
-        if (typeof instance.getDatabases !== 'function') continue;
-        if (typeof instance.isTransactional !== 'function') continue;
+        if (typeof instance.execute !== 'function') {
+          continue;
+        }
+        if (typeof instance.executeBeforeDeploy !== 'function') {
+          continue;
+        }
+        if (typeof instance.getDatabases !== 'function') {
+          continue;
+        }
+        if (typeof instance.isTransactional !== 'function') {
+          continue;
+        }
 
         discovered.push({ version, className, migration: instance });
       }
@@ -210,8 +245,10 @@ export class MigrationRunner {
       path.resolve(process.cwd(), 'dist/migrations/versions'),
     ];
 
-    for (const p of candidates) {
-      if (fs.existsSync(p) && fs.statSync(p).isDirectory()) return p;
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
+        return candidate;
+      }
     }
 
     throw new Error(
@@ -229,19 +266,23 @@ export class MigrationRunner {
     const versionRegex = /^\d{8}_\d{2}$/;
     const seen = new Set<string>();
 
-    for (const m of this.migrations) {
-      if (!versionRegex.test(m.version)) {
+    for (const migrationEntry of this.migrations) {
+      if (!versionRegex.test(migrationEntry.version)) {
         throw new Error(
-          `[Migrations] Version inválida: "${m.version}". Esperado YYYYMMDD_XX. Classe: ${m.className}`,
+          `[Migrations] Version inválida: "${migrationEntry.version}". Esperado YYYYMMDD_XX. Classe: ${migrationEntry.className}`,
         );
       }
-      if (seen.has(m.version)) {
-        throw new Error(`[Migrations] Versão duplicada descoberta: "${m.version}". Classe: ${m.className}`);
-      }
-      seen.add(m.version);
 
-      if (!m.migration?.name) {
-        throw new Error(`[Migrations] Migration sem "name". Classe: ${m.className}`);
+      if (seen.has(migrationEntry.version)) {
+        throw new Error(
+          `[Migrations] Versão duplicada descoberta: "${migrationEntry.version}". Classe: ${migrationEntry.className}`,
+        );
+      }
+
+      seen.add(migrationEntry.version);
+
+      if (!migrationEntry.migration.name) {
+        throw new Error(`[Migrations] Migration sem "name". Classe: ${migrationEntry.className}`);
       }
     }
   }
@@ -253,8 +294,11 @@ export class MigrationRunner {
       const databases = entry.migration.getDatabases();
 
       for (const db of databases) {
-        if (!map.has(db)) map.set(db, []);
-        map.get(db)!.push(entry);
+        if (!map.has(db)) {
+          map.set(db, []);
+        }
+
+        map.get(db)?.push(entry);
       }
     }
 
@@ -274,10 +318,14 @@ export class MigrationRunner {
   }
 
   private computeChecksum(entry: DiscoveredMigration): string {
-    const toStepPayload = (steps: IMigrationStepProcessor[]) =>
-      steps.map((s) =>
-        typeof (s as any).checksumPayload === 'function' ? (s as any).checksumPayload() : s.label,
-      );
+    const toStepPayload = (steps: IMigrationStepProcessor[]): unknown[] =>
+      steps.map((stepProcessor) => {
+        const stepWithChecksum = stepProcessor as StepWithChecksum;
+
+        return typeof stepWithChecksum.checksumPayload === 'function'
+          ? stepWithChecksum.checksumPayload()
+          : stepProcessor.label;
+      });
 
     const content = {
       version: entry.version,

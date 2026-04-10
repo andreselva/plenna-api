@@ -11,6 +11,8 @@ import BaseRepository from "src/Shared/Repositories/BaseRepository";
 import { ChargeStatus } from "src/enum/charge-status.enum";
 import { RevenueStatus } from "src/modules/Finance/Revenues/Types/revenue.status.type";
 
+const DEFAULT_EXPIRATION_HOURS_FOR_CHARGES = 24;
+
 @Injectable()
 export class ChargesRepository extends BaseRepository<Charge> {
     constructor(database: MySQLDatabase, authContext: AuthContextService) {
@@ -60,4 +62,15 @@ export class ChargesRepository extends BaseRepository<Charge> {
         const { sql, values } = QueryBuilder.buildQuery(processing, processing.getTableName(), processing.getPrimaryKey(), processing.getIgnoredProperties());
         await this.database.execute(sql, values);
     }
+
+    async findExpiredCharges(): Promise<Charge[]> {
+      const query = `
+          SELECT * FROM charges
+          WHERE status = ?
+            AND clientId = ?
+            AND createdAt < DATE_SUB(NOW(), INTERVAL ${DEFAULT_EXPIRATION_HOURS_FOR_CHARGES} HOUR)
+      `;
+      const result = await this.database.select(query, [ChargeStatus.AWAITING_PAYMENT, this.authContext.getClientId()]);
+      return this.extractToEntity(result);
+  }
 }

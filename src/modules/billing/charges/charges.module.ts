@@ -13,7 +13,6 @@ import { ChargeRevenueProvider } from './providers/charge-revenue.provider';
 import { ChargesFactory } from './factorys/charges.factory';
 import { ChargeEventsService } from './events/charge-events.service';
 import { ChargeEventsRepository } from './events/charge-events.repository';
-import { ChargeExpirationService } from './expiration/charge-expiration.service';
 
 @Module({
   controllers: [ChargesController],
@@ -27,7 +26,6 @@ import { ChargeExpirationService } from './expiration/charge-expiration.service'
     ChargesFactory,
     ChargeEventsService,
     ChargeEventsRepository,
-    ChargeExpirationService,
     {
       provide: CHARGE_PROVIDERS_TOKEN,
       useFactory: (
@@ -39,6 +37,6 @@ import { ChargeExpirationService } from './expiration/charge-expiration.service'
     }
   ],
   imports: [BillingRulesModule, IntegrationsModule, FinancialEventsModule],
-  exports: [ChargesService, ChargeExpirationService]
+  exports: [ChargesService, ChargeEventsService]
 })
 export class ChargesModule {}

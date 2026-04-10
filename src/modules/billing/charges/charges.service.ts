@@ -149,6 +149,10 @@ export class ChargesService {
         });
     }
 
+    async getExpiredCharges(): Promise<Charge[]> {
+        return await this.repository.findExpiredCharges();
+    }
+
     async refund(chargeId: number): Promise<Charge> {
         return this.database.transaction(async () => {
             const charge = await this.repository.findById(chargeId);

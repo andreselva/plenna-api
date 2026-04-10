@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+# Permissão mínima padrão para o GITHUB_TOKEN.
+# Cada job eleva apenas o que precisa.
+permissions:
+  contents: read
+
+jobs:
+  # ─── Job 1: Segurança ────────────────────────────────────────────────────────
+  #
+  # Roda antes de qualquer build ou teste. Se falhar, bloqueia os jobs seguintes.
+  #
+  # Proteções contra supply chain attacks (vetor do incidente axios e similares):
+  #   • npm ci --ignore-scripts → impede que postinstall/preinstall de pacotes
+  #     comprometidos executem código arbitrário durante a instalação.
+  #   • npm audit → detecta vulnerabilidades conhecidas (CVEs) no grafo de deps.
+  #   • dependency-review-action → em PRs, falha se um pacote adicionado/atualizado
+  #     possui CVE conhecida antes mesmo do merge.
+  #   • Gitleaks → detecta secrets/tokens acidentalmente commitados.
+  # ─────────────────────────────────────────────────────────────────────────────
+  security:
+    name: Segurança de dependências
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write   # necessário para upload de resultados SARIF
+      pull-requests: read       # necessário para dependency-review-action em PRs
+
+    steps:
+      - name: Checkout (histórico completo para scan de secrets)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Lockfile é obrigatório. Sem ele, npm install escolhe versões mais novas
+      # que não foram auditadas, abrindo espaço para dependency confusion attacks.
+      - name: Verificar presença do package-lock.json
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "::error::package-lock.json ausente. Commite o lockfile para garantir builds reproduzíveis e auditáveis."
+            exit 1
+          fi
+          echo "package-lock.json presente."
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Instala dependências SEM executar lifecycle scripts (postinstall, preinstall,
+      # prepare, etc.). Esse é o principal bloqueio contra ataques de supply chain
+      # onde o vetor é um script malicioso injetado em um pacote comprometido.
+      - name: Instalar dependências (sem lifecycle scripts)
+        run: npm ci --ignore-scripts
+
+      # Verifica vulnerabilidades conhecidas no grafo completo de dependências.
+      # Falha em severity >= high. Ajuste para --audit-level=moderate se quiser
+      # ser mais restritivo, ou --audit-level=critical para menos ruído.
+      - name: Auditoria de vulnerabilidades (npm audit)
+        run: npm audit --audit-level=high
+
+      # Detecta secrets, tokens, chaves de API ou credenciais acidentalmente
+      # commitados no repositório, varrendo o histórico completo (fetch-depth: 0).
+      # Para repositórios privados em organizações, configure GITLEAKS_LICENSE
+      # em Settings > Secrets para habilitar o scan de histórico completo.
+      - name: Scan de secrets (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+      # Exclusivo para PRs: compara o grafo de dependências antes e depois do PR.
+      # Se um pacote adicionado ou atualizado tiver CVE conhecida com severity
+      # >= moderate, o PR é bloqueado antes do merge.
+      - name: Revisão de dependências (apenas PRs)
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+
+  # ─── Job 2: Lint ─────────────────────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: security
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # Roda o ESLint sem --fix para que erros reais causem falha no job.
+      # O script "lint" do package.json usa --fix (útil localmente), por isso
+      # chamamos o ESLint diretamente aqui.
+      - name: ESLint
+        run: npx eslint "{src,apps,libs,test}/**/*.ts"
+
+  # ─── Job 3: Build e testes ───────────────────────────────────────────────────
+  build-and-test:
+    name: Build e testes unitários
+    runs-on: ubuntu-latest
+    needs: security
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Testes unitários
+        run: npm test -- --runInBand

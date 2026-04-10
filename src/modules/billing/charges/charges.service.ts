@@ -28,7 +28,7 @@ const VALID_TRANSITIONS: Record<ChargeStatus, ChargeStatus[]> = {
     [ChargeStatus.AWAITING_PAYMENT]: [ChargeStatus.PAID, ChargeStatus.EXPIRED, ChargeStatus.CANCELED],
     [ChargeStatus.PAID]: [],
     [ChargeStatus.FAILED]: [],
-    [ChargeStatus.CANCELED]: [],
+    [ChargeStatus.CANCELED]: [ChargeStatus.DRAFT],
     [ChargeStatus.EXPIRED]: [],
 };
 

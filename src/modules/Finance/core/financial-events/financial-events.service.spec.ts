@@ -4,6 +4,7 @@ import { AuthContextService } from 'src/modules/Auth/auth-context.service';
 import RedisService from 'src/modules/redis/redis-service';
 import { FinancialEventsRepository } from './financial-events.repository';
 import { LedgerEngine } from '../ledger/ledger.engine';
+import { TransactionContext } from 'src/modules/Config/Database/transaction-context';
 
 describe('FinancialEventsService', () => {
   let service: FinancialEventsService;
@@ -40,6 +41,12 @@ describe('FinancialEventsService', () => {
             process: jest.fn(),
           },
         },
+        {
+          provide: TransactionContext,
+          useValue: {
+            hasTransaction: jest.fn()
+          }
+        }
       ],
     }).compile();
 

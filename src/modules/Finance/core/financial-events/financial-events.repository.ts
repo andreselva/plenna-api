@@ -2,11 +2,17 @@ import { Injectable } from "@nestjs/common";
 import { FinancialEvents } from "src/EntityModels/FinancialEvent";
 import { AuthContextService } from "src/modules/Auth/auth-context.service";
 import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
+import { TransactionContext } from "src/modules/Config/Database/transaction-context";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
+import { FinancialEventOutsideTransactionException } from "./exceptions/financial-event-outside-transaction.exception";
 
 @Injectable()
 export class FinancialEventsRepository extends BaseRepository<FinancialEvents>{
-    constructor(database: MySQLDatabase, authContext: AuthContextService) {
+    constructor(
+        database: MySQLDatabase,
+        authContext: AuthContextService,
+        private readonly transactionContext: TransactionContext,
+    ) {
         super(database, authContext, FinancialEvents)
     }
 
@@ -18,19 +24,15 @@ export class FinancialEventsRepository extends BaseRepository<FinancialEvents>{
         return financialEvent;
     }
 
-    async getMaxSequenceNumber(): Promise<number | null> {
-        const query = `SELECT MAX(sequenceNumber) AS maxSequenceNumber
-            FROM financial_events
-            WHERE clientId = ?`;
+    async getLastEvent(): Promise<FinancialEvents | null> {
+        if (!this.transactionContext.hasTransaction()) {
+            throw new FinancialEventOutsideTransactionException(`getLastEvent must be called within a transaction`);
+        }
+        const query = `SELECT * FROM financial_events WHERE clientId = ? ORDER BY sequenceNumber DESC LIMIT 1 FOR UPDATE`;
         const result = await this.database.select(query, [this.authContext.getClientId()]);
-        const value = result[0]?.maxSequenceNumber;
-        return value !== null && value !== undefined ? Number(value) : null;
+        if (result !== null && result !== undefined && result.length === 1) {
+            return this.extractToEntity(result)[0];
+        }
+        return null;
     }
-
-    async getLastEventHash(): Promise<string | null> {
-        const query = `SELECT eventHash as previousHash FROM financial_events WHERE clientId = ? ORDER BY sequenceNumber DESC LIMIT 1`;
-        const result = await this.database.select(query, [this.authContext.getClientId()]);
-        return result[0]?.previousHash ?? null;
-    }
-
 }

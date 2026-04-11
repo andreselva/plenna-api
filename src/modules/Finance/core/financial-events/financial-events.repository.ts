@@ -28,7 +28,7 @@ export class FinancialEventsRepository extends BaseRepository<FinancialEvents>{
         if (!this.transactionContext.hasTransaction()) {
             throw new FinancialEventOutsideTransactionException(`getLastEvent must be called within a transaction`);
         }
-        const query = `SELECT * FROM financial_events WHERE clientId = ? ORDER BY id DESC LIMIT 1 FOR UPDATE`;
+        const query = `SELECT * FROM financial_events WHERE clientId = ? ORDER BY sequenceNumber DESC LIMIT 1 FOR UPDATE`;
         const result = await this.database.select(query, [this.authContext.getClientId()]);
         if (result !== null && result !== undefined && result.length === 1) {
             return this.extractToEntity(result)[0];

@@ -57,7 +57,7 @@ export class FinancialEventsService {
 
   private getSequenceNumber(lastEvent: FinancialEvents | null): number {
     if (lastEvent !== null) {
-      return lastEvent.sequenceNumber + 1;
+      return Number(lastEvent.sequenceNumber) + 1;
     }
     return 1;
   }

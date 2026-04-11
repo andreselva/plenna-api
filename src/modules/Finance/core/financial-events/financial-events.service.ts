@@ -6,10 +6,10 @@ import { FinancialEventsRepository } from './financial-events.repository';
 import { HelperFunctions } from 'src/Shared/Utils/HelperFunctions';
 import { HasherHelper } from 'src/Shared/Utils/HasherHelper';
 import { AuthContextService } from 'src/modules/Auth/auth-context.service';
-import RedisService from 'src/modules/redis/redis-service';
+import { TransactionContext } from 'src/modules/Config/Database/transaction-context';
 import { PaymentType } from '../../Payment/Types/payment.type';
-import { RedisKeys } from 'src/modules/redis/redis.keys';
 import { LedgerEngine } from '../ledger/ledger.engine';
+import { FinancialEventOutsideTransactionException } from './exceptions/financial-event-outside-transaction.exception';
 
 export interface IFinancialEvent {
   accountId: number;
@@ -23,23 +23,23 @@ export interface IFinancialEvent {
 export class FinancialEventsService {
   constructor(
     private readonly authContext: AuthContextService,
-    private readonly redisService: RedisService,
     private readonly repository: FinancialEventsRepository,
-    private readonly ledgerEngine: LedgerEngine
+    private readonly ledgerEngine: LedgerEngine,
+    private readonly transactionContext: TransactionContext,
   ) {}
 
   async register(data: IFinancialEvent): Promise<FinancialEvents> {
+    if (!this.transactionContext.hasTransaction()) {
+      throw new FinancialEventOutsideTransactionException(`register() must be called within a transaction`);
+    }
     const event = await this.buildEvent(data);
     const saved = await this.repository.saveEvent(event);
     await this.ledgerEngine.process(saved);
-    if (saved?.id > 0) {
-      const rkPreviousHash = RedisKeys.previousHash(this.authContext.getClientId());
-      await this.redisService.set(rkPreviousHash, saved.eventHash);
-    }
     return saved;
   }
 
   private async buildEvent(data: IFinancialEvent): Promise<FinancialEvents> {
+    const lastEvent = await this.repository.getLastEvent();
     const event = new FinancialEvents();
     event.clientId = this.authContext.getClientId();
     event.accountId = data.accountId;
@@ -47,38 +47,26 @@ export class FinancialEventsService {
     event.amount = data.amount;
     event.occurredAt = DateHelper.getCurrentDate();
     event.createdAt = DateHelper.getCurrentDate();
-    event.sequenceNumber = await this.getSequenceNumber();
+    event.sequenceNumber = this.getSequenceNumber(lastEvent);
     event.referenceType = data.referenceType;
     event.referenceId = data.referenceId;
-    event.previousHash = await this.getPreviousHash();
+    event.previousHash = this.getPreviousHash(lastEvent);
     event.eventHash = this.generateEventHash(event);
     return event;
   }
 
-  private async getSequenceNumber(): Promise<number> {
-    const rk = RedisKeys.sequenceNumber(this.authContext.getClientId());
-
-    const redisValue = await this.redisService.get<number | string>(rk);
-
-    if (redisValue === null) {
-      const maxFromDb = await this.repository.getMaxSequenceNumber();
-      const current = maxFromDb ?? 0;
-      await this.redisService.set(rk, current);
+  private getSequenceNumber(lastEvent: FinancialEvents | null): number {
+    if (lastEvent !== null) {
+      return lastEvent.sequenceNumber + 1;
     }
-
-    return await this.redisService.incr(rk);
+    return 1;
   }
 
-  private async getPreviousHash(): Promise<string> {
-    const rkPreviousHash = RedisKeys.previousHash(this.authContext.getClientId());
-
-    const redisValue = await this.redisService.get<string>(rkPreviousHash);
-    if (redisValue !== null && redisValue !== undefined) {
-      return redisValue;
+  private getPreviousHash(lastEvent: FinancialEvents | null): string {
+    if (lastEvent !== null) {
+      return lastEvent.eventHash;
     }
-
-    const lastHashFromDb = await this.repository.getLastEventHash();
-    return lastHashFromDb ?? 'INITIAL';
+    return 'INITIAL';
   }
 
   private generateEventHash(event: FinancialEvents): string {

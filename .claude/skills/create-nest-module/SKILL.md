@@ -175,3 +175,74 @@ export class AppModule implements NestModule {}
 ```
 
 Não registre o módulo nos dois lugares — se registrou no módulo pai, o `AppModule` já o alcança transitivamente.
+
+---
+
+## 6. Migration de inserção na tabela `modules`
+
+**Sempre perguntar ao usuário** se deve ser gerada a migration para inserir o módulo na tabela `modules` do sistema antes de finalizar a criação.
+
+Se a resposta for sim, crie o arquivo seguindo o padrão de nomenclatura:
+```
+src/migrations/versions/Migration<YYYYMMDD>_<NN>_InsereModulo<NomeModulo>.ts
+```
+
+Use a data atual e o próximo número de sequência disponível (`<NN>`).
+
+### Padrão da migration
+
+```typescript
+import { Database } from 'src/enum/database.enum';
+import { IMigration } from '../core/IMigration';
+import { IMigrationStepProcessor } from '../core/IMigrationStepProcessor';
+import { MigrationSteps } from '../core/MigrationSteps';
+
+export class Migration<YYYYMMDD>_<NN>_InsereModulo<NomeModulo> implements IMigration {
+    readonly name = 'Insere módulo de <nome legível>';
+
+    execute(): IMigrationStepProcessor[] {
+        return [
+            MigrationSteps.RunSQL(
+                `INSERT INTO modules (name, location, description, showInSidebar, \`group\`, displayName)
+                VALUES ('<nome>', '/<rota>', '<descrição>', <0|1>, '<grupo>', '<displayName>');`
+            ),
+            // Incluir este step apenas se o módulo tiver um pai na tabela modules:
+            MigrationSteps.RunSQL(
+                `UPDATE modules child
+                JOIN modules parent ON parent.name = '<nome-do-pai>'
+                SET child.parentId = parent.id
+                WHERE child.name = '<nome>';`
+            ),
+        ];
+    }
+
+    executeBeforeDeploy(): IMigrationStepProcessor[] {
+        return [];
+    }
+
+    getDatabases(): Database[] {
+        return [Database.PLENNA];
+    }
+
+    isTransactional(): boolean {
+        return false;
+    }
+}
+```
+
+### Campos do INSERT
+
+| Campo | Descrição |
+|---|---|
+| `name` | Identificador único do módulo (camelCase, ex: `transfers`) |
+| `location` | Rota no frontend (ex: `/transfers`). `null` se for módulo-pai sem rota própria |
+| `description` | Descrição técnica do módulo |
+| `showInSidebar` | `1` se aparece no menu lateral, `0` se é interno/config |
+| `` `group` `` | Agrupamento no sidebar: `navigation`, `config` ou string vazia |
+| `displayName` | Nome exibido na interface (ex: `Transferências`) |
+
+### Regras importantes
+
+- **Nunca use `parentId` hardcoded.** Use o `UPDATE ... JOIN` para encontrar o pai pelo `name`.
+- O step de atualização de `parentId` só é necessário se o módulo tiver um módulo pai na tabela.
+- Pergunte ao usuário qual é o `name` do módulo pai (caso exista) e se o módulo deve aparecer no sidebar.

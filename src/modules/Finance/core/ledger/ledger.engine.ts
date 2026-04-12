@@ -43,9 +43,5 @@ export class LedgerEngine {
   if (HelperFunctions.isNullable(event.id, true, true)) {
    throw new Error(`invalid eventId`);
   }
-
-  if (event.referenceType === PaymentType.TRANSFER && event.referenceId === event.accountId) {
-   throw new Error(`referenceId and accountId are the same for the TRANSFER type`);
-  }
  }
 }

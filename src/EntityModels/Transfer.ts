@@ -19,7 +19,6 @@ export class Transfer extends EntityModel implements IEntity {
     static fromRow(row: ITransferRow): Transfer {
         const t = new Transfer();
         t.id = row.id;
-        t.clientId = row.clientId;
         t.originAccount = row.originAccount;
         t.targetAccount = row.targetAccount;
         t.amount = row.amount;

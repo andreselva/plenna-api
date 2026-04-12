@@ -5,10 +5,6 @@ export class TransferDTO {
     @IsOptional()
     id: number;
 
-    @IsInt({ message: 'invalid clientId' })
-    @IsOptional()
-    clientId: number;
-
     @IsInt({ message: 'invalid originAccount' })
     @IsNotEmpty({ message: 'originAccount cannot be empty' })
     originAccount: number;

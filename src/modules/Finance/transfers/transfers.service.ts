@@ -24,16 +24,21 @@ export class TransfersService {
         return this.database.transaction(async () => {
             const transfer = await this.repository.saveEntity(entity);
             await this.registerFinancialEvent(transfer);
+            return transfer;
         })
     }
 
-    async revertTransfer(transfer: TransferDTO) {
-        const originAccountId = transfer.originAccount;
-        const targetAccountId = transfer.targetAccount;
-        transfer.originAccount = targetAccountId;
-        transfer.targetAccount = originAccountId;
-        transfer.id = 0;
-        return await this.create(transfer);
+    async revertTransfer(id: number) {
+        const original = await this.repository.findById(id);
+        if (!original) {
+            throw new Error(`Transfer ${id} not found`);
+        }
+        const revertDTO = new TransferDTO();
+        revertDTO.originAccount = original.targetAccount;
+        revertDTO.targetAccount = original.originAccount;
+        revertDTO.amount = original.amount;
+        revertDTO.transferDate = original.transferDate;
+        return await this.create(revertDTO);
     }
 
     private async registerFinancialEvent(transfer: Transfer): Promise<void> {

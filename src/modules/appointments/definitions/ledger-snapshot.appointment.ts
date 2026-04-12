@@ -13,7 +13,7 @@ export class LedgerSnapshotAppointment extends ExecutableAppointment {
             3,
             'Snapshot do Ledger',
             'Gera snapshots periódicos do saldo do ledger por conta bancária.',
-            Recurrence.DAILY_08,
+            Recurrence.EVERY_15_MIN,
             false,
             'ledger-snapshot',
             null,

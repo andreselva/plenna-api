@@ -83,9 +83,9 @@ export class LedgerSnapshotRepository extends BaseRepository<LedgerSnapshot> {
         return Number(rows[0]?.total ?? 0);
     }
 
-    async getAllClientIds(): Promise<number[]> {
-        const query = `SELECT DISTINCT clientId FROM ledger_entries`;
+    async getAllActiveClientIds(): Promise<number[]> {
+        const query = `SELECT id FROM clients WHERE status = 'active'`;
         const rows = await this.database.select(query, []);
-        return rows.map((row: any) => Number(row.clientId));
+        return rows.map((row: any) => Number(row.id));
     }
 }

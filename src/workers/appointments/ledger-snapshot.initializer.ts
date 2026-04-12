@@ -19,7 +19,7 @@ export class LedgerSnapshotInitializer implements OnModuleInit {
         const appointment = this.appointments.find((a) => a.type === 'ledger-snapshot');
         if (!appointment) return;
 
-        const clientIds = await this.snapshotRepository.getAllClientIds();
+        const clientIds = await this.snapshotRepository.getAllActiveClientIds();
         this.logger.log(`Inicializando agendamento de snapshot para ${clientIds.length} cliente(s)`);
 
         for (const clientId of clientIds) {

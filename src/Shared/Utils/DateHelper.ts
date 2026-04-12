@@ -135,6 +135,6 @@ export default class DateHelper {
         const past = DateTime.fromISO(normalized, { zone: 'America/Sao_Paulo' });
         if (!past.isValid) return Infinity;
         const diff = DateTime.local({ zone: 'America/Sao_Paulo' }).diff(past, 'days');
-        return Math.floor(diff.days);
+        return Math.floor(diff.as('days'));
     }
 }

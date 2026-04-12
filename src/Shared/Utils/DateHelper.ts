@@ -138,8 +138,13 @@ export default class DateHelper {
         if (!past.isValid) return Infinity;
 
         const diff = DateTime.local({ zone: 'America/Sao_Paulo' }).diff(past, 'days');
+
         const days = diff.days;
 
-        return Number.isFinite(days) ? Math.floor(days) : Infinity;
+        if (typeof days !== 'number' || !Number.isFinite(days)) {
+            return Infinity;
+        }
+
+        return Math.floor(days);
     }
 }

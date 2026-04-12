@@ -84,7 +84,7 @@ export class LedgerSnapshotRepository extends BaseRepository<LedgerSnapshot> {
     }
 
     async getAllActiveClientIds(): Promise<number[]> {
-        const query = `SELECT id FROM clients WHERE status = 'active'`;
+        const query = `SELECT id FROM clients WHERE status = 'active' AND clientName <> '__PLENNA_SAAS__'`;
         const rows = await this.database.select(query, []);
         return rows.map((row: any) => Number(row.id));
     }

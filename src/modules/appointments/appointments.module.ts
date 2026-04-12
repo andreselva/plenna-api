@@ -53,6 +53,7 @@ import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appoint
   exports: [
     AVAILABLE_APPOINTMENTS_TOKEN,
     AppointmentsQueueService,
+    LedgerSnapshotAppointment,
   ]
 })
 export class AppointmentsModule {}

@@ -1,5 +1,6 @@
-import { Controller, Get, Inject, NotFoundException, Param, Post } from '@nestjs/common';
+import { Controller, Delete, Get, Inject, NotFoundException, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { AuthContextService } from 'src/modules/Auth/auth-context.service';
+import { AppointmentsQueueService } from '../appointments-queue.service';
 import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from '../appointments.constants';
 import { ExecutableAppointment } from '../executable-appointment.base';
 import { Queue } from '../queue.provider';
@@ -13,6 +14,7 @@ export class AppointmentsDebugController {
     @Inject(AVAILABLE_APPOINTMENTS_TOKEN)
     private readonly appointments: ExecutableAppointment[],
     private readonly authContext: AuthContextService,
+    private readonly queueService: AppointmentsQueueService,
   ) {}
 
   @Get('repeatables')
@@ -33,7 +35,6 @@ export class AppointmentsDebugController {
     }
   }
 
-  @Public()
   @Post('trigger/:type')
   async trigger(@Param('type') type: string) {
     const appointment = this.appointments.find((a) => a.type === type);
@@ -44,5 +45,40 @@ export class AppointmentsDebugController {
     const clientId = this.authContext.getClientId();
     await appointment.execute({ clientId, appointmentId: appointment.id, config: null });
     return { triggered: type, clientId };
+  }
+
+  @Delete('unschedule/:type/:clientId')
+  async unschedule(
+    @Param('type') type: string,
+    @Param('clientId', ParseIntPipe) clientId: number,
+  ) {
+    const appointment = this.appointments.find((a) => a.type === type);
+    if (!appointment) {
+      throw new NotFoundException(`Agendamento "${type}" não encontrado.`);
+    }
+
+    await this.queueService.unschedule(appointment, clientId);
+    return { unscheduled: type, clientId };
+  }
+
+  @Delete('unschedule-all/:type')
+  async unscheduleAll(@Param('type') type: string) {
+    const appointment = this.appointments.find((a) => a.type === type);
+    if (!appointment) {
+      throw new NotFoundException(`Agendamento "${type}" não encontrado.`);
+    }
+
+    const schedulers = await this.queue.getRepeatableJobs?.() ?? [];
+    const prefix = `${type}:`;
+    const targets = schedulers.filter((s: any) => (s.id ?? s.key ?? '').includes(prefix));
+
+    for (const s of targets) {
+      const rawClientId = Number((s.id ?? s.key ?? '').replace(prefix, ''));
+      if (!isNaN(rawClientId)) {
+        await this.queueService.unschedule(appointment, rawClientId);
+      }
+    }
+
+    return { unscheduled: type, count: targets.length };
   }
 }

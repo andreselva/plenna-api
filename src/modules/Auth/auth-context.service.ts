@@ -32,7 +32,7 @@ export class AuthContextService {
      * Retorna o clientId do usuário logado.
      */
     getClientId(): number {
-        return 1;
+        return this.request.user?.clientId;
     }
 
     getRole(): Role {

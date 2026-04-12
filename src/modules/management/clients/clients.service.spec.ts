@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientsService } from './clients.service';
 import ClientRepository from './clients.repository';
+import { AppointmentsQueueService } from 'src/modules/appointments/appointments-queue.service';
+import { LedgerSnapshotAppointment } from 'src/modules/appointments/definitions/ledger-snapshot.appointment';
 
 describe('ClientsService', () => {
   let service: ClientsService;
@@ -14,6 +16,16 @@ describe('ClientsService', () => {
           useValue: {
             saveClient: jest.fn(),
           },
+        },
+        {
+          provide: AppointmentsQueueService,
+          useValue: {
+            schedule: jest.fn(),
+          },
+        },
+        {
+          provide: LedgerSnapshotAppointment,
+          useValue: {},
         },
       ],
     }).compile();

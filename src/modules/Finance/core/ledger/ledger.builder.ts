@@ -1,6 +1,5 @@
 import { FinancialEvents } from "src/EntityModels/FinancialEvent";
 import { LedgerEntry } from "src/EntityModels/ledger-entry";
-import { LedgerEntryTypeEnum } from "src/enum/ledger-entry-type.enum";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import { Injectable } from "@nestjs/common";
 import { LedgerResolver } from "./ledger.resolver";

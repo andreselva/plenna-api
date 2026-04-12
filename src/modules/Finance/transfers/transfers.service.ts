@@ -5,7 +5,7 @@ import { TransfersRepository } from './transfers.repository';
 import MySQLDatabase from 'src/modules/Config/Database/MySQLDatabase';
 import { FinancialEventsEnum } from 'src/enum/financial-events.enum';
 import { PaymentType } from '../Payment/Types/payment.type';
-import { FinancialEventsService, IFinancialEvent } from '../core/financial-events/financial-events.service';
+import { FinancialEventsService } from '../core/financial-events/financial-events.service';
 
 @Injectable()
 export class TransfersService {

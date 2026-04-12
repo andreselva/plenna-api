@@ -7,6 +7,7 @@ import MySQLDatabase from "src/modules/Config/Database/MySQLDatabase";
 import DataMapper from "src/Shared/mapper/DataMapper";
 import QueryBuilder from "src/Shared/QueryBuilder/QueryBuilder";
 import BaseRepository from "src/Shared/Repositories/BaseRepository";
+import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
 
 @Injectable()
 export class LedgerRepository extends BaseRepository<LedgerEntry> {
@@ -17,7 +18,8 @@ export class LedgerRepository extends BaseRepository<LedgerEntry> {
  async getBankAccountById(accountId: number): Promise<BankAccount> {
   const query = `SELECT type FROM bank_accounts WHERE id = ? AND clientId = ?`;
   const result = await this.database.select(query, [accountId, this.authContext.getClientId()]);
-  return DataMapper.toEntities(result, BankAccount)[0];
+  const account = DataMapper.toEntities(result, BankAccount)[0];
+  return HelperFunctions.cleanNullables(account)
  }
 
  async saveLedgerEventProcessing(ledgerEventProcessing: LedgerEventProcessing) {

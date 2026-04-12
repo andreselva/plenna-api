@@ -3,7 +3,6 @@ import { FinancialEvents } from "src/EntityModels/FinancialEvent";
 import { LedgerBuilder } from "./ledger.builder";
 import { LedgerEntry } from "src/EntityModels/ledger-entry";
 import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
-import { PaymentType } from "../../Payment/Types/payment.type";
 import { EventAlreadyProcessedException } from "./exceptions/EventAlreadyProcessedException";
 import { InvalidQuantityLedgerEntriesException } from "./exceptions/InvalidQuantityLedgerEntriesException";
 import { LedgerResolver } from "./ledger.resolver";
@@ -42,10 +41,6 @@ export class LedgerEngine {
 
   if (HelperFunctions.isNullable(event.id, true, true)) {
    throw new Error(`invalid eventId`);
-  }
-
-  if (event.referenceType === PaymentType.TRANSFER && event.referenceId === event.accountId) {
-   throw new Error(`referenceId and accountId are the same for the TRANSFER type`);
   }
  }
 }

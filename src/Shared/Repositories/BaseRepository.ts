@@ -32,10 +32,11 @@ export default abstract class BaseRepository<T extends EntityModel> {
     }
 
     async loadById(id: number): Promise<T | null> {
-        let sql = `SELECT * FROM ${this.entityClass.prototype.getTableName()} WHERE ${this.entityClass.prototype.getPrimaryKey()} = ?`;
+        const proto = this.entityClass.prototype;
+        let sql = `SELECT * FROM ${proto.getTableName()} WHERE ${proto.getPrimaryKey()} = ?`;
         const values = [id];
 
-        if ('clientId' in this.entityClass.prototype) {
+        if ('clientId' in new this.entityClass()) {
             sql += ` AND clientId = ?`;
             values.push(this.authContext.getClientId());
         }
@@ -48,10 +49,11 @@ export default abstract class BaseRepository<T extends EntityModel> {
     }
 
     async loadAll(): Promise<T[]> {
-        let sql = `SELECT * FROM ${this.entityClass.prototype.getTableName()}`;
+        const proto = this.entityClass.prototype;
+        let sql = `SELECT * FROM ${proto.getTableName()}`;
         const values: any[] = [];
 
-        if ('clientId' in this.entityClass.prototype) {
+        if ('clientId' in new this.entityClass()) {
             sql += ` WHERE clientId = ?`;
             values.push(this.authContext.getClientId());
         }

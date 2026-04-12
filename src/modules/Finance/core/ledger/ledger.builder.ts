@@ -1,6 +1,5 @@
 import { FinancialEvents } from "src/EntityModels/FinancialEvent";
 import { LedgerEntry } from "src/EntityModels/ledger-entry";
-import { LedgerEntryTypeEnum } from "src/enum/ledger-entry-type.enum";
 import DateHelper from "src/Shared/Utils/DateHelper";
 import { Injectable } from "@nestjs/common";
 import { LedgerResolver } from "./ledger.resolver";
@@ -23,9 +22,9 @@ export class LedgerBuilder {
   originEntry.entityType = event.referenceType;
   originEntry.type = this.resolver.defineTypeOrigin(event.referenceType);
   originEntry.amount = originAmount;
-  originEntry.accountId = originEntry.type === LedgerEntryTypeEnum.T ? event.referenceId : event.accountId;
+  originEntry.accountId = event.accountId;
   originEntry.metadata = metadata;
-  originEntry.liquidity = originEntry.type === LedgerEntryTypeEnum.T;
+  originEntry.liquidity = false;
   originEntry.createdAt = DateHelper.getCurrentDate();
  
   const destinationEntry = new LedgerEntry();

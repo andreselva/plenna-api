@@ -9,7 +9,22 @@ export class Migration20260412_02_AlteraEnumFinancialEvents implements IMigratio
     execute(): IMigrationStepProcessor[] {
         return [
             MigrationSteps.RunSQL(
-                `ALTER TABLE financial_events MODIFY COLUMN type ENUM('PAYMENT_POSTED','TRANSFER_POSTED','REVERSAL','OPENING_BALANCE','REVENUE_RECEIVED','CHARGE_GENERATED','CHARGE_PAID','CHARGE_CANCELED','CHARGE_EXPIRED','CHARGE_REFUNDED','REVENUE_RECOGNIZED','EXPENSE_RECOGNIZED', 'TRANSFER_RECEIVED');`
+                `ALTER TABLE financial_events MODIFY COLUMN type
+                 ENUM(
+                 'PAYMENT_POSTED',
+                 'TRANSFER_POSTED',
+                 'REVERSAL',
+                 'OPENING_BALANCE',
+                 'REVENUE_RECEIVED',
+                 'CHARGE_GENERATED',
+                 'CHARGE_PAID',
+                 'CHARGE_CANCELED',
+                 'CHARGE_EXPIRED',
+                 'CHARGE_REFUNDED',
+                 'REVENUE_RECOGNIZED',
+                 'EXPENSE_RECOGNIZED', 
+                 'TRANSFER_RECEIVED'
+                 ) NOT NULL;`
             )
         ];
     }

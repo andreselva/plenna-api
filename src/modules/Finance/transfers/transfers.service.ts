@@ -27,6 +27,15 @@ export class TransfersService {
         })
     }
 
+    async revertTransfer(transfer: TransferDTO) {
+        const originAccountId = transfer.originAccount;
+        const targetAccountId = transfer.targetAccount;
+        transfer.originAccount = targetAccountId;
+        transfer.targetAccount = originAccountId;
+        transfer.id = 0;
+        return await this.create(transfer);
+    }
+
     private async registerFinancialEvent(transfer: Transfer): Promise<void> {
         await this.financialEvents.register({
             accountId: transfer.originAccount,

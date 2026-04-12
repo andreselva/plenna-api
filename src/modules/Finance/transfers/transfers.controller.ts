@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { TransferDTO } from './DTOs/transfer.dto';
 import { TransfersService } from './transfers.service';
 
@@ -20,9 +20,8 @@ export class TransfersController {
         return await this.service.create(dto);
     }
 
-    @Put(':id')
-    @HttpCode(HttpStatus.OK)
-    async update(@Param('id') id: string, @Body() dto: TransferDTO) {
-        return await this.service.update(Number(id), dto);
+    @Post('/revert')
+    async revertTransfer(@Body() transfer: TransferDTO) {
+        return await this.service.revertTransfer(transfer)
     }
 }

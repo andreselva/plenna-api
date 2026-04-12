@@ -18,11 +18,9 @@ import { ChargesModule } from '../billing/charges/charges.module';
 import { ChargeExpirationAppointment } from './definitions/charge-expiration.appointment';
 import { LedgerModule } from '../Finance/core/ledger/ledger.module';
 import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appointment';
-import { LedgerBuildModule } from '../Finance/core/ledger-build/ledger-build.module';
-import { LedgerBuildAppointment } from './definitions/ledger-build.appointment';
 
 @Module({
-  imports: [EmailModule, RedisModule, ChargesModule, LedgerModule, LedgerBuildModule],
+  imports: [EmailModule, RedisModule, ChargesModule, LedgerModule],
   providers: [
     AppointmentsService,
     AppointmentsQueueService,
@@ -31,7 +29,6 @@ import { LedgerBuildAppointment } from './definitions/ledger-build.appointment';
     UpcomingExpensesEmailAppointment,
     ChargeExpirationAppointment,
     LedgerSnapshotAppointment,
-    LedgerBuildAppointment,
     AppointmentSettingsService,
     AppointmentsRepository,
     {
@@ -45,9 +42,8 @@ import { LedgerBuildAppointment } from './definitions/ledger-build.appointment';
         upcomingExpenses: UpcomingExpensesEmailAppointment,
         chargeExpiration: ChargeExpirationAppointment,
         ledgerSnapshot: LedgerSnapshotAppointment,
-        ledgerBuild: LedgerBuildAppointment,
-      ) => [upcomingExpenses, chargeExpiration, ledgerSnapshot, ledgerBuild],
-      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment, LedgerSnapshotAppointment, LedgerBuildAppointment],
+      ) => [upcomingExpenses, chargeExpiration, ledgerSnapshot],
+      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment, LedgerSnapshotAppointment],
     },
   ],
   controllers: [
@@ -58,7 +54,6 @@ import { LedgerBuildAppointment } from './definitions/ledger-build.appointment';
     AVAILABLE_APPOINTMENTS_TOKEN,
     AppointmentsQueueService,
     LedgerSnapshotAppointment,
-    LedgerBuildAppointment,
   ]
 })
 export class AppointmentsModule {}

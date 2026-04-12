@@ -2,6 +2,8 @@ import { Recurrence } from 'src/enum/recurrence.enum';
 import { IAppointment } from 'src/Shared/interfaces/IAppointment';
 
 export abstract class AppointmentBase<TConfig = unknown> implements IAppointment<TConfig> {
+  public isInternal: boolean = false;
+
   constructor(
     public id: number,
     public name: string,

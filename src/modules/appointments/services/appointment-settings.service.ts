@@ -54,6 +54,20 @@ export class AppointmentSettingsService {
     return this.mapRow(rows[0]);
   }
 
+  async getAllActiveClientIds(): Promise<number[]> {
+    const rows = (await this.database.select(
+      `SELECT id FROM clients WHERE status = 'active' AND clientName <> '__PLENNA_SAAS__'`,
+      [],
+    )) as { id: number }[];
+    return rows.map((r) => Number(r.id));
+  }
+
+  async upsertBulk(clientIds: number[], setting: Omit<AppointmentSetting, 'clientId'>): Promise<void> {
+    for (const clientId of clientIds) {
+      await this.upsert({ ...setting, clientId });
+    }
+  }
+
   async upsert(setting: AppointmentSetting): Promise<void> {
     const payload = {
       clientId: setting.clientId,

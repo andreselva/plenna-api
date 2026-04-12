@@ -8,6 +8,7 @@ import { Recurrence } from 'src/enum/recurrence.enum';
 import { AppointmentJobData } from './types/appointment-job-data.type';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { AppointmentSettingsService } from './services/appointment-settings.service';
+import { Role } from 'src/enum/role.enum';
 
 jest.mock('./appointments-queue.service', () => ({
   AppointmentsQueueService: class {},
@@ -64,7 +65,7 @@ describe('AppointmentsService', () => {
         },
         {
           provide: AuthContextService,
-          useValue: { getClientId: jest.fn().mockReturnValue(42) },
+          useValue: { getClientId: jest.fn().mockReturnValue(42), getRole: jest.fn().mockReturnValue(Role.SUPER_ADMIN) },
         },
       ],
     }).compile();

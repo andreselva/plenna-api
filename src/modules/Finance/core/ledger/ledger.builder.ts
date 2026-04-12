@@ -23,9 +23,9 @@ export class LedgerBuilder {
   originEntry.entityType = event.referenceType;
   originEntry.type = this.resolver.defineTypeOrigin(event.referenceType);
   originEntry.amount = originAmount;
-  originEntry.accountId = originEntry.type === LedgerEntryTypeEnum.T ? event.referenceId : event.accountId;
+  originEntry.accountId = event.accountId;
   originEntry.metadata = metadata;
-  originEntry.liquidity = originEntry.type === LedgerEntryTypeEnum.T;
+  originEntry.liquidity = false;
   originEntry.createdAt = DateHelper.getCurrentDate();
  
   const destinationEntry = new LedgerEntry();

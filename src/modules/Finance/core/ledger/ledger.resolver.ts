@@ -66,17 +66,18 @@ export class LedgerResolver {
 
             case FinancialEventsEnum.OPENING_BALANCE:
             case FinancialEventsEnum.REVENUE_RECEIVED:
-            case FinancialEventsEnum.TRANSFER_POSTED:
             case FinancialEventsEnum.CHARGE_PAID:
             case FinancialEventsEnum.CHARGE_CANCELED:
             case FinancialEventsEnum.CHARGE_EXPIRED:
             case FinancialEventsEnum.EXPENSE_RECOGNIZED:
+            case FinancialEventsEnum.TRANSFER_RECEIVED:
                 return { originAmount: -Math.abs(event.amount), destinationAmount: Math.abs(event.amount) };
                 
             case FinancialEventsEnum.PAYMENT_POSTED:
             case FinancialEventsEnum.CHARGE_GENERATED:
             case FinancialEventsEnum.REVENUE_RECOGNIZED:
             case FinancialEventsEnum.CHARGE_REFUNDED:
+            case FinancialEventsEnum.TRANSFER_POSTED:
                 return { originAmount: Math.abs(event.amount), destinationAmount: -Math.abs(event.amount) };
             default:
                 throw new InvalidEventTypeException(event.id);

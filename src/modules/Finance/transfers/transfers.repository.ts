@@ -23,7 +23,7 @@ export class TransfersRepository extends BaseRepository<Transfer> {
     }
 
     async saveEntity(entity: Transfer): Promise<Transfer> {
-        const result = await this.save(entity);
+        const result = await this.save(entity, true);
         if (result.affectedRows > 0 && entity.id === 0) {
             entity.id = result.insertId;
         }

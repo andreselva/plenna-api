@@ -22,7 +22,7 @@ export class AppointmentsService {
     const clientId = this.authContext.getClientId();
     const settings = await this.settingsService.findAllByClient(clientId);
     const items = await Promise.all(
-      this.appointments.map(async (appointment) => {
+      this.appointments.filter((a) => !a.isInternal).map(async (appointment) => {
         const stored = settings.get(appointment.type);
         const config = (stored?.config) ?? appointment.config;
         const recurrence = stored?.recurrence ?? appointment.recurrence;

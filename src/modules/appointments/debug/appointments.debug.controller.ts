@@ -1,12 +1,18 @@
-import { Controller, Get, Inject } from '@nestjs/common';
-import { APPOINTMENTS_QUEUE_TOKEN } from '../appointments.constants';
+import { Controller, Get, Inject, NotFoundException, Param, Post } from '@nestjs/common';
+import { AuthContextService } from 'src/modules/Auth/auth-context.service';
+import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from '../appointments.constants';
+import { ExecutableAppointment } from '../executable-appointment.base';
 import { Queue } from '../queue.provider';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('appointments/debug')
 export class AppointmentsDebugController {
   constructor(
     @Inject(APPOINTMENTS_QUEUE_TOKEN)
     private readonly queue: Queue,
+    @Inject(AVAILABLE_APPOINTMENTS_TOKEN)
+    private readonly appointments: ExecutableAppointment[],
+    private readonly authContext: AuthContextService,
   ) {}
 
   @Get('repeatables')
@@ -25,5 +31,18 @@ export class AppointmentsDebugController {
     } catch {
       return [];
     }
+  }
+
+  @Public()
+  @Post('trigger/:type')
+  async trigger(@Param('type') type: string) {
+    const appointment = this.appointments.find((a) => a.type === type);
+    if (!appointment) {
+      throw new NotFoundException(`Agendamento "${type}" não encontrado.`);
+    }
+
+    const clientId = this.authContext.getClientId();
+    await appointment.execute({ clientId, appointmentId: appointment.id, config: null });
+    return { triggered: type, clientId };
   }
 }

@@ -8,6 +8,7 @@ export interface IAppointment<TConfig = unknown> {
   description?: string;
   recurrence: Recurrence;
   isActive: boolean;
+  isInternal?: boolean;
   type: string;
   config: TConfig | null;
   timezone?: string | null;

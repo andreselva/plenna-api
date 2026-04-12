@@ -128,4 +128,13 @@ export default class DateHelper {
     static convertToDateTime(date: string): DateTime {
         return DateTime.fromISO(date, { zone: "America/Sao_Paulo" });
     }
+
+    static daysSince(date: string | null): number {
+        if (!date) return Infinity;
+        const normalized = date.includes(' ') ? date.replace(' ', 'T') : date;
+        const past = DateTime.fromISO(normalized, { zone: 'America/Sao_Paulo' });
+        if (!past.isValid) return Infinity;
+        const diff = DateTime.local({ zone: 'America/Sao_Paulo' }).diff(past, 'days');
+        return Math.floor(diff.days);
+    }
 }

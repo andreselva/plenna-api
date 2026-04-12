@@ -16,9 +16,11 @@ import type { Redis } from 'ioredis';
 import { UpcomingExpensesEmailAppointment } from './definitions/upcoming-expenses-email.appointment';
 import { ChargesModule } from '../billing/charges/charges.module';
 import { ChargeExpirationAppointment } from './definitions/charge-expiration.appointment';
+import { LedgerModule } from '../Finance/core/ledger/ledger.module';
+import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appointment';
 
 @Module({
-  imports: [EmailModule, RedisModule, ChargesModule],
+  imports: [EmailModule, RedisModule, ChargesModule, LedgerModule],
   providers: [
     AppointmentsService,
     AppointmentsQueueService,
@@ -26,6 +28,7 @@ import { ChargeExpirationAppointment } from './definitions/charge-expiration.app
     UpcomingExpensesEmailService,
     UpcomingExpensesEmailAppointment,
     ChargeExpirationAppointment,
+    LedgerSnapshotAppointment,
     AppointmentSettingsService,
     AppointmentsRepository,
     {
@@ -38,8 +41,9 @@ import { ChargeExpirationAppointment } from './definitions/charge-expiration.app
       useFactory: (
         upcomingExpenses: UpcomingExpensesEmailAppointment,
         chargeExpiration: ChargeExpirationAppointment,
-      ) => [upcomingExpenses, chargeExpiration],
-      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment],
+        ledgerSnapshot: LedgerSnapshotAppointment,
+      ) => [upcomingExpenses, chargeExpiration, ledgerSnapshot],
+      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment, LedgerSnapshotAppointment],
     },
   ],
   controllers: [
@@ -47,7 +51,8 @@ import { ChargeExpirationAppointment } from './definitions/charge-expiration.app
     AppointmentsDebugController,
   ],
   exports: [
-    AVAILABLE_APPOINTMENTS_TOKEN
+    AVAILABLE_APPOINTMENTS_TOKEN,
+    AppointmentsQueueService,
   ]
 })
 export class AppointmentsModule {}

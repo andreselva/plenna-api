@@ -25,6 +25,19 @@
       "localRoot": "${workspaceFolder}",
       "remoteRoot": "/app",
       "skipFiles": ["<node_internals>/**"]
+    },
+    {                                                         
+      "type": "node",                                                                                                                                                                                                                           
+      "request": "launch",                                    
+      "name": "Worker: Appointments",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["ts-node", "-r", "tsconfig-paths/register"],                                                                                                                                                                              
+      "args": ["src/workers/appointments/appointments.worker.ts"],
+      "env": {                                                                                                                                                                                                                                  
+        "USE_FAKE_QUEUE": "true"                              
+      },                                                                                                                                                                                                                                        
+      "sourceMaps": true,                                                                                                                                                                                                                       
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     }
   ]
 }

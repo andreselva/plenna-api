@@ -3,7 +3,6 @@ import { FinancialEvents } from "src/EntityModels/FinancialEvent";
 import { LedgerBuilder } from "./ledger.builder";
 import { LedgerEntry } from "src/EntityModels/ledger-entry";
 import { HelperFunctions } from "src/Shared/Utils/HelperFunctions";
-import { PaymentType } from "../../Payment/Types/payment.type";
 import { EventAlreadyProcessedException } from "./exceptions/EventAlreadyProcessedException";
 import { InvalidQuantityLedgerEntriesException } from "./exceptions/InvalidQuantityLedgerEntriesException";
 import { LedgerResolver } from "./ledger.resolver";

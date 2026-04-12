@@ -4,7 +4,6 @@ import { AppointmentsQueueService } from '../appointments-queue.service';
 import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from '../appointments.constants';
 import { ExecutableAppointment } from '../executable-appointment.base';
 import { Queue } from '../queue.provider';
-import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('appointments/debug')
 export class AppointmentsDebugController {

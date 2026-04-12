@@ -131,10 +131,15 @@ export default class DateHelper {
 
     static daysSince(date: string | null): number {
         if (!date) return Infinity;
+
         const normalized = date.includes(' ') ? date.replace(' ', 'T') : date;
         const past = DateTime.fromISO(normalized, { zone: 'America/Sao_Paulo' });
+
         if (!past.isValid) return Infinity;
+
         const diff = DateTime.local({ zone: 'America/Sao_Paulo' }).diff(past, 'days');
-        return Math.floor(diff.as('days'));
+        const days = diff.days;
+
+        return Number.isFinite(days) ? Math.floor(days) : Infinity;
     }
 }

@@ -26,7 +26,7 @@ export abstract class AppointmentBase<TConfig = unknown> implements IAppointment
     const recurrence = recurrenceOverride ?? this.recurrence;
     const tz = timezoneOverride ?? this.timezone ?? 'America/Sao_Paulo';
     switch (recurrence) {
-      case Recurrence.EVERY_15_MIN: return { every: 5_000 };//Da pra usar esse recurrence para testar, só definir para every: 5_000
+      case Recurrence.EVERY_15_MIN: return { every: 15 * 60 * 1000 };//Da pra usar esse recurrence para testar, só definir para every: 5_000
       case Recurrence.HOURLY:       return { pattern: '0 * * * *', tz };
       case Recurrence.DAILY_08:     return { pattern: '0 8 * * *', tz };
       case Recurrence.WEEKDAYS_08:  return { pattern: '0 8 * * 1-5', tz };

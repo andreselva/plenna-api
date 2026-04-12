@@ -28,6 +28,7 @@ export abstract class AppointmentBase<TConfig = unknown> implements IAppointment
     switch (recurrence) {
       case Recurrence.EVERY_15_MIN: return { every: 15 * 60 * 1000 };//Da pra usar esse recurrence para testar, só definir para every: 5_000
       case Recurrence.HOURLY:       return { pattern: '0 * * * *', tz };
+      case Recurrence.DAILY_03:     return { pattern: '0 3 * * *', tz };
       case Recurrence.DAILY_08:     return { pattern: '0 8 * * *', tz };
       case Recurrence.WEEKDAYS_08:  return { pattern: '0 8 * * 1-5', tz };
       case Recurrence.WEEKLY_MON_09:return { pattern: '0 9 * * 1', tz };

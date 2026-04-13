@@ -18,9 +18,13 @@ import { ChargesModule } from '../billing/charges/charges.module';
 import { ChargeExpirationAppointment } from './definitions/charge-expiration.appointment';
 import { LedgerModule } from '../Finance/core/ledger/ledger.module';
 import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appointment';
+import { LedgerBuildModule } from '../Finance/core/ledger-build/ledger-build.module';
+import { LedgerBuildAppointment } from './definitions/ledger-build.appointment';
+import { LedgerMonthlyBuildModule } from '../Finance/core/ledger-monthly-build/ledger-monthly-build.module';
+import { LedgerMonthlyBuildAppointment } from './definitions/ledger-monthly-build.appointment';
 
 @Module({
-  imports: [EmailModule, RedisModule, ChargesModule, LedgerModule],
+  imports: [EmailModule, RedisModule, ChargesModule, LedgerModule, LedgerBuildModule, LedgerMonthlyBuildModule],
   providers: [
     AppointmentsService,
     AppointmentsQueueService,
@@ -29,6 +33,8 @@ import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appoint
     UpcomingExpensesEmailAppointment,
     ChargeExpirationAppointment,
     LedgerSnapshotAppointment,
+    LedgerBuildAppointment,
+    LedgerMonthlyBuildAppointment,
     AppointmentSettingsService,
     AppointmentsRepository,
     {
@@ -42,8 +48,16 @@ import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appoint
         upcomingExpenses: UpcomingExpensesEmailAppointment,
         chargeExpiration: ChargeExpirationAppointment,
         ledgerSnapshot: LedgerSnapshotAppointment,
-      ) => [upcomingExpenses, chargeExpiration, ledgerSnapshot],
-      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment, LedgerSnapshotAppointment],
+        ledgerBuild: LedgerBuildAppointment,
+        ledgerMonthlyBuild: LedgerMonthlyBuildAppointment,
+      ) => [upcomingExpenses, chargeExpiration, ledgerSnapshot, ledgerBuild, ledgerMonthlyBuild],
+      inject: [
+        UpcomingExpensesEmailAppointment,
+        ChargeExpirationAppointment,
+        LedgerSnapshotAppointment,
+        LedgerBuildAppointment,
+        LedgerMonthlyBuildAppointment,
+      ],
     },
   ],
   controllers: [
@@ -54,6 +68,8 @@ import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appoint
     AVAILABLE_APPOINTMENTS_TOKEN,
     AppointmentsQueueService,
     LedgerSnapshotAppointment,
+    LedgerBuildAppointment,
+    LedgerMonthlyBuildAppointment,
   ]
 })
 export class AppointmentsModule {}

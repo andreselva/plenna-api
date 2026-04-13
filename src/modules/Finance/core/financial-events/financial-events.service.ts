@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { FinancialEventsEnum } from 'src/enum/financial-events.enum';
 import { FinancialEvents } from 'src/EntityModels/FinancialEvent';
 import DateHelper from 'src/Shared/Utils/DateHelper';
@@ -10,6 +10,7 @@ import { TransactionContext } from 'src/modules/Config/Database/transaction-cont
 import { PaymentType } from '../../Payment/Types/payment.type';
 import { LedgerEngine } from '../ledger/ledger.engine';
 import { FinancialEventOutsideTransactionException } from './exceptions/financial-event-outside-transaction.exception';
+import { LedgerBuildService } from '../ledger-build/ledger-build.service';
 
 export interface IFinancialEvent {
   accountId: number;
@@ -26,6 +27,7 @@ export class FinancialEventsService {
     private readonly repository: FinancialEventsRepository,
     private readonly ledgerEngine: LedgerEngine,
     private readonly transactionContext: TransactionContext,
+    @Optional() private readonly ledgerBuildService: LedgerBuildService | null,
   ) {}
 
   async register(data: IFinancialEvent): Promise<FinancialEvents> {
@@ -35,6 +37,7 @@ export class FinancialEventsService {
     const event = await this.buildEvent(data);
     const saved = await this.repository.saveEvent(event);
     await this.ledgerEngine.process(saved);
+    this.ledgerBuildService?.scheduleRebuild().catch(() => {});
     return saved;
   }
 

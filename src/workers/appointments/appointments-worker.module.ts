@@ -5,10 +5,14 @@ import { DatabaseModule } from 'src/modules/Config/Database/database.module';
 import { RedisModule } from 'src/modules/redis/redis.module';
 import { AppointmentsModule } from 'src/modules/appointments/appointments.module';
 import { LedgerModule } from 'src/modules/Finance/core/ledger/ledger.module';
+import { LedgerBuildModule } from 'src/modules/Finance/core/ledger-build/ledger-build.module';
+import { LedgerMonthlyBuildModule } from 'src/modules/Finance/core/ledger-monthly-build/ledger-monthly-build.module';
 import { WorkerAuthModule } from '../worker-auth.module';
 import { AppointmentsWorkerService } from './appointments-worker.service';
 import { WorkerFactory } from '../worker.factory';
 import { LedgerSnapshotInitializer } from './ledger-snapshot.initializer';
+import { LedgerBuildInitializer } from './ledger-build.initializer';
+import { LedgerMonthlyBuildInitializer } from './ledger-monthly-build.initializer';
 
 @Module({
   imports: [
@@ -18,7 +22,15 @@ import { LedgerSnapshotInitializer } from './ledger-snapshot.initializer';
     RedisModule,
     AppointmentsModule,
     LedgerModule,
+    LedgerBuildModule,
+    LedgerMonthlyBuildModule,
   ],
-  providers: [AppointmentsWorkerService, WorkerFactory, LedgerSnapshotInitializer],
+  providers: [
+    AppointmentsWorkerService,
+    WorkerFactory,
+    LedgerSnapshotInitializer,
+    LedgerBuildInitializer,
+    LedgerMonthlyBuildInitializer,
+  ],
 })
 export class AppointmentsWorkerModule {}

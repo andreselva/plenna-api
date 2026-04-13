@@ -11,8 +11,8 @@ export class LedgerMonthlyBuildAppointment extends ExecutableAppointment {
 
     constructor(private readonly ledgerMonthlyBuildService: LedgerMonthlyBuildService) {
         super(
-            5,
-            'Monthly Build do Ledger',
+            4,
+            'Build mensal do ledger',
             'Gera o resumo financeiro mensal consolidado do ledger com filtro de período para dashboards e relatórios históricos.',
             Recurrence.DAILY_03,
             false,

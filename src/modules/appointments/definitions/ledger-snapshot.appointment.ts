@@ -3,6 +3,7 @@ import { Recurrence } from 'src/enum/recurrence.enum';
 import { LedgerSnapshotService } from 'src/modules/Finance/core/ledger/ledger-snapshot.service';
 import { ExecutableAppointment } from '../executable-appointment.base';
 import { AppointmentJobData } from '../types/appointment-job-data.type';
+import { AppointmentsEnum } from 'src/enum/appointments.enum';
 
 @Injectable()
 export class LedgerSnapshotAppointment extends ExecutableAppointment {
@@ -15,7 +16,7 @@ export class LedgerSnapshotAppointment extends ExecutableAppointment {
             'Gera snapshots periódicos do saldo do ledger por conta bancária.',
             Recurrence.DAILY_08,
             false,
-            'ledger-snapshot',
+            AppointmentsEnum.LEDGER_SNAPSHOT,
             null,
             'America/Sao_Paulo',
         );

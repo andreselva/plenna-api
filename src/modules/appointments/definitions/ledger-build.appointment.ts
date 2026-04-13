@@ -3,6 +3,7 @@ import { Recurrence } from 'src/enum/recurrence.enum';
 import { LedgerBuildService } from 'src/modules/Finance/core/ledger-build/ledger-build.service';
 import { ExecutableAppointment } from '../executable-appointment.base';
 import { AppointmentJobData } from '../types/appointment-job-data.type';
+import { AppointmentsEnum } from 'src/enum/appointments.enum';
 
 @Injectable()
 export class LedgerBuildAppointment extends ExecutableAppointment {
@@ -15,7 +16,7 @@ export class LedgerBuildAppointment extends ExecutableAppointment {
             'Gera o resumo financeiro consolidado do ledger para dashboards e relatórios.',
             Recurrence.DAILY_03,
             false,
-            'ledger-build',
+            AppointmentsEnum.LEDGER_BUILD,
             null,
             'America/Sao_Paulo',
         );

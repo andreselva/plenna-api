@@ -8,6 +8,7 @@ import { AppointmentJobData } from 'src/modules/appointments/types/appointment-j
 import { DateTime } from 'luxon';
 import DateHelper from 'src/Shared/Utils/DateHelper';
 import { LedgerMonthlyBuildRepository } from './ledger-monthly-build.repository';
+import { EventSummaryResult, PendingItemsResult } from './types/build-result.type';
 
 const TIMEZONE = 'America/Sao_Paulo';
 const REBUILD_DELAY_MS = 2 * 60 * 1000;
@@ -29,9 +30,9 @@ export class LedgerMonthlyBuildService {
         this.logger.log(`Iniciando monthly build para cliente ${clientId}`);
 
         const now = DateTime.local().setZone(TIMEZONE);
-        const period = now.toFormat('yyyy-MM');
-        const periodStart = now.startOf('month').toFormat('yyyy-MM-dd HH:mm:ss');
-        const periodEnd = now.endOf('month').toFormat('yyyy-MM-dd HH:mm:ss');
+        const period: string = now.toFormat('yyyy-MM');
+        const periodStart: string = now.startOf('month').toFormat('yyyy-MM-dd HH:mm:ss');
+        const periodEnd: string = now.endOf('month').toFormat('yyyy-MM-dd HH:mm:ss');
 
         const [
             paymentPosted,
@@ -50,6 +51,23 @@ export class LedgerMonthlyBuildService {
             pendingRevenues,
             openCharges,
             currentLiquidBalance,
+        ]: [
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            EventSummaryResult,
+            PendingItemsResult,
+            PendingItemsResult,
+            { openChargesCount: number; openChargesValue: number },
+            number,
         ] = await Promise.all([
             this.repository.getEventSummaryForPeriod(FinancialEventsEnum.PAYMENT_POSTED, periodStart, periodEnd),
             this.repository.getEventSummaryForPeriod(FinancialEventsEnum.TRANSFER_POSTED, periodStart, periodEnd),

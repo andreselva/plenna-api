@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { LedgerMonthlyBuild } from 'src/EntityModels/ledger-monthly-build';
+import { FinancialEventsEnum } from 'src/enum/financial-events.enum';
 import { AuthContextService } from 'src/modules/Auth/auth-context.service';
 import MySQLDatabase from 'src/modules/Config/Database/MySQLDatabase';
 import BaseRepository from 'src/Shared/Repositories/BaseRepository';
+import { ExpenseStatus } from '../../Expenses/Types/expense.status.type';
+import { RevenueStatus } from '../../Revenues/Types/revenue.status.type';
+import { EventSummaryResult, PendingItemsResult } from './types/build-result.type';
 
 @Injectable()
 export class LedgerMonthlyBuildRepository extends BaseRepository<LedgerMonthlyBuild> {
@@ -57,6 +61,55 @@ export class LedgerMonthlyBuildRepository extends BaseRepository<LedgerMonthlyBu
         return this.extractToEntity(rows)[0];
     }
 
+    async getEventSummaryForPeriod(
+        eventType: FinancialEventsEnum,
+        periodStart: string,
+        periodEnd: string,
+    ): Promise<EventSummaryResult> {
+        const clientId = this.authContext.getClientId();
+        const query = `
+            SELECT COUNT(*) AS count,
+                   COALESCE(SUM(amount), 0) AS totalAmount
+            FROM financial_events
+            WHERE clientId = ? AND type = ? AND occurredAt BETWEEN ? AND ?
+        `;
+        const rows = await this.database.select(query, [clientId, eventType, periodStart, periodEnd]);
+        return {
+            count: Number(rows[0]?.count ?? 0),
+            totalAmount: Number(rows[0]?.totalAmount ?? 0),
+        };
+    }
+
+    async getPendingExpenses(): Promise<PendingItemsResult> {
+        const clientId = this.authContext.getClientId();
+        const query = `
+            SELECT COUNT(*) AS count,
+                   COALESCE(SUM(value), 0) AS totalValue
+            FROM expense
+            WHERE clientId = ? AND status IN (?, ?)
+        `;
+        const rows = await this.database.select(query, [clientId, ExpenseStatus.PENDING, ExpenseStatus.PARTIAL]);
+        return {
+            count: Number(rows[0]?.count ?? 0),
+            totalValue: Number(rows[0]?.totalValue ?? 0),
+        };
+    }
+
+    async getPendingRevenues(): Promise<PendingItemsResult> {
+        const clientId = this.authContext.getClientId();
+        const query = `
+            SELECT COUNT(*) AS count,
+                   COALESCE(SUM(value), 0) AS totalValue
+            FROM revenue
+            WHERE clientId = ? AND status IN (?, ?)
+        `;
+        const rows = await this.database.select(query, [clientId, RevenueStatus.PENDING, RevenueStatus.PARTIAL]);
+        return {
+            count: Number(rows[0]?.count ?? 0),
+            totalValue: Number(rows[0]?.totalValue ?? 0),
+        };
+    }
+
     async getOpenChargesSnapshot(): Promise<{ openChargesCount: number; openChargesValue: number }> {
         const clientId = this.authContext.getClientId();
         const query = `
@@ -94,7 +147,7 @@ export class LedgerMonthlyBuildRepository extends BaseRepository<LedgerMonthlyBu
         return Number(rows[0]?.totalBalance ?? 0);
     }
 
-    async getAllActiveClientIds(): Promise<number[]> {
+    async getActiveClientIds(): Promise<number[]> {
         const query = `SELECT id FROM clients WHERE status = 'active' AND clientName <> '__PLENNA_SAAS__'`;
         const rows = await this.database.select(query, []);
         return rows.map((row: any) => Number(row.id));

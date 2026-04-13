@@ -1,9 +1,9 @@
 import { Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { LedgerBuildService } from './ledger-build.service';
+import { LedgerMonthlyBuildService } from './ledger-monthly-build.service';
 
-@Controller('ledger-build')
-export class LedgerBuildController {
-    constructor(private readonly service: LedgerBuildService) {}
+@Controller('ledger-monthly-build')
+export class LedgerMonthlyBuildController {
+    constructor(private readonly service: LedgerMonthlyBuildService) {}
 
     @Post('rebuild')
     @HttpCode(HttpStatus.ACCEPTED)

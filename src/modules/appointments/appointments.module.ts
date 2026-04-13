@@ -18,13 +18,11 @@ import { ChargesModule } from '../billing/charges/charges.module';
 import { ChargeExpirationAppointment } from './definitions/charge-expiration.appointment';
 import { LedgerModule } from '../Finance/core/ledger/ledger.module';
 import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appointment';
-import { LedgerBuildModule } from '../Finance/core/ledger-build/ledger-build.module';
-import { LedgerBuildAppointment } from './definitions/ledger-build.appointment';
 import { LedgerMonthlyBuildModule } from '../Finance/core/ledger-monthly-build/ledger-monthly-build.module';
 import { LedgerMonthlyBuildAppointment } from './definitions/ledger-monthly-build.appointment';
 
 @Module({
-  imports: [EmailModule, RedisModule, ChargesModule, LedgerModule, LedgerBuildModule, LedgerMonthlyBuildModule],
+  imports: [EmailModule, RedisModule, ChargesModule, LedgerModule, LedgerMonthlyBuildModule],
   providers: [
     AppointmentsService,
     AppointmentsQueueService,
@@ -33,7 +31,6 @@ import { LedgerMonthlyBuildAppointment } from './definitions/ledger-monthly-buil
     UpcomingExpensesEmailAppointment,
     ChargeExpirationAppointment,
     LedgerSnapshotAppointment,
-    LedgerBuildAppointment,
     LedgerMonthlyBuildAppointment,
     AppointmentSettingsService,
     AppointmentsRepository,
@@ -48,10 +45,9 @@ import { LedgerMonthlyBuildAppointment } from './definitions/ledger-monthly-buil
         upcomingExpenses: UpcomingExpensesEmailAppointment,
         chargeExpiration: ChargeExpirationAppointment,
         ledgerSnapshot: LedgerSnapshotAppointment,
-        ledgerBuild: LedgerBuildAppointment,
         ledgerMonthlyBuild: LedgerMonthlyBuildAppointment,
-      ) => [upcomingExpenses, chargeExpiration, ledgerSnapshot, ledgerBuild, ledgerMonthlyBuild],
-      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment, LedgerSnapshotAppointment, LedgerBuildAppointment, LedgerMonthlyBuildAppointment],
+      ) => [upcomingExpenses, chargeExpiration, ledgerSnapshot, ledgerMonthlyBuild],
+      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment, LedgerSnapshotAppointment, LedgerMonthlyBuildAppointment],
     },
   ],
   controllers: [
@@ -62,7 +58,6 @@ import { LedgerMonthlyBuildAppointment } from './definitions/ledger-monthly-buil
     AVAILABLE_APPOINTMENTS_TOKEN,
     AppointmentsQueueService,
     LedgerSnapshotAppointment,
-    LedgerBuildAppointment,
     LedgerMonthlyBuildAppointment,
   ]
 })

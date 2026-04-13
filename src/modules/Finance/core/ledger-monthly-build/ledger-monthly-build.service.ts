@@ -1,15 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { LedgerMonthlyBuild } from 'src/EntityModels/ledger-monthly-build';
 import { AuthContextService } from 'src/modules/Auth/auth-context.service';
 import { FinancialEventsEnum } from 'src/enum/financial-events.enum';
+import { APPOINTMENTS_QUEUE_TOKEN } from 'src/modules/appointments/appointments.constants';
+import { Queue } from 'src/modules/appointments/queue.provider';
+import { AppointmentJobData } from 'src/modules/appointments/types/appointment-job-data.type';
 import { DateTime } from 'luxon';
 import DateHelper from 'src/Shared/Utils/DateHelper';
-import { MonthlyEventBuilder } from './builders/monthly-event.builder';
-import { MonthlyPendingExpensesBuilder } from './builders/monthly-pending-expenses.builder';
-import { MonthlyPendingRevenuesBuilder } from './builders/monthly-pending-revenues.builder';
 import { LedgerMonthlyBuildRepository } from './ledger-monthly-build.repository';
 
 const TIMEZONE = 'America/Sao_Paulo';
+const REBUILD_DELAY_MS = 2 * 60 * 1000;
+const LEDGER_MONTHLY_BUILD_APPOINTMENT_ID = 5;
 
 @Injectable()
 export class LedgerMonthlyBuildService {
@@ -18,9 +20,8 @@ export class LedgerMonthlyBuildService {
     constructor(
         private readonly repository: LedgerMonthlyBuildRepository,
         private readonly authContext: AuthContextService,
-        private readonly monthlyEventBuilder: MonthlyEventBuilder,
-        private readonly pendingExpensesBuilder: MonthlyPendingExpensesBuilder,
-        private readonly pendingRevenuesBuilder: MonthlyPendingRevenuesBuilder,
+        @Inject(APPOINTMENTS_QUEUE_TOKEN)
+        private readonly queue: Queue<AppointmentJobData>,
     ) {}
 
     async build(): Promise<void> {
@@ -51,21 +52,21 @@ export class LedgerMonthlyBuildService {
             openCharges,
             currentLiquidBalance,
         ] = await Promise.all([
-            this.monthlyEventBuilder.build(FinancialEventsEnum.PAYMENT_POSTED, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.TRANSFER_POSTED, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.TRANSFER_RECEIVED, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.REVERSAL, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.OPENING_BALANCE, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.REVENUE_RECEIVED, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.CHARGE_GENERATED, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.CHARGE_PAID, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.CHARGE_CANCELED, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.CHARGE_EXPIRED, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.CHARGE_REFUNDED, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.REVENUE_RECOGNIZED, periodStart, periodEnd),
-            this.monthlyEventBuilder.build(FinancialEventsEnum.EXPENSE_RECOGNIZED, periodStart, periodEnd),
-            this.pendingExpensesBuilder.build(),
-            this.pendingRevenuesBuilder.build(),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.PAYMENT_POSTED, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.TRANSFER_POSTED, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.TRANSFER_RECEIVED, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.REVERSAL, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.OPENING_BALANCE, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.REVENUE_RECEIVED, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.CHARGE_GENERATED, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.CHARGE_PAID, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.CHARGE_CANCELED, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.CHARGE_EXPIRED, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.CHARGE_REFUNDED, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.REVENUE_RECOGNIZED, periodStart, periodEnd),
+            this.repository.getEventSummaryForPeriod(FinancialEventsEnum.EXPENSE_RECOGNIZED, periodStart, periodEnd),
+            this.repository.getPendingExpenses(),
+            this.repository.getPendingRevenues(),
             this.repository.getOpenChargesSnapshot(),
             this.repository.getCurrentLiquidBalance(),
         ]);
@@ -99,5 +100,24 @@ export class LedgerMonthlyBuildService {
 
         await this.repository.upsert(build);
         this.logger.log(`Monthly build concluído para cliente ${clientId} — período ${period}`);
+    }
+
+    async scheduleRebuild(): Promise<void> {
+        const clientId = this.authContext.getClientId();
+        const jobId = `ledger-monthly-build:rebuild:${clientId}`;
+
+        const payload: AppointmentJobData = {
+            appointmentId: LEDGER_MONTHLY_BUILD_APPOINTMENT_ID,
+            clientId,
+            config: null,
+        };
+
+        await this.queue.add('ledger-monthly-build', payload, {
+            jobId,
+            delay: REBUILD_DELAY_MS,
+            removeOnComplete: true,
+        });
+
+        this.logger.log(`Rebuild mensal agendado para cliente ${clientId} (delay=2min, jobId=${jobId})`);
     }
 }

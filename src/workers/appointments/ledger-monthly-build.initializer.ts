@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { AppointmentsEnum } from 'src/enum/appointments.enum';
 import { AVAILABLE_APPOINTMENTS_TOKEN } from 'src/modules/appointments/appointments.constants';
 import { AppointmentsQueueService } from 'src/modules/appointments/appointments-queue.service';
 import { ExecutableAppointment } from 'src/modules/appointments/executable-appointment.base';
@@ -16,10 +17,10 @@ export class LedgerMonthlyBuildInitializer implements OnModuleInit {
     ) {}
 
     async onModuleInit(): Promise<void> {
-        const appointment = this.appointments.find((a) => a.type === 'ledger-monthly-build');
+        const appointment = this.appointments.find((a) => a.type === AppointmentsEnum.LEDGER_MONTHLY_BUILD);
         if (!appointment) return;
 
-        const clientIds = await this.buildRepository.getAllActiveClientIds();
+        const clientIds = await this.buildRepository.getActiveClientIds();
         this.logger.log(`Inicializando agendamento de ledger-monthly-build para ${clientIds.length} cliente(s)`);
 
         for (const clientId of clientIds) {

@@ -134,7 +134,7 @@ export class LedgerBuildService {
             },
         };
 
-        await this.repository.save(build);
+        await this.repository.save(build, true);
         this.logger.log(`Ledger build concluído para cliente ${clientId}`);
     }
 

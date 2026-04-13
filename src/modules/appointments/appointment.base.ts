@@ -1,3 +1,4 @@
+import { AppointmentsEnum } from 'src/enum/appointments.enum';
 import { Recurrence } from 'src/enum/recurrence.enum';
 import { IAppointment } from 'src/Shared/interfaces/IAppointment';
 
@@ -10,7 +11,7 @@ export abstract class AppointmentBase<TConfig = unknown> implements IAppointment
     public description: string | undefined,
     public recurrence: Recurrence,
     public isActive: boolean,
-    public readonly type: string,
+    public readonly type: AppointmentsEnum,
     public config: TConfig | null,
     public timezone?: string | null,
   ) {}

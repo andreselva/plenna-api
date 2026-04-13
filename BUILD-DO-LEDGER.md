@@ -69,7 +69,6 @@ UNIQUE KEY (clientId, period)
     "transferPosted": { "count": 0, "totalAmount": 0 },
     "transferReceived": { "count": 0, "totalAmount": 0 },
     "reversal": { "count": 0, "totalAmount": 0 },
-    "openingBalance": { "count": 0, "totalAmount": 0 },
     "revenueReceived": { "count": 0, "totalAmount": 0 },
     "chargeGenerated": { "count": 0, "totalAmount": 0 },
     "chargePaid": { "count": 0, "totalAmount": 0 },

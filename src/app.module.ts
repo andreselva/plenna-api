@@ -20,6 +20,7 @@ import { SaasModule } from './modules/saas/saas.module';
 import { BankAccountsModule } from './modules/Finance/core/bank-accounts/bank-accounts.module';
 import { LedgerModule } from './modules/Finance/core/ledger/ledger.module';
 import { LedgerBuildModule } from './modules/Finance/core/ledger-build/ledger-build.module';
+import { LedgerMonthlyBuildModule } from './modules/Finance/core/ledger-monthly-build/ledger-monthly-build.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { CustomersModule } from './modules/customers/customers.module';
 
@@ -45,6 +46,7 @@ import { CustomersModule } from './modules/customers/customers.module';
     BankAccountsModule,
     LedgerModule,
     LedgerBuildModule,
+    LedgerMonthlyBuildModule,
     BillingModule,
     CustomersModule
   ],

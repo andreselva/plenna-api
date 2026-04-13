@@ -4,7 +4,8 @@ import * as nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
-import MailComposer from 'nodemailer/lib/mail-composer';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const MailComposer = require('nodemailer/lib/mail-composer');
 
 import {
   SESv2Client,

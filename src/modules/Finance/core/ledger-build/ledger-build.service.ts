@@ -10,17 +10,8 @@ import { ChargeCanceledBuilder } from './builders/charge-canceled.builder';
 import { ChargeExpiredBuilder } from './builders/charge-expired.builder';
 import { ChargeGeneratedBuilder } from './builders/charge-generated.builder';
 import { ChargePaidBuilder } from './builders/charge-paid.builder';
-import { ChargeRefundedBuilder } from './builders/charge-refunded.builder';
-import { ExpenseRecognizedBuilder } from './builders/expense-recognized.builder';
-import { OpeningBalanceBuilder } from './builders/opening-balance.builder';
-import { PaymentPostedBuilder } from './builders/payment-posted.builder';
 import { PendingExpensesBuilder } from './builders/pending-expenses.builder';
 import { PendingRevenuesBuilder } from './builders/pending-revenues.builder';
-import { RevenueReceivedBuilder } from './builders/revenue-received.builder';
-import { RevenueRecognizedBuilder } from './builders/revenue-recognized.builder';
-import { ReversalBuilder } from './builders/reversal.builder';
-import { TransferPostedBuilder } from './builders/transfer-posted.builder';
-import { TransferReceivedBuilder } from './builders/transfer-received.builder';
 import { LedgerBuildRepository } from './ledger-build.repository';
 
 const REBUILD_DELAY_MS = 2 * 60 * 1000;
@@ -36,19 +27,10 @@ export class LedgerBuildService {
         @Inject(APPOINTMENTS_QUEUE_TOKEN)
         private readonly queue: Queue<AppointmentJobData>,
         private readonly bankBalanceBuilder: BankBalanceBuilder,
-        private readonly paymentPostedBuilder: PaymentPostedBuilder,
-        private readonly transferPostedBuilder: TransferPostedBuilder,
-        private readonly transferReceivedBuilder: TransferReceivedBuilder,
-        private readonly reversalBuilder: ReversalBuilder,
-        private readonly openingBalanceBuilder: OpeningBalanceBuilder,
-        private readonly revenueReceivedBuilder: RevenueReceivedBuilder,
         private readonly chargeGeneratedBuilder: ChargeGeneratedBuilder,
         private readonly chargePaidBuilder: ChargePaidBuilder,
         private readonly chargeCanceledBuilder: ChargeCanceledBuilder,
         private readonly chargeExpiredBuilder: ChargeExpiredBuilder,
-        private readonly chargeRefundedBuilder: ChargeRefundedBuilder,
-        private readonly revenueRecognizedBuilder: RevenueRecognizedBuilder,
-        private readonly expenseRecognizedBuilder: ExpenseRecognizedBuilder,
         private readonly pendingExpensesBuilder: PendingExpensesBuilder,
         private readonly pendingRevenuesBuilder: PendingRevenuesBuilder,
     ) {}
@@ -59,36 +41,18 @@ export class LedgerBuildService {
 
         const [
             bankBalance,
-            paymentPosted,
-            transferPosted,
-            transferReceived,
-            reversal,
-            openingBalance,
-            revenueReceived,
             chargeGenerated,
             chargePaid,
             chargeCanceled,
             chargeExpired,
-            chargeRefunded,
-            revenueRecognized,
-            expenseRecognized,
             pendingExpenses,
             pendingRevenues,
         ] = await Promise.all([
             this.bankBalanceBuilder.build(),
-            this.paymentPostedBuilder.build(),
-            this.transferPostedBuilder.build(),
-            this.transferReceivedBuilder.build(),
-            this.reversalBuilder.build(),
-            this.openingBalanceBuilder.build(),
-            this.revenueReceivedBuilder.build(),
             this.chargeGeneratedBuilder.build(),
             this.chargePaidBuilder.build(),
             this.chargeCanceledBuilder.build(),
             this.chargeExpiredBuilder.build(),
-            this.chargeRefundedBuilder.build(),
-            this.revenueRecognizedBuilder.build(),
-            this.expenseRecognizedBuilder.build(),
             this.pendingExpensesBuilder.build(),
             this.pendingRevenuesBuilder.build(),
         ]);
@@ -113,21 +77,6 @@ export class LedgerBuildService {
         build.pendingRevenuesValue = pendingRevenues.totalValue;
         build.buildData = {
             bankBalance,
-            events: {
-                paymentPosted,
-                transferPosted,
-                transferReceived,
-                reversal,
-                openingBalance,
-                revenueReceived,
-                chargeGenerated,
-                chargePaid,
-                chargeCanceled,
-                chargeExpired,
-                chargeRefunded,
-                revenueRecognized,
-                expenseRecognized,
-            },
             pending: {
                 expenses: pendingExpenses,
                 revenues: pendingRevenues,

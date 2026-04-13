@@ -13,11 +13,13 @@ export class BankBalanceBuilder {
     async build(): Promise<BankBalanceBuilderResult> {
         const clientId = this.authContext.getClientId();
         const query = `
-            SELECT accountId,
-                   COALESCE(SUM(amount), 0) AS balance
-            FROM ledger_entries
-            WHERE clientId = ? AND liquidity = 1
-            GROUP BY accountId
+            SELECT accountId, balance
+            FROM ledger_snapshots ls
+            WHERE clientId = ?
+              AND id = (
+                  SELECT MAX(id) FROM ledger_snapshots
+                  WHERE clientId = ls.clientId AND accountId = ls.accountId
+              )
         `;
         const rows = await this.database.select(query, [clientId]);
         const byAccount = rows.map((r: any) => ({

@@ -26,8 +26,7 @@ export class Migration20260413_01_CriaTabelaLedgerMonthlyBuilds implements IMigr
                 );`
             ),
             MigrationSteps.RunSQL(
-                `CREATE INDEX IF NOT EXISTS idx_client_type_occurred
-                 ON financial_events (clientId, type, occurredAt);`
+                `CREATE INDEX idx_client_type_occurred ON financial_events (clientId, type, occurredAt);`
             ),
         ];
     }

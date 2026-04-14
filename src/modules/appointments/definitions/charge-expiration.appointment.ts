@@ -3,6 +3,7 @@ import { Recurrence } from 'src/enum/recurrence.enum';
 import { ChargesService } from 'src/modules/billing/charges/charges.service';
 import { ExecutableAppointment } from '../executable-appointment.base';
 import { AppointmentJobData } from '../types/appointment-job-data.type';
+import { AppointmentsEnum } from 'src/enum/appointments.enum';
 
 
 @Injectable()
@@ -16,7 +17,7 @@ export class ChargeExpirationAppointment extends ExecutableAppointment {
             'Expira cobranças em "Aguardando pagamento" que ultrapassaram o prazo de pagamento.',
             Recurrence.HOURLY,
             false,
-            'charge-expiration',
+            AppointmentsEnum.CHARGE_EXPIRATION,
             null,
             'America/Sao_Paulo',
         );

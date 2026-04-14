@@ -6,6 +6,7 @@ import { AppointmentJobData } from './types/appointment-job-data.type';
 
 class SampleAppointment extends ExecutableAppointment {
   constructor() {
+    
     super(1, 'Sample', 'Descrição', Recurrence.DAILY_08, true, 'sample', null, 'America/Sao_Paulo');
   }
 

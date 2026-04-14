@@ -5,6 +5,7 @@ import { UpcomingExpensesService } from '../services/upcoming-expenses.service';
 import { UpcomingExpensesEmailService } from '../services/upcoming-expenses-email.service';
 import AppointmentsRepository from '../appointments.repository';
 import { AppointmentJobData } from '../types/appointment-job-data.type';
+import { AppointmentsEnum } from 'src/enum/appointments.enum';
 
 export interface UpcomingExpensesEmailConfig {
   days?: number;
@@ -25,7 +26,7 @@ export class UpcomingExpensesEmailAppointment extends ExecutableAppointment<Upco
       'Notifica clientes sobre contas e faturas próximas ao vencimento.',
       Recurrence.DAILY_08,
       false,
-      'upcoming-expenses-email',
+      AppointmentsEnum.UPCOMING_EXPENSES_EMAIL,
       null,
       'America/Sao_Paulo',
     );

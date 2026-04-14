@@ -18,9 +18,11 @@ import { ChargesModule } from '../billing/charges/charges.module';
 import { ChargeExpirationAppointment } from './definitions/charge-expiration.appointment';
 import { LedgerModule } from '../Finance/core/ledger/ledger.module';
 import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appointment';
+import { LedgerMonthlyBuildModule } from '../Finance/core/ledger-monthly-build/ledger-monthly-build.module';
+import { LedgerMonthlyBuildAppointment } from './definitions/ledger-monthly-build.appointment';
 
 @Module({
-  imports: [EmailModule, RedisModule, ChargesModule, LedgerModule],
+  imports: [EmailModule, RedisModule, ChargesModule, LedgerModule, LedgerMonthlyBuildModule],
   providers: [
     AppointmentsService,
     AppointmentsQueueService,
@@ -29,6 +31,7 @@ import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appoint
     UpcomingExpensesEmailAppointment,
     ChargeExpirationAppointment,
     LedgerSnapshotAppointment,
+    LedgerMonthlyBuildAppointment,
     AppointmentSettingsService,
     AppointmentsRepository,
     {
@@ -42,8 +45,9 @@ import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appoint
         upcomingExpenses: UpcomingExpensesEmailAppointment,
         chargeExpiration: ChargeExpirationAppointment,
         ledgerSnapshot: LedgerSnapshotAppointment,
-      ) => [upcomingExpenses, chargeExpiration, ledgerSnapshot],
-      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment, LedgerSnapshotAppointment],
+        ledgerMonthlyBuild: LedgerMonthlyBuildAppointment,
+      ) => [upcomingExpenses, chargeExpiration, ledgerSnapshot, ledgerMonthlyBuild],
+      inject: [UpcomingExpensesEmailAppointment, ChargeExpirationAppointment, LedgerSnapshotAppointment, LedgerMonthlyBuildAppointment],
     },
   ],
   controllers: [
@@ -54,6 +58,7 @@ import { LedgerSnapshotAppointment } from './definitions/ledger-snapshot.appoint
     AVAILABLE_APPOINTMENTS_TOKEN,
     AppointmentsQueueService,
     LedgerSnapshotAppointment,
+    LedgerMonthlyBuildAppointment,
   ]
 })
 export class AppointmentsModule {}

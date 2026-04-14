@@ -4,6 +4,7 @@ import { AppointmentsQueueService } from '../appointments-queue.service';
 import { APPOINTMENTS_QUEUE_TOKEN, AVAILABLE_APPOINTMENTS_TOKEN } from '../appointments.constants';
 import { ExecutableAppointment } from '../executable-appointment.base';
 import { Queue } from '../queue.provider';
+import { AppointmentsEnum } from 'src/enum/appointments.enum';
 
 @Controller('appointments/debug')
 export class AppointmentsDebugController {
@@ -35,7 +36,7 @@ export class AppointmentsDebugController {
   }
 
   @Post('trigger/:type')
-  async trigger(@Param('type') type: string) {
+  async trigger(@Param('type') type: AppointmentsEnum | string) {
     const appointment = this.appointments.find((a) => a.type === type);
     if (!appointment) {
       throw new NotFoundException(`Agendamento "${type}" não encontrado.`);
@@ -48,7 +49,7 @@ export class AppointmentsDebugController {
 
   @Delete('unschedule/:type/:clientId')
   async unschedule(
-    @Param('type') type: string,
+    @Param('type') type: AppointmentsEnum | string,
     @Param('clientId', ParseIntPipe) clientId: number,
   ) {
     const appointment = this.appointments.find((a) => a.type === type);
@@ -61,7 +62,7 @@ export class AppointmentsDebugController {
   }
 
   @Delete('unschedule-all/:type')
-  async unscheduleAll(@Param('type') type: string) {
+  async unscheduleAll(@Param('type') type: AppointmentsEnum | string) {
     const appointment = this.appointments.find((a) => a.type === type);
     if (!appointment) {
       throw new NotFoundException(`Agendamento "${type}" não encontrado.`);

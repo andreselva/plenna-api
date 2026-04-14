@@ -11,7 +11,7 @@ export abstract class AppointmentBase<TConfig = unknown> implements IAppointment
     public description: string | undefined,
     public recurrence: Recurrence,
     public isActive: boolean,
-    public readonly type: AppointmentsEnum,
+    public readonly type: AppointmentsEnum | string,
     public config: TConfig | null,
     public timezone?: string | null,
   ) {}

@@ -200,6 +200,6 @@ npm run worker:appointments
 
 <p align="center">
   Feito com muito pensamento e alguns arrependimentos arquiteturais.<br/>
-  <em>André — Bento Gonçalves, RS</em>
+  <em>André — Bento Gonçalves, RS</em><br/>
   <em>Projeto encerrado em 14/04/2026.</em>
 </p>

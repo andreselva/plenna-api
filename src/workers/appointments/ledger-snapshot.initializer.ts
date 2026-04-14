@@ -17,6 +17,7 @@ export class LedgerSnapshotInitializer implements OnModuleInit {
     ) {}
 
     async onModuleInit(): Promise<void> {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
         const appointment = this.appointments.find((a) => a.type === AppointmentsEnum.LEDGER_SNAPSHOT);
         if (!appointment) return;
 

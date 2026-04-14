@@ -36,7 +36,7 @@ export class AppointmentsDebugController {
   }
 
   @Post('trigger/:type')
-  async trigger(@Param('type') type: AppointmentsEnum) {
+  async trigger(@Param('type') type: AppointmentsEnum | string) {
     const appointment = this.appointments.find((a) => a.type === type);
     if (!appointment) {
       throw new NotFoundException(`Agendamento "${type}" não encontrado.`);
@@ -49,7 +49,7 @@ export class AppointmentsDebugController {
 
   @Delete('unschedule/:type/:clientId')
   async unschedule(
-    @Param('type') type: AppointmentsEnum,
+    @Param('type') type: AppointmentsEnum | string,
     @Param('clientId', ParseIntPipe) clientId: number,
   ) {
     const appointment = this.appointments.find((a) => a.type === type);
@@ -62,7 +62,7 @@ export class AppointmentsDebugController {
   }
 
   @Delete('unschedule-all/:type')
-  async unscheduleAll(@Param('type') type: AppointmentsEnum) {
+  async unscheduleAll(@Param('type') type: AppointmentsEnum | string) {
     const appointment = this.appointments.find((a) => a.type === type);
     if (!appointment) {
       throw new NotFoundException(`Agendamento "${type}" não encontrado.`);

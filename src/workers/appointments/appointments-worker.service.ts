@@ -15,6 +15,7 @@ export class AppointmentsWorkerService {
   ) {}
 
   async process(job: Job<AppointmentJobData>): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
     const handler = this.appointments.find((appointment) => appointment.type === job.name);
 
     if (!handler) {

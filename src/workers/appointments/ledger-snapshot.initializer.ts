@@ -3,6 +3,7 @@ import { AVAILABLE_APPOINTMENTS_TOKEN } from 'src/modules/appointments/appointme
 import { AppointmentsQueueService } from 'src/modules/appointments/appointments-queue.service';
 import { ExecutableAppointment } from 'src/modules/appointments/executable-appointment.base';
 import { LedgerSnapshotRepository } from 'src/modules/Finance/core/ledger/ledger-snapshot.repository';
+import { AppointmentsEnum } from 'src/enum/appointments.enum';
 
 @Injectable()
 export class LedgerSnapshotInitializer implements OnModuleInit {
@@ -16,7 +17,7 @@ export class LedgerSnapshotInitializer implements OnModuleInit {
     ) {}
 
     async onModuleInit(): Promise<void> {
-        const appointment = this.appointments.find((a) => a.type === 'ledger-snapshot');
+        const appointment = this.appointments.find((a) => a.type === AppointmentsEnum.LEDGER_SNAPSHOT);
         if (!appointment) return;
 
         const clientIds = await this.snapshotRepository.getAllActiveClientIds();
